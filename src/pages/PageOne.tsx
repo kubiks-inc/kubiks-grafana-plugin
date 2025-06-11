@@ -7,7 +7,6 @@ import { ROUTES } from '../constants';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
 import { getBackendSrv } from '@grafana/runtime';
-import { InfiniteCanvas } from '../containers/canvas/InfiniteCanvas';
 
 function PageOne() {
   const s = useStyles2(getStyles);

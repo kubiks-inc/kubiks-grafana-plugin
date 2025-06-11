@@ -6,7 +6,7 @@ function PageTwo() {
   return (
     <PluginPage>
       <div data-testid={testIds.pageTwo.container}>
-        <p>This is page two.</p>
+        <p className="text-8xl">Hello world!</p>
       </div>
     </PluginPage>
   );
