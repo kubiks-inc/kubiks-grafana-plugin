@@ -113,7 +113,7 @@ export const CanvasNavbar: React.FC<CanvasNavbarProps> = ({ }) => {
                   <span className={styles.searchText}>Search records...</span>
                   <div className={styles.keyboardShortcut}>
                     <kbd className={styles.kbd}>
-                      <Command className={styles.commandIcon} />K
+                      <Command className={styles.commandIcon} />F
                     </kbd>
                   </div>
                 </div>

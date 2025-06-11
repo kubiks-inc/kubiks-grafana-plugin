@@ -474,11 +474,14 @@ export const createViewStore = (initState: Partial<ViewStoreState> = {}) => {
 
                         set({ filteredRecords: [...parentNodes, ...nodesToShow] })
                     } else {
-                        const hiddenNodes = getHiddenNodes(originalViewState.records, get().elementsToExplore)
+                        // const hiddenNodes = getHiddenNodes(originalViewState.records, get().elementsToExplore)
+                        // set({
+                        //     filteredRecords: originalViewState.records.filter(
+                        //         (node) => !hiddenNodes.includes(node)
+                        //     ),
+                        // })
                         set({
-                            filteredRecords: originalViewState.records.filter(
-                                (node) => !hiddenNodes.includes(node)
-                            ),
+                            filteredRecords: originalViewState.records,
                         })
                     }
                 },
