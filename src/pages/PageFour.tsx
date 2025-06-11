@@ -7,13 +7,14 @@ import { prefixRoute } from '../utils/utils.routing';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
 import { InfiniteCanvas } from '../containers/canvas/InfiniteCanvas';
+import { generateCanvas } from '../lib/canvas/generate';
 
 function PageFour() {
   const s = useStyles2(getStyles);
 
   return (
     <PluginPage layout={PageLayoutType.Canvas}>
-      <InfiniteCanvas />
+      <InfiniteCanvas data={generateCanvas()} />
 
       {/* <div className={s.page} data-testid={testIds.pageFour.container}>
         <div className={s.container}>
