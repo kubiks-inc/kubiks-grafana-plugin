@@ -709,7 +709,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     contentWrapper: css`
         flex: 1;
         overflow: auto;
-        padding: ${theme.spacing(2)};
+        padding: ${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(8)} ${theme.spacing(2)};
         display: flex;
         flex-direction: column;
         gap: ${theme.spacing(2)};
