@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { EdgeProps, getSimpleBezierPath, Position, BaseEdge } from '@xyflow/react'
-import { useRouter } from 'next/navigation'
 import { LayoutItem } from '@/lib/model/view'
-// import { useViewStore } from '@/components/canvas/view-store-provider'
+import { useViewStore } from '@/store/ViewStoreProvider'
 
 type Endpoint = {
   avgLatencyMs: number
@@ -65,7 +64,7 @@ const HighlightedEdge = ({
   data = defaultData,
   ...props
 }: EdgeProps) => {
-  // const setConnectionPopup = useViewStore((state) => state.setConnectionPopup)
+  const setConnectionPopup = useViewStore((state) => state.setConnectionPopup)
   const popupTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Use simple bezier path for a clean curved line
@@ -133,18 +132,18 @@ const HighlightedEdge = ({
     (e: React.MouseEvent) => {
       e.stopPropagation()
       console.log('handleButtonClick')
-      // setConnectionPopup({
-      //   x: e.clientX,
-      //   y: e.clientY,
-      //   placement: 'top',
-      //   open: true,
-      //   rps: rps ?? 0,
-      //   errorRate: errorRate ?? 0,
-      //   latency: latency ?? 0,
-      //   sourceName: sourceName ?? '',
-      //   targetName: targetName ?? '',
-      //   endpoints: groupedEndpoints,
-      // })
+      setConnectionPopup({
+        x: e.clientX,
+        y: e.clientY,
+        placement: 'top',
+        open: true,
+        rps: rps ?? 0,
+        errorRate: errorRate ?? 0,
+        latency: latency ?? 0,
+        sourceName: sourceName ?? '',
+        targetName: targetName ?? '',
+        endpoints: groupedEndpoints,
+      })
     },
     [
       midpoint,
@@ -154,7 +153,7 @@ const HighlightedEdge = ({
       sourceName,
       targetName,
       groupedEndpoints,
-      // setConnectionPopup,
+      setConnectionPopup,
     ]
   )
 

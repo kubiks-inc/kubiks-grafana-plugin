@@ -28,8 +28,11 @@ import { useViewStore } from '@/store/ViewStoreProvider'
 // import { EdgePopup } from './edgePopup'
 import { layoutElements as layoutElementsGrid } from '@/lib/canvas/canvasLayoutGrid'
 import { layoutElements as layoutElementsTree } from '@/lib/canvas/canvasLayoutTree'
+
+
 const edgeTypes: EdgeTypes = {
   highlighted: HighlightedEdge,
+  connection: HighlightedEdge,
 }
 
 const nodeTypes: NodeTypes = {
