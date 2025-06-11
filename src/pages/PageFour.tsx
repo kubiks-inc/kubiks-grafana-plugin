@@ -11,6 +11,8 @@ import { generateView } from '../lib/canvas/generate';
 import { useViewStore } from '@/store/ViewStoreProvider';
 import { useEffect } from 'react';
 import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';
+import { CanvasNavbar } from '@/components/Canvas/Navbar';
+import { ReactFlowProvider } from '@xyflow/react'
 
 function PageFour() {
   const s = useStyles2(getStyles);
@@ -22,9 +24,12 @@ function PageFour() {
   }, [])
 
   return (
-    <PluginPage layout={PageLayoutType.Canvas}>
-      <InfiniteCanvas />
-      <ServiceDrawer open={isServiceDrawerOpen} onOpenChange={setIsServiceDrawerOpen} />
+    <PluginPage layout={PageLayoutType.Custom}>
+      <ReactFlowProvider>
+        <CanvasNavbar />
+        <InfiniteCanvas />
+        <ServiceDrawer open={isServiceDrawerOpen} onOpenChange={setIsServiceDrawerOpen} />
+      </ReactFlowProvider>
 
       {/* <div className={s.page} data-testid={testIds.pageFour.container}>
         <div className={s.container}>
