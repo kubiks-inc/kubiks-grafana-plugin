@@ -43,7 +43,7 @@
     },
     {
       "type": "page",
-      "name": "Page Four",
+      "name": "Service Map",
       "path": "/a/%PLUGIN_ID%/four",
       "addToNav": true,
       "defaultNav": false
