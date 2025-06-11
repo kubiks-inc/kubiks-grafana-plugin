@@ -66,6 +66,7 @@ const HighlightedEdge = ({
 }: EdgeProps) => {
   const setConnectionPopup = useViewStore((state) => state.setConnectionPopup)
   const popupTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isHovered, setIsHovered] = useState(false)
 
   // Use simple bezier path for a clean curved line
   const [edgePath] = getSimpleBezierPath({
@@ -80,7 +81,8 @@ const HighlightedEdge = ({
   // Calculate the midpoint for the button
   const midpoint = getBezierMidpoint(sourceX, sourceY, targetX, targetY)
 
-  const getEdgeColor = (errorRate: number = 0) => {
+  const getEdgeColor = (errorRate: number = 0, hovered: boolean = false) => {
+    if (hovered) return 'var(--color-primary, #3b82f6)' // blue-500 when hovered
     if (errorRate > 5) return 'var(--color-error-high, #ef4444)' // red-500 fallback
     if (errorRate > 1) return 'var(--color-error-medium, #f97316)' // orange-500 fallback
     return 'var(--color-error-low, #22c55e)' // green-500 fallback
@@ -120,12 +122,31 @@ const HighlightedEdge = ({
     return acc
   }, {})
 
+  // Determine the primary connection type
+  const getConnectionType = () => {
+    if (endpoints.length === 0) return 'TCP'
+
+    // Get the most common endpoint type
+    const typeCounts = Object.entries(groupedEndpoints).map(([type, endpointList]) => ({
+      type: type.toUpperCase(),
+      count: endpointList.length
+    }))
+
+    if (typeCounts.length === 0) return 'TCP'
+
+    // Sort by count and return the most common type
+    typeCounts.sort((a, b) => b.count - a.count)
+    return typeCounts[0].type
+  }
+
+  const connectionType = getConnectionType()
+
   const status = getLayoutValue(data.layout as LayoutItem[], 'status')?.data as unknown as string
   const edgePayload = data as EdgeData
   const sourceName = edgePayload.sourceName
   const targetName = edgePayload.targetName
   const edgeWidth = getEdgeWidth(rps ?? 0)
-  const edgeColor = getEdgeColor(errorRate ?? 0)
+  const edgeColor = getEdgeColor(errorRate ?? 0, isHovered)
   const arrowSize = Math.max(edgeWidth * 2, 5)
 
   const handleButtonClick = useCallback(
@@ -157,6 +178,14 @@ const HighlightedEdge = ({
     ]
   )
 
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+  }
+
   return (
     <>
       <defs>
@@ -183,47 +212,55 @@ const HighlightedEdge = ({
             strokeDasharray: getDashArray(rps ?? 0),
             animation: `dash ${getAnimationDuration(rps ?? 0)} linear infinite`,
             pointerEvents: 'none',
+            transition: 'stroke 0.2s ease-in-out',
             ...style,
           }}
           markerEnd={`url(#arrowhead-${id})`}
         />
 
-        {/* Interactive button in the middle of the edge */}
-        <circle
-          cx={midpoint.x}
-          cy={midpoint.y}
-          r={25} // Increased size from 15 to 25
-          fill="rgba(255, 255, 255, 0.5)"
-          fillOpacity={0.8}
-          stroke={edgeColor}
-          strokeWidth={3}
+        {/* Interactive label in the middle of the edge */}
+        <rect
+          x={midpoint.x - 25}
+          y={midpoint.y - 12}
+          width={50}
+          height={24}
+          rx={12}
+          ry={12}
+          fill={isHovered ? "rgba(59, 130, 246, 0.9)" : edgeColor}
+          fillOpacity={isHovered ? 0.9 : 0.8}
+          stroke={isHovered ? "var(--color-primary, #3b82f6)" : "rgba(255, 255, 255, 0.3)"}
+          strokeWidth={2}
           cursor="pointer"
           onClick={handleButtonClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           pointerEvents="all"
-          filter="drop-shadow(0 0 3px rgba(255, 255, 255, 0.5))"
+          filter="drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))"
+          style={{ transition: 'all 0.2s ease-in-out' }}
         />
 
-        {/* Plus icon inside the button */}
-        <g onClick={handleButtonClick} cursor="pointer">
-          <line
-            x1={midpoint.x - 10}
-            y1={midpoint.y}
-            x2={midpoint.x + 10}
-            y2={midpoint.y}
-            stroke="white"
-            strokeWidth={3}
-            strokeLinecap="round"
-          />
-          <line
-            x1={midpoint.x}
-            y1={midpoint.y - 10}
-            x2={midpoint.x}
-            y2={midpoint.y + 10}
-            stroke="white"
-            strokeWidth={3}
-            strokeLinecap="round"
-          />
-        </g>
+        {/* Connection type text inside the label */}
+        <text
+          x={midpoint.x}
+          y={midpoint.y}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fill="white"
+          fontSize="10"
+          fontWeight="bold"
+          fontFamily="system-ui, -apple-system, sans-serif"
+          cursor="pointer"
+          onClick={handleButtonClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          pointerEvents="all"
+          style={{
+            userSelect: 'none',
+            transition: 'fill 0.2s ease-in-out'
+          }}
+        >
+          {connectionType}
+        </text>
       </g>
       <style>
         {`
