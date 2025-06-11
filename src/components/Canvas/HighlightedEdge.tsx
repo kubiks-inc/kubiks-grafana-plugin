@@ -217,19 +217,18 @@ const HighlightedEdge = ({
           }}
           markerEnd={`url(#arrowhead-${id})`}
         />
-
         {/* Interactive label in the middle of the edge */}
         <rect
-          x={midpoint.x - 25}
-          y={midpoint.y - 12}
-          width={50}
-          height={24}
-          rx={12}
-          ry={12}
+          x={midpoint.x - 50}
+          y={midpoint.y - 20}
+          width={100}
+          height={40}
+          rx={20}
+          ry={20}
           fill={isHovered ? "rgba(59, 130, 246, 0.9)" : edgeColor}
           fillOpacity={isHovered ? 0.9 : 0.8}
           stroke={isHovered ? "var(--color-primary, #3b82f6)" : "rgba(255, 255, 255, 0.3)"}
-          strokeWidth={2}
+          strokeWidth={3}
           cursor="pointer"
           onClick={handleButtonClick}
           onMouseEnter={handleMouseEnter}
@@ -246,7 +245,7 @@ const HighlightedEdge = ({
           textAnchor="middle"
           dominantBaseline="central"
           fill="white"
-          fontSize="10"
+          fontSize="16"
           fontWeight="bold"
           fontFamily="system-ui, -apple-system, sans-serif"
           cursor="pointer"
