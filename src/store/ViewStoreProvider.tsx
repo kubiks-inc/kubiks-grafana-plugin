@@ -44,7 +44,7 @@ export const ViewStoreProvider = ({
             originalViewState: data,
             filteredRecords: data?.records,
             liveMode: true,
-            isServiceDrawerOpen: true,
+            isServiceDrawerOpen: false,
         }
 
         storeRef.current = createViewStore(initialState)

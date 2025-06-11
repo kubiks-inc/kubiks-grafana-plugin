@@ -10,11 +10,12 @@ import { InfiniteCanvas } from '@/containers/Canvas/InfiniteCanvas';
 import { generateView } from '../lib/canvas/generate';
 import { useViewStore } from '@/store/ViewStoreProvider';
 import { useEffect } from 'react';
+import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';
 
 function PageFour() {
   const s = useStyles2(getStyles);
 
-  const { setFilteredRecords } = useViewStore(state => state)
+  const { setFilteredRecords, isServiceDrawerOpen, setIsServiceDrawerOpen, } = useViewStore(state => state)
 
   useEffect(() => {
     setFilteredRecords(generateView())
@@ -23,6 +24,7 @@ function PageFour() {
   return (
     <PluginPage layout={PageLayoutType.Canvas}>
       <InfiniteCanvas />
+      <ServiceDrawer open={isServiceDrawerOpen} onOpenChange={setIsServiceDrawerOpen} />
 
       {/* <div className={s.page} data-testid={testIds.pageFour.container}>
         <div className={s.container}>
