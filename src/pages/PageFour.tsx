@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';
 import { CanvasNavbar } from '@/components/Canvas/Navbar';
 import { ReactFlowProvider } from '@xyflow/react'
+import { EdgePopup } from '@/components/Canvas/EdgePopup';
 
 function PageFour() {
   const s = useStyles2(getStyles);
@@ -35,6 +36,7 @@ function PageFour() {
         <CanvasNavbar />
         <InfiniteCanvas />
         <ServiceDrawer open={isServiceDrawerOpen} onOpenChange={setIsServiceDrawerOpen} />
+        <EdgePopup />
       </ReactFlowProvider>
 
       {/* <div className={s.page} data-testid={testIds.pageFour.container}>
