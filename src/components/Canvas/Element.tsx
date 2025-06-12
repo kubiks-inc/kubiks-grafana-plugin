@@ -15,6 +15,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { getTitle, getExploreLink } from './helpers'
 import { useViewStore } from '@/store/ViewStoreProvider'
+import { getIconUrlWithFallback } from '@/utils/iconMapper'
 // import { useViewStore } from './view-store-provider'
 // import { getTitle, getExploreLink } from './helpers'
 
@@ -393,7 +394,7 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
                 }}
               >
                 <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#252528]">
-                  <img src={link.icon} alt={link.label} className="w-12 h-12" />
+                  <img src={getIconUrlWithFallback(link.icon)} alt={link.label} className="w-12 h-12" />
                 </div>
                 <span className="text-2xl font-medium">{link.label}</span>
                 <ExternalLinkIcon className="w-4 h-4 text-white/40 ml-2" />
@@ -461,7 +462,7 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
         >
           {data.icon && (
             <img
-              src={data.icon}
+              src={getIconUrlWithFallback(data.icon)}
               alt={`${data.name} icon`}
               className={cn(
                 'transition-transform duration-300',
