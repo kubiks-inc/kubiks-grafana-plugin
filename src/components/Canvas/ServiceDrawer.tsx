@@ -655,10 +655,9 @@ export function ServiceDrawer({ open, onOpenChange }: ServiceDrawerProps) {
 const getStyles = (theme: GrafanaTheme2) => ({
     drawer: css`
         position: fixed;
-        top: 57px;
         right: 0;
         z-index: 50;
-        height: calc(100vh - 57px);
+        height: 100%;
         background: ${theme.colors.background.primary};
         color: ${theme.colors.text.primary};
         border-left: 1px solid ${theme.colors.border.medium};

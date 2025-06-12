@@ -76,7 +76,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                 return
             }
 
-            // Cmd/Ctrl + K to open search
+            // Cmd/Ctrl + F to open search
             if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
                 e.preventDefault()
                 // Only open if it's not already open
@@ -251,7 +251,8 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                         <span className={s.hintText}>
                             Use <kbd className={s.kbd}>↑</kbd>
                             <kbd className={s.kbd}>↓</kbd> to navigate •{' '}
-                            <kbd className={s.kbd}>Enter</kbd> to select
+                            <kbd className={s.kbd}>Enter</kbd> to select •{' '}
+                            <kbd className={s.kbd}>Ctrl+F</kbd> to open
                         </span>
                     </div>
                     <div className={s.recordCount}>
@@ -359,19 +360,22 @@ const getStyles = (theme: GrafanaTheme2) => ({
         flex-direction: column;
         height: 100%;
         max-height: 60vh;
+        min-height: 400px;
     `,
     searchContainer: css`
-        padding: ${theme.spacing(2)};
+        padding: ${theme.spacing(1.5)};
         border-bottom: 1px solid ${theme.colors.border.medium};
+        background: ${theme.colors.background.primary};
     `,
     searchInput: css`
         width: 100%;
+        font-size: ${theme.typography.bodySmall.fontSize};
     `,
     hints: css`
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: ${theme.spacing(1)} ${theme.spacing(2)};
+        padding: ${theme.spacing(1)} ${theme.spacing(1.5)};
         border-bottom: 1px solid ${theme.colors.border.medium};
         background: ${theme.colors.background.secondary};
         font-size: ${theme.typography.bodySmall.fontSize};
@@ -384,26 +388,31 @@ const getStyles = (theme: GrafanaTheme2) => ({
     recordCount: css`
         display: flex;
         align-items: center;
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.primary.text};
     `,
     hintText: css`
         color: ${theme.colors.text.secondary};
-        font-size: ${theme.typography.bodySmall.fontSize};
+        font-size: 11px;
     `,
     kbd: css`
         padding: ${theme.spacing(0.25)} ${theme.spacing(0.5)};
         background: ${theme.colors.background.canvas};
-        border: 1px solid ${theme.colors.border.medium};
+        border: 1px solid ${theme.colors.border.strong};
         border-radius: ${theme.shape.radius.default};
         font-size: 10px;
+        font-weight: ${theme.typography.fontWeightMedium};
         margin: 0 ${theme.spacing(0.25)};
+        font-family: ${theme.typography.fontFamilyMonospace};
     `,
     resultsContainer: css`
         flex: 1;
         overflow-y: auto;
         padding: ${theme.spacing(1)};
+        background: ${theme.colors.background.primary};
     `,
     emptyState: css`
-        padding: ${theme.spacing(3)};
+        padding: ${theme.spacing(4)};
         text-align: center;
         color: ${theme.colors.text.secondary};
     `,
@@ -413,75 +422,114 @@ const getStyles = (theme: GrafanaTheme2) => ({
         margin-top: ${theme.spacing(0.5)};
     `,
     group: css`
-        margin-bottom: ${theme.spacing(1)};
+        margin-bottom: ${theme.spacing(1.5)};
+        
+        &:last-child {
+            margin-bottom: 0;
+        }
     `,
     separator: css`
         height: 1px;
-        background: ${theme.colors.border.medium};
+        background: ${theme.colors.border.weak};
         margin: ${theme.spacing(1)} 0;
     `,
     groupHeader: css`
         display: flex;
         align-items: center;
-        padding: ${theme.spacing(1)} ${theme.spacing(2)};
+        padding: ${theme.spacing(0.75)} ${theme.spacing(1.5)};
         background: ${theme.colors.background.secondary};
+        border: 1px solid ${theme.colors.border.weak};
         border-radius: ${theme.shape.radius.default};
         margin-bottom: ${theme.spacing(0.5)};
     `,
     groupIcon: css`
         margin-right: ${theme.spacing(1)};
-        color: ${theme.colors.text.secondary};
+        color: ${theme.colors.primary.main};
+        font-size: 14px;
     `,
     groupTitle: css`
         font-weight: ${theme.typography.fontWeightMedium};
         color: ${theme.colors.text.primary};
+        font-size: ${theme.typography.bodySmall.fontSize};
+        text-transform: capitalize;
     `,
     recordsList: css`
         display: flex;
         flex-direction: column;
         gap: ${theme.spacing(0.25)};
+        padding-left: ${theme.spacing(0.5)};
     `,
     recordItem: css`
         display: flex;
         align-items: center;
-        padding: ${theme.spacing(1)} ${theme.spacing(2)};
+        padding: ${theme.spacing(1)} ${theme.spacing(1.5)};
         border-radius: ${theme.shape.radius.default};
         cursor: pointer;
-        transition: background-color 0.2s ease;
+        transition: all 0.15s ease;
+        background: ${theme.colors.background.secondary};
+        border: 1px solid transparent;
+        margin-bottom: ${theme.spacing(0.25)};
 
         &:hover {
-            background: ${theme.colors.action.hover};
+            background: ${theme.colors.emphasize(theme.colors.background.secondary, 0.03)};
+            border-color: ${theme.colors.border.medium};
+        }
+
+        &:last-child {
+            margin-bottom: 0;
         }
     `,
     recordItemSelected: css`
-        background: ${theme.colors.action.selected};
+        background: ${theme.colors.primary.main}15;
+        border-color: ${theme.colors.primary.border};
         color: ${theme.colors.text.primary};
+
+        &:hover {
+            background: ${theme.colors.primary.main}20;
+        }
     `,
     recordIcon: css`
         margin-right: ${theme.spacing(1)};
         display: flex;
         align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: ${theme.shape.radius.default};
+        background: ${theme.colors.background.canvas};
+        border: 1px solid ${theme.colors.border.weak};
+        flex-shrink: 0;
     `,
     recordIconImage: css`
         display: block;
         object-fit: contain;
+        border-radius: 1px;
     `,
     recordContent: css`
         flex: 1;
         display: flex;
         flex-direction: column;
+        min-width: 0;
     `,
     recordName: css`
-        font-weight: ${theme.typography.fontWeightMedium};
+        font-weight: ${theme.typography.fontWeightRegular};
+        font-size: ${theme.typography.bodySmall.fontSize};
+        color: ${theme.colors.text.primary};
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     `,
     selectedBadge: css`
         margin-left: auto;
+        flex-shrink: 0;
     `,
     selectedText: css`
-        font-size: ${theme.typography.bodySmall.fontSize};
-        background: ${theme.colors.action.selected};
-        color: ${theme.colors.text.primary};
+        font-size: 10px;
+        background: ${theme.colors.primary.main};
+        color: ${theme.colors.primary.contrastText};
         padding: ${theme.spacing(0.25)} ${theme.spacing(0.75)};
         border-radius: ${theme.shape.radius.default};
+        font-weight: ${theme.typography.fontWeightMedium};
     `,
 })
