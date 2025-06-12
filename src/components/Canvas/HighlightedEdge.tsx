@@ -81,9 +81,9 @@ const HighlightedEdge = ({
   const midpoint = getBezierMidpoint(sourceX, sourceY, targetX, targetY)
 
   const getEdgeColor = (errorRate: number = 0) => {
-    if (errorRate > 5) return 'var(--color-error-high)'
-    if (errorRate > 1) return 'var(--color-error-medium)'
-    return 'var(--color-error-low)'
+    if (errorRate > 5) return 'var(--color-error-high, #ef4444)' // red-500 fallback
+    if (errorRate > 1) return 'var(--color-error-medium, #f97316)' // orange-500 fallback
+    return 'var(--color-error-low, #22c55e)' // green-500 fallback
   }
 
   const getEdgeWidth = (rps: number = 0) => {
