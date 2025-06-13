@@ -263,6 +263,9 @@ const config = async (env: Env): Promise<Configuration> => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       // handle resolving "rootDir" paths
       modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
+      alias: {
+        '@': path.resolve(process.cwd(), 'src'),
+      },
       unsafeCache: true,
     },
   };
