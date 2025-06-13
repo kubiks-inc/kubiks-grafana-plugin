@@ -4,7 +4,7 @@ import { GrafanaTheme2 } from '@grafana/data'
 import { useStyles2, Button, Badge, Icon } from '@grafana/ui'
 import { useViewStore } from '@/store/ViewStoreProvider'
 
-export const EdgePopup: React.FC = () => {
+export const ConnectionDetailsDrawer: React.FC = () => {
     const connectionPopup = useViewStore((state) => state.connectionPopup)
     const setConnectionPopup = useViewStore((state) => state.setConnectionPopup)
     const styles = useStyles2(getStyles)
