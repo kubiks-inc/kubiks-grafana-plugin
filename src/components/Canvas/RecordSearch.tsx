@@ -77,7 +77,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
             }
 
             // Cmd/Ctrl + K to open search
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
                 e.preventDefault()
                 // Only open if it's not already open
                 if (!open) {

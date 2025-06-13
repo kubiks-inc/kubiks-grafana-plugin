@@ -17,10 +17,16 @@ import { ReactFlowProvider } from '@xyflow/react'
 function PageFour() {
   const s = useStyles2(getStyles);
 
-  const { setFilteredRecords, isServiceDrawerOpen, setIsServiceDrawerOpen, } = useViewStore(state => state)
+  const { setFilteredRecords, isServiceDrawerOpen, setIsServiceDrawerOpen, setViewState, setOriginalViewState } = useViewStore(state => state)
 
   useEffect(() => {
     setFilteredRecords(generateView())
+    setViewState({
+      records: generateView()
+    })
+    setOriginalViewState({
+      records: generateView()
+    })
   }, [])
 
   return (
