@@ -2,6 +2,8 @@ import React, { Suspense, lazy } from 'react';
 import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { LoadingPlaceholder } from '@grafana/ui';
 import type { AppConfigProps } from './components/AppConfig/AppConfig';
+import { PanelPlugin } from '@grafana/data';
+import { ServiceMapPanel } from './panels/ServiceMapPanel';
 import './styles.css';
 
 const LazyApp = lazy(() => import('./components/App/App'));
@@ -19,9 +21,4 @@ const AppConfig = (props: AppConfigProps) => (
   </Suspense>
 );
 
-export const plugin = new AppPlugin<{}>().setRootPage(App).addConfigPage({
-  title: 'Configuration',
-  icon: 'cog',
-  body: AppConfig,
-  id: 'configuration',
-});
+export const plugin = new PanelPlugin(ServiceMapPanel);
