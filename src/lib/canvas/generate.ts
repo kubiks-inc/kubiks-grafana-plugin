@@ -1,5 +1,5 @@
 import { demoData } from "./demo.data";
 
-export const generateCanvas = () => {
+export const generateView = () => {
   return demoData;
 };

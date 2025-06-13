@@ -24,7 +24,7 @@ import { NodeContextMenu } from '@/components/Canvas/NodeContextMenu'
 import { layoutElements } from '@/lib/canvas/canvasLayout'
 // import CanvasNavbar from './CanvasNavbar'
 // import { ViewState } from '@/lib/api/model/view-state'
-// import { useViewStore } from './view-store-provider'
+import { useViewStore } from '@/store/ViewStoreProvider'
 // import { EdgePopup } from './edgePopup'
 import { layoutElements as layoutElementsGrid } from '@/lib/canvas/canvasLayoutGrid'
 import { layoutElements as layoutElementsTree } from '@/lib/canvas/canvasLayoutTree'
@@ -40,7 +40,7 @@ const nodeTypes: NodeTypes = {
 const eqSet = (xs: Set<unknown>, ys: Set<unknown>) =>
   xs.size === ys.size && [...xs].every((x) => ys.has(x))
 
-interface InfiniteCanvasProps {}
+interface InfiniteCanvasProps { }
 
 export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
   const {
@@ -146,7 +146,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
     }
 
     let layoutedNodes: Node[] | null = null
-    switch (view.layoutType) {
+    switch (view?.layoutType) {
       case 'd3':
         layoutedNodes = await layoutElements(nodes, edges, positions)
         break
