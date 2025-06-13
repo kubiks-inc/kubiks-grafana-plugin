@@ -18,17 +18,17 @@ import { ConnectionDetailsDrawer } from '@/components/Canvas/EdgeDetailsDrawer';
 
 interface Props extends PanelProps { }
 
-export const ServiceMapPanel: React.FC<Props> = ({ width, height, data }) => {
+export const ServiceMapPanel: React.FC<Props> = (props) => {
     return (
         <PluginPage layout={PageLayoutType.Custom}>
             <ViewStoreProvider>
-                <ServiceMapPanelContent width={width} height={height} data={data} />
+                <ServiceMapPanelContent {...props} />
             </ViewStoreProvider>
         </PluginPage>
     );
 };
 
-const ServiceMapPanelContent: React.FC<Props> = ({ width, height, data }) => {
+const ServiceMapPanelContent: React.FC<Props> = (props) => {
     const s = useStyles2(getStyles);
 
     const { setFilteredRecords, isServiceDrawerOpen, setIsServiceDrawerOpen, setViewState, setOriginalViewState } = useViewStore(state => state)
@@ -46,7 +46,7 @@ const ServiceMapPanelContent: React.FC<Props> = ({ width, height, data }) => {
     return (
         <PluginPage layout={PageLayoutType.Custom}>
             <ReactFlowProvider>
-                <div className={s.container} style={{ width, height }}>
+                <div className={s.container} style={{ width: props.width, height: props.height }}>
                     {/* <CanvasNavbar /> */}
                     <div className={s.canvasContainer}>
                         <InfiniteCanvas />
