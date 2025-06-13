@@ -4,6 +4,7 @@ import { LoadingPlaceholder } from '@grafana/ui';
 import type { AppConfigProps } from './components/AppConfig/AppConfig';
 import { PanelPlugin } from '@grafana/data';
 import { ServiceMapPanel } from './panels/ServiceMapPanel';
+import { ServiceMapEditor } from './components/ServiceMapEditor';
 import './styles.css';
 
 const LazyApp = lazy(() => import('./components/App/App'));
@@ -21,4 +22,13 @@ const AppConfig = (props: AppConfigProps) => (
   </Suspense>
 );
 
-export const plugin = new PanelPlugin(ServiceMapPanel);
+export const plugin = new PanelPlugin(ServiceMapPanel).setPanelOptions((builder) => {
+  return builder.addCustomEditor({
+    id: 'services',
+    path: 'services',
+    name: 'Service list',
+    description: 'Define which services to include',
+    editor: ServiceMapEditor,
+    defaultValue: [],
+  });
+});
