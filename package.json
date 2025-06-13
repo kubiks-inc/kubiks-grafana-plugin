@@ -71,6 +71,7 @@
     "@grafana/runtime": "^11.5.3",
     "@grafana/schema": "^11.5.3",
     "@grafana/ui": "^11.5.3",
+    "@xyflow/react": "^12.6.4",
     "monaco-editor": "^0.52.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",

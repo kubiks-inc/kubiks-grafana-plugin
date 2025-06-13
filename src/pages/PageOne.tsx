@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { LinkButton, useStyles2 } from '@grafana/ui';
@@ -6,9 +6,24 @@ import { prefixRoute } from '../utils/utils.routing';
 import { ROUTES } from '../constants';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
+import { getBackendSrv } from '@grafana/runtime';
+import { InfiniteCanvas } from '../containers/canvas/InfiniteCanvas';
 
 function PageOne() {
   const s = useStyles2(getStyles);
+
+  const [config, setConfig] = useState<any>(null);
+
+  useEffect(() => {
+    getBackendSrv()
+      .get('/api/plugins/kubiks-kubiks-app/settings')
+      .then((res) => {
+        // res.jsonData and res.secureJsonData contain your config
+        setConfig(res);
+      });
+  }, []);
+
+  console.log(config);
 
   return (
     <PluginPage>

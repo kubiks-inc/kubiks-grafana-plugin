@@ -6,20 +6,23 @@ import { ROUTES } from '../constants';
 import { prefixRoute } from '../utils/utils.routing';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
+import { InfiniteCanvas } from '../containers/canvas/InfiniteCanvas';
 
 function PageFour() {
   const s = useStyles2(getStyles);
 
   return (
     <PluginPage layout={PageLayoutType.Canvas}>
-      <div className={s.page} data-testid={testIds.pageFour.container}>
+      <InfiniteCanvas />
+
+      {/* <div className={s.page} data-testid={testIds.pageFour.container}>
         <div className={s.container}>
           <LinkButton data-testid={testIds.pageFour.navigateBack} icon="arrow-left" href={prefixRoute(ROUTES.One)}>
             Back
           </LinkButton>
           <div className={s.content}>This is a full-width page without a navigation bar.</div>
         </div>
-      </div>
+      </div> */}
     </PluginPage>
   );
 }
