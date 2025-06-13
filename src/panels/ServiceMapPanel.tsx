@@ -46,29 +46,39 @@ const ServiceMapPanelContent: React.FC<Props> = ({ width, height, data }) => {
     return (
         <PluginPage layout={PageLayoutType.Custom}>
             <ReactFlowProvider>
-                <CanvasNavbar />
-                <InfiniteCanvas />
-                <ServiceDrawer open={isServiceDrawerOpen} onOpenChange={setIsServiceDrawerOpen} />
-                <ConnectionDetailsDrawer />
+                <div className={s.container} style={{ width, height }}>
+                    {/* <CanvasNavbar /> */}
+                    <div className={s.canvasContainer}>
+                        <InfiniteCanvas />
+                    </div>
+                    <ServiceDrawer open={isServiceDrawerOpen} onOpenChange={setIsServiceDrawerOpen} />
+                    <ConnectionDetailsDrawer />
+                </div>
             </ReactFlowProvider>
         </PluginPage>
     );
 };
 
-
 const getStyles = (theme: GrafanaTheme2) => ({
-    page: css`
-      padding: ${theme.spacing(3)};
-      background-color: ${theme.colors.background.secondary};
-      display: flex;
-      justify-content: center;
-    `,
     container: css`
-      width: 900px;
-      max-width: 100%;
-      min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        position: relative;
+    `,
+    canvasContainer: css`
+        flex: 1;
+        min-height: 0;
+        position: relative;
+    `,
+    page: css`
+        padding: ${theme.spacing(3)};
+        background-color: ${theme.colors.background.secondary};
+        display: flex;
+        justify-content: center;
     `,
     content: css`
-      margin-top: ${theme.spacing(6)};
+        margin-top: ${theme.spacing(6)};
     `,
 });
