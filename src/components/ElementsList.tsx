@@ -54,7 +54,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         const newLayoutItem: LayoutItem = {
             type: 'text',
             label: `Field ${currentLayout.length + 1}`,
-            source: '',
+            source: undefined,
             sourceType: 'query'
         };
         updated[elementIndex] = {
@@ -88,7 +88,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         const newDetailsItem: LayoutItem = {
             type: 'text',
             label: `Details Field ${currentDetails.length + 1}`,
-            source: '',
+            source: undefined,
             sourceType: 'query'
         };
         updated[elementIndex] = {
@@ -136,28 +136,37 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
             {elements.map((item, elementIndex) => (
                 <div key={elementIndex} className={styles.elementCard}>
                     <div className={styles.elementHeader}>
-                        <Input
-                            value={item.name}
-                            onChange={(e) => handleNameChange(elementIndex, e)}
-                            placeholder={`${item.type === 'group' ? 'Group' : item.type === 'connection' ? 'Connection' : 'Element'} name`}
-                            width={25}
-                        />
-                        <Select
-                            value={item.type}
-                            options={typeOptions}
-                            onChange={(option) => handleTypeChange(elementIndex, option.value as 'group' | 'element' | 'connection')}
-                            width={12}
-                            placeholder="Type"
-                        />
-                        <Select
-                            value={item.source}
-                            options={queryOptions}
-                            onChange={(option) => handleSourceChange(elementIndex, option.value || '')}
-                            width={20}
-                            placeholder="Select query (optional)"
-                            isInvalid={typeof item.source === 'string' && item.source ? !isValidQueryRef(item.source, queries) : false}
-                            isClearable
-                        />
+                        <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Element Name</label>
+                            <Input
+                                value={item.name}
+                                onChange={(e) => handleNameChange(elementIndex, e)}
+                                placeholder={`${item.type === 'group' ? 'Group' : item.type === 'connection' ? 'Connection' : 'Element'} name`}
+                                width={25}
+                            />
+                        </div>
+                        <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Type</label>
+                            <Select
+                                value={item.type}
+                                options={typeOptions}
+                                onChange={(option) => handleTypeChange(elementIndex, option.value as 'group' | 'element' | 'connection')}
+                                width={12}
+                                placeholder="Type"
+                            />
+                        </div>
+                        <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Data Source</label>
+                            <Select
+                                value={item.source}
+                                options={queryOptions}
+                                onChange={(option) => handleSourceChange(elementIndex, option.value || '')}
+                                width={20}
+                                placeholder="Select query (optional)"
+                                isInvalid={typeof item.source === 'string' && item.source ? !isValidQueryRef(item.source, queries) : false}
+                                isClearable
+                            />
+                        </div>
                         <Button
                             variant="secondary"
                             size="sm"
@@ -260,5 +269,12 @@ const getStyles = (theme: GrafanaTheme2) => ({
         color: ${theme.colors.text.secondary};
         line-height: 1.4;
     `,
-
+    inputGroup: css`
+        margin-right: ${theme.spacing(1)};
+    `,
+    inputLabel: css`
+        margin-bottom: ${theme.spacing(0.5)};
+        font-size: ${theme.typography.bodySmall.fontSize};
+        color: ${theme.colors.text.secondary};
+    `,
 }); 

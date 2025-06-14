@@ -107,140 +107,169 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
             {(element.layout || []).map((layoutItem, layoutIndex) => (
                 <div key={layoutIndex} className={styles.layoutItem}>
                     <div className={styles.layoutItemHeader}>
-                        <Select
-                            value={layoutItem.type}
-                            options={layoutTypeOptions}
-                            onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                type: option.value as LayoutItem['type']
-                            })}
-                            width={15}
-                            placeholder="Field Type"
-                        />
-                        <Input
-                            value={layoutItem.label || ''}
-                            onChange={(e) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                label: e.currentTarget.value
-                            })}
-                            placeholder="Display label"
-                            width={20}
-                        />
+                        <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Field Type</label>
+                            <Select
+                                value={layoutItem.type}
+                                options={layoutTypeOptions}
+                                onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                    type: option.value as LayoutItem['type']
+                                })}
+                                width={15}
+                                placeholder="Field Type"
+                            />
+                        </div>
+                        <div className={styles.inputGroup}>
+                            <label className={styles.inputLabel}>Display Label</label>
+                            <Input
+                                value={layoutItem.label || ''}
+                                onChange={(e) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                    label: e.currentTarget.value
+                                })}
+                                placeholder="Display label"
+                                width={20}
+                            />
+                        </div>
                         {layoutItem.type === 'icon' ? (
                             <div className={styles.iconSelectorContainer}>
-                                <Select
-                                    value={layoutItem.value?.data?.toString() || ''}
-                                    options={iconOptions.map(icon => ({
-                                        label: icon.label,
-                                        value: icon.value
-                                    }))}
-                                    onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                        source: '',
-                                        value: { data: option.value || '' }
-                                    })}
-                                    width={25}
-                                    placeholder="Select icon"
-                                    isClearable
-                                    formatOptionLabel={(option) => {
-                                        const iconOption = iconOptions.find(icon => icon.value === option.value);
-                                        return (
-                                            <div className={styles.iconOption}>
-                                                <img
-                                                    src={iconOption?.iconUrl || getIconUrlWithFallback(option.value || '')}
-                                                    alt={option.label}
-                                                    className={styles.iconPreview}
-                                                />
-                                                <span>{option.label}</span>
-                                            </div>
-                                        );
-                                    }}
-                                />
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.inputLabel}>Icon</label>
+                                    <Select
+                                        value={layoutItem.value?.data?.toString() || ''}
+                                        options={iconOptions.map(icon => ({
+                                            label: icon.label,
+                                            value: icon.value
+                                        }))}
+                                        onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                            source: undefined,
+                                            value: { data: option.value || '' }
+                                        })}
+                                        width={25}
+                                        placeholder="Select icon"
+                                        isClearable
+                                        formatOptionLabel={(option) => {
+                                            const iconOption = iconOptions.find(icon => icon.value === option.value);
+                                            return (
+                                                <div className={styles.iconOption}>
+                                                    <img
+                                                        src={iconOption?.iconUrl || getIconUrlWithFallback(option.value || '')}
+                                                        alt={option.label}
+                                                        className={styles.iconPreview}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </div>
+                                            );
+                                        }}
+                                    />
+                                </div>
                             </div>
                         ) : layoutItem.type === 'parentId' ? (
                             <div className={styles.parentIdSelectorContainer}>
-                                <Select
-                                    value={layoutItem.value?.data?.toString() || ''}
-                                    options={groupElements}
-                                    onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                        source: '',
-                                        sourceType: 'value',
-                                        value: { data: option.value || '' }
-                                    })}
-                                    width={25}
-                                    placeholder="Select parent group"
-                                    isClearable
-                                />
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.inputLabel}>Parent Group</label>
+                                    <Select
+                                        value={layoutItem.value?.data?.toString() || ''}
+                                        options={groupElements}
+                                        onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                            source: undefined,
+                                            sourceType: 'value',
+                                            value: { data: option.value || '' }
+                                        })}
+                                        width={25}
+                                        placeholder="Select parent group"
+                                        isClearable
+                                    />
+                                </div>
                             </div>
                         ) : (
                             <>
-                                <Select
-                                    value={layoutItem.sourceType || 'query'}
-                                    options={sourceModeOptions}
-                                    onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                        sourceType: option.value as 'query' | 'value' | 'dashboard',
-                                        ...(option.value === 'query' ? { value: undefined, source: '' } :
-                                            option.value === 'value' ? { source: '' } :
-                                                option.value === 'dashboard' ? { source: { panelId: '', dashboardUid: '' }, value: undefined } : {})
-                                    })}
-                                    width={12}
-                                    placeholder="Source Mode"
-                                />
-                                {layoutItem.sourceType === 'value' ? (
-                                    <Input
-                                        value={layoutItem.value?.data?.toString() || ''}
-                                        onChange={(e) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                            value: { data: e.currentTarget.value }
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.inputLabel}>Source Mode</label>
+                                    <Select
+                                        value={layoutItem.sourceType || 'query'}
+                                        options={sourceModeOptions}
+                                        onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                            sourceType: option.value as 'query' | 'value' | 'dashboard',
+                                            ...(option.value === 'query' ? { value: undefined, source: undefined } :
+                                                option.value === 'value' ? { source: undefined } :
+                                                    option.value === 'dashboard' ? { source: { panelId: '', dashboardUid: '' }, value: undefined } : {})
                                         })}
-                                        placeholder="Enter value"
-                                        width={20}
+                                        width={12}
+                                        placeholder="Source Mode"
                                     />
-                                ) : layoutItem.sourceType === 'dashboard' ? (
-                                    <div className={styles.panelSelectorContainer}>
-                                        <Select
-                                            value={typeof layoutItem.source === 'object' ? layoutItem.source.dashboardUid : ''}
-                                            options={dashboardOptions}
-                                            onChange={(option) => {
-                                                const dashboardUid = option.value || '';
-                                                onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                                    source: { dashboardUid, panelId: '' } // Reset panel selection when dashboard changes
-                                                });
-                                                if (dashboardUid) {
-                                                    loadPanelOptions(dashboardUid);
-                                                }
-                                            }}
-                                            width={25}
-                                            placeholder="Select dashboard"
-                                            isClearable
-                                            isLoading={loadingDashboards}
-                                        />
-                                        <Select
-                                            value={typeof layoutItem.source === 'object' ? layoutItem.source.panelId : ''}
-                                            options={typeof layoutItem.source === 'object' && layoutItem.source.dashboardUid ?
-                                                (panelOptionsMap[layoutItem.source.dashboardUid] || []) :
-                                                [{ label: 'Select dashboard first', value: '' }]}
-                                            onChange={(option) => {
-                                                const currentSource = typeof layoutItem.source === 'object' ? layoutItem.source : { dashboardUid: '', panelId: '' };
-                                                onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                                    source: { ...currentSource, panelId: option.value || '' }
-                                                });
-                                            }}
-                                            width={25}
-                                            placeholder="Select panel"
-                                            isClearable
-                                            isLoading={typeof layoutItem.source === 'object' && layoutItem.source.dashboardUid ?
-                                                loadingPanels[layoutItem.source.dashboardUid] : false}
-                                            disabled={!layoutItem.source || typeof layoutItem.source !== 'object' || !layoutItem.source.dashboardUid}
+                                </div>
+                                {layoutItem.sourceType === 'value' ? (
+                                    <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Value</label>
+                                        <Input
+                                            value={layoutItem.value?.data?.toString() || ''}
+                                            onChange={(e) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                value: { data: e.currentTarget.value }
+                                            })}
+                                            placeholder="Enter value"
+                                            width={20}
                                         />
                                     </div>
+                                ) : layoutItem.sourceType === 'dashboard' ? (
+                                    <div className={styles.panelSelectorContainer}>
+                                        <div className={styles.inputGroup}>
+                                            <label className={styles.inputLabel}>Dashboard</label>
+                                            <Select
+                                                value={typeof layoutItem.source === 'object' && 'dashboardUid' in layoutItem.source ? layoutItem.source.dashboardUid : ''}
+                                                options={dashboardOptions}
+                                                onChange={(option) => {
+                                                    const dashboardUid = option.value || '';
+                                                    onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                        source: { dashboardUid, panelId: '' } // Reset panel selection when dashboard changes
+                                                    });
+                                                    if (dashboardUid) {
+                                                        loadPanelOptions(dashboardUid);
+                                                    }
+                                                }}
+                                                width={25}
+                                                placeholder="Select dashboard"
+                                                isClearable
+                                                isLoading={loadingDashboards}
+                                            />
+                                        </div>
+                                        <div className={styles.inputGroup}>
+                                            <label className={styles.inputLabel}>Panel</label>
+                                            <Select
+                                                value={typeof layoutItem.source === 'object' && 'panelId' in layoutItem.source ? layoutItem.source.panelId : ''}
+                                                options={typeof layoutItem.source === 'object' && 'dashboardUid' in layoutItem.source && layoutItem.source.dashboardUid ?
+                                                    (panelOptionsMap[layoutItem.source.dashboardUid] || []) :
+                                                    [{ label: 'Select dashboard first', value: '' }]}
+                                                onChange={(option) => {
+                                                    const currentSource = typeof layoutItem.source === 'object' && 'dashboardUid' in layoutItem.source
+                                                        ? layoutItem.source
+                                                        : { dashboardUid: '', panelId: '' };
+                                                    onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                        source: { ...currentSource, panelId: option.value || '' }
+                                                    });
+                                                }}
+                                                width={25}
+                                                placeholder="Select panel"
+                                                isClearable
+                                                isLoading={typeof layoutItem.source === 'object' && 'dashboardUid' in layoutItem.source && layoutItem.source.dashboardUid ?
+                                                    loadingPanels[layoutItem.source.dashboardUid] : false}
+                                                disabled={!layoutItem.source || typeof layoutItem.source !== 'object' || !('dashboardUid' in layoutItem.source) || !layoutItem.source.dashboardUid}
+                                            />
+                                        </div>
+                                    </div>
                                 ) : (
-                                    <Select
-                                        value={typeof layoutItem.source === 'string' ? layoutItem.source : ''}
-                                        options={queryOptions}
-                                        onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                            source: option.value || ''
-                                        })}
-                                        width={20}
-                                        placeholder="Data source query"
-                                        isClearable
-                                    />
+                                    <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Data Source Query</label>
+                                        <Select
+                                            value={typeof layoutItem.source === 'object' && 'queryRef' in layoutItem.source ? layoutItem.source.queryRef : ''}
+                                            options={queryOptions}
+                                            onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                source: option.value ? { queryRef: option.value } : undefined
+                                            })}
+                                            width={20}
+                                            placeholder="Data source query"
+                                            isClearable
+                                        />
+                                    </div>
                                 )}
                             </>
                         )}
@@ -321,5 +350,15 @@ const getStyles = (theme: GrafanaTheme2) => ({
         height: 16px;
         object-fit: contain;
         flex-shrink: 0;
+    `,
+    inputGroup: css`
+        display: flex;
+        flex-direction: column;
+        gap: ${theme.spacing(0.5)};
+    `,
+    inputLabel: css`
+        font-size: ${theme.typography.bodySmall.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.text.secondary};
     `,
 }); 
