@@ -1,5 +1,5 @@
 import { DataFrame } from "@grafana/data";
-import { Element } from "./model/view";
+import { Element, LayoutItem, QueryElementSource } from "./model/view";
 import { Record } from "./model/view";
 
 const getIcon = (element: Element) => {
@@ -11,37 +11,48 @@ const getIcon = (element: Element) => {
     return null
 }
 
-const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: DataFrame | null) => {
-    const layoutItems = []
+const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: DataFrame | null): LayoutItem[] => {
+    const layoutItems: LayoutItem[] = []
 
     for (const layoutItem of element.layout ?? []) {
         switch (layoutItem.sourceType) {
             case 'value':
                 layoutItems.push({
-                    "type": layoutItem.type,
-                    "value": layoutItem.value
+                    type: layoutItem.type,
+                    value: layoutItem.value
                 })
                 break;
             case 'dashboard':
-                layoutItems.push({
-                    "type": layoutItem.type,
-                    "value": layoutItem.source,
-                })
+                //TODO: Implement dashboard source
                 break;
             case 'query':
-                const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === layoutItem.source)
+                const ref = layoutItem.source as QueryElementSource
+                const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === ref?.queryRef)
                 //correlate layoutQueryResult with queryResults
                 const result = layoutQueryResult.filter((series: DataFrame) => {
                     return series.fields?.[1]?.labels?.['service_name'] === record?.fields?.[1]?.labels?.['service_name']
                 })
-                if (result.length > 0) {
-                    layoutItems.push({
-                        "type": layoutItem.type,
-                        "value": {
-                            "data": result[0].fields[1].values[0]
-                        }
-                    })
+
+                if (result.length > 0 && layoutItem.field) {
+                    if (layoutItem.field === 'value') {
+                        layoutItems.push({
+                            type: layoutItem.type,
+                            label: layoutItem.label,
+                            value: {
+                                data: result[0].fields[1].values[0]
+                            }
+                        })
+                    } else {
+                        layoutItems.push({
+                            type: layoutItem.type,
+                            label: layoutItem.label,
+                            value: {
+                                data: result[0].fields[1].labels?.[layoutItem.field] || ''
+                            }
+                        })
+                    }
                 }
+
                 break;
         }
     }

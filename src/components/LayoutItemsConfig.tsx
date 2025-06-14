@@ -121,6 +121,19 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                 placeholder="Field Type"
                             />
                         </div>
+                        {!['title', 'status', 'parentId', 'icon', 'links'].includes(layoutItem.type) && (
+                            <div className={styles.inputGroup}>
+                                <label className={styles.inputLabel}>Label</label>
+                                <Input
+                                    value={layoutItem.label || ''}
+                                    onChange={(e) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                        label: e.currentTarget.value
+                                    })}
+                                    placeholder="Display label"
+                                    width={20}
+                                />
+                            </div>
+                        )}
                         {layoutItem.type === 'icon' ? (
                             <div className={styles.iconSelectorContainer}>
                                 <div className={styles.inputGroup}>
@@ -276,7 +289,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                                     onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
                                                         field: option.value || undefined
                                                     })}
-                                                    width={20}
+                                                    width={30}
                                                     placeholder="Select field from query"
                                                     isClearable
                                                     className={styles.fieldSelector}

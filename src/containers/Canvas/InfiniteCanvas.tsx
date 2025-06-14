@@ -160,7 +160,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
         layoutedNodes = await layoutElementsTree(nodes, edges, positions)
         break
       default:
-        layoutedNodes = await layoutElements(nodes, edges, positions)
+        layoutedNodes = await layoutElementsTree(nodes, edges, positions)
         break
     }
 

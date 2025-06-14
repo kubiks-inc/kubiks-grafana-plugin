@@ -395,7 +395,7 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
       case 'links':
         return (
           <div className="flex flex-wrap gap-3" key={`${data.key}-label-${i}`}>
-            {(item.value?.data as LayoutLink[]).map((link, linkIndex: number) => (
+            {((item.value?.data || []) as LayoutLink[]).map((link, linkIndex: number) => (
               <div
                 key={linkIndex}
                 className="text-white/90 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg cursor-pointer hover:bg-white/5 transition-colors"
