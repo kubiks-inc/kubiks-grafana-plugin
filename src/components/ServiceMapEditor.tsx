@@ -19,6 +19,8 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = [], onChange, contex
             context.data.forEach((dataFrame: any) => {
                 if (dataFrame.refId) {
                     uniqueRefIds.add(dataFrame.refId);
+                } else if (dataFrame?.meta?.preferredVisualisationType) {
+                    uniqueRefIds.add(dataFrame?.meta?.preferredVisualisationType)
                 }
             });
 
