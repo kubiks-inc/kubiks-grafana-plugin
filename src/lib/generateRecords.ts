@@ -71,8 +71,8 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
             records.push({
                 "component": element.type,
                 "icon": getIcon(element),
-                "id": crypto.randomUUID(),
-                "key": crypto.randomUUID(),
+                "id": element.name,
+                "key": element.name,
                 "layout": generateLayoutItems(element, dataFrames, null),
                 "parentId": "",
                 "type": ""
