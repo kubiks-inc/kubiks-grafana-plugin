@@ -8,6 +8,7 @@ import { IconLayoutItem } from './IconLayoutItem';
 import { ParentIdLayoutItem } from './ParentIdLayoutItem';
 import { TitleLayoutItem } from './TitleLayoutItem';
 import { StatusLayoutItem } from './StatusLayoutItem';
+import { LinkLayoutItem } from './LinkLayoutItem';
 import { SourceModeLayoutItem } from './SourceModeLayoutItem';
 
 interface LayoutItemsConfigProps {
@@ -55,13 +56,14 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                 return <TitleLayoutItem key={layoutIndex} {...baseProps} />;
             case 'status':
                 return <StatusLayoutItem key={layoutIndex} {...baseProps} />;
+            case 'link':
+                return <LinkLayoutItem key={layoutIndex} {...baseProps} />;
             case 'text':
             case 'tags':
             case 'keyValue':
             case 'progress':
             case 'inversed_progress':
             case 'blocks':
-            case 'link':
             case 'panel':
             default:
                 return <SourceModeLayoutItem key={layoutIndex} {...baseProps} />;
