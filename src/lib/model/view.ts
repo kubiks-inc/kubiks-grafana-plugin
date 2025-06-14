@@ -26,6 +26,7 @@ export interface Element {
 export interface LayoutItem {
   type: 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'links' | 'icon' | 'status'
   source?: string // Query reference
+  sourceMode?: 'query' | 'manual' // Mode for source selection
   selector?: Selector
   label?: string
   value?: { data: number | string | object }

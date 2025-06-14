@@ -235,31 +235,6 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
     }
 
     switch (item.type) {
-      case 'title':
-        return (
-          <div className="text-4xl font-bold text-white mb-2" key={`${data.key}-title-${i}`}>
-            {item.value?.data as string || item.label || 'Untitled'}
-          </div>
-        )
-      case 'parentId':
-        return (
-          <div className="text-xl text-white/60 mb-2" key={`${data.key}-parentId-${i}`}>
-            Parent: {item.value?.data as string || 'None'}
-          </div>
-        )
-      case 'icon':
-        return (
-          <div className="flex items-center gap-2 mb-2" key={`${data.key}-icon-${i}`}>
-            {item.value?.data && (
-              <img
-                src={getIconUrlWithFallback(item.value.data as string)}
-                alt="Element icon"
-                className="w-8 h-8"
-              />
-            )}
-            {item.label && <span className="text-white/80">{item.label}</span>}
-          </div>
-        )
       case 'status':
         const statusValue = item.value?.data as Status | undefined
         return (
