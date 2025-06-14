@@ -1,18 +1,14 @@
 import React from 'react';
-import { DataFrame, PanelProps } from '@grafana/data';
+import { PanelProps } from '@grafana/data';
 import { css } from '@emotion/css';
 import { GrafanaTheme2, PageLayoutType } from '@grafana/data';
-import { LinkButton, useStyles2 } from '@grafana/ui';
-import { ROUTES } from '../constants';
-import { prefixRoute } from '../utils/utils.routing';
-import { testIds } from '../components/testIds';
+import { useStyles2 } from '@grafana/ui';
 import { PluginPage } from '@grafana/runtime';
 import { InfiniteCanvas } from '@/containers/Canvas/InfiniteCanvas';
 import { generateRecords } from '../lib/generateRecords';
 import { useViewStore, ViewStoreProvider } from '@/store/ViewStoreProvider';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';
-import { CanvasNavbar } from '@/components/Canvas/Navbar';
 import { ReactFlowProvider } from '@xyflow/react'
 import { ConnectionDetailsDrawer } from '@/components/Canvas/EdgeDetailsDrawer';
 
@@ -39,7 +35,6 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
         selectedServiceDetails,
         setViewState,
         setOriginalViewState,
-        viewState
     } = useViewStore(state => state)
     const { elements } = props.options;
 
