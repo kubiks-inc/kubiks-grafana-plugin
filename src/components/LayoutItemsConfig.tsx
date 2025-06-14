@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { Input, Button, Select, useStyles2 } from '@grafana/ui';
-import { DataQuery, GrafanaTheme2 } from '@grafana/data';
+import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import { getQueryOptions, getQueryByRef, getFieldOptionsFromQuery } from '../utils/queryUtils';
 import { getIconOptions, getIconUrlWithFallback } from '../utils/iconMapper';
 import { getDashboardOptions, getPanelOptions, DashboardOption, PanelOption } from '../utils/dashboardUtils';
@@ -11,7 +11,8 @@ interface LayoutItemsConfigProps {
     element: Element;
     elementIndex: number;
     elements: Element[];
-    queries: DataQuery[];
+    queries: string[];
+    data: DataFrame[];
     onUpdateLayoutItem: (elementIndex: number, layoutIndex: number, updates: Partial<LayoutItem>) => void;
     onAddLayoutItem: (elementIndex: number) => void;
     onRemoveLayoutItem: (elementIndex: number, layoutIndex: number) => void;
@@ -22,6 +23,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
     elementIndex,
     elements,
     queries,
+    data,
     onUpdateLayoutItem,
     onAddLayoutItem,
     onRemoveLayoutItem
@@ -269,7 +271,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                                     value={layoutItem.field || ''}
                                                     options={(() => {
                                                         const selectedQuery = getQueryByRef(layoutItem.source.queryRef, queries);
-                                                        return selectedQuery ? getFieldOptionsFromQuery(selectedQuery) : [];
+                                                        return selectedQuery ? getFieldOptionsFromQuery(selectedQuery, data) : [];
                                                     })()}
                                                     onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
                                                         field: option.value || undefined

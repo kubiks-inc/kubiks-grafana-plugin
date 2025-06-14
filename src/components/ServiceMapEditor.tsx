@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/css';
-import { StandardEditorProps, DataQuery, GrafanaTheme2 } from '@grafana/data';
+import { StandardEditorProps, GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
 import { ElementsList } from './ElementsList';
 import { Element } from '../lib/model/view';
@@ -10,11 +10,7 @@ interface Props extends StandardEditorProps<Element[]> { }
 export const ServiceMapEditor: React.FC<Props> = ({ value = [], onChange, context }) => {
     const styles = useStyles2(getStyles);
 
-    // Extract queries from the context data - similar to backup component approach
-    const getAvailableQueries = (): DataQuery[] => {
-        const queries: DataQuery[] = [];
-
-        // Extract unique refIds from data frames
+    const getAvailableQueries = useCallback((): string[] => {
         if (context?.data && Array.isArray(context.data)) {
             const uniqueRefIds = new Set<string>();
             context.data.forEach((dataFrame: any) => {
@@ -25,25 +21,18 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = [], onChange, contex
                 }
             });
 
-            // Convert refIds to query objects
-            Array.from(uniqueRefIds).forEach((refId) => {
-                queries.push({
-                    refId,
-                    datasource: { type: 'unknown' }, // We don't have datasource info from dataframes
-                } as DataQuery);
-            });
+            return Array.from(uniqueRefIds)
         }
 
-        return queries;
-    };
-
-    const queries = getAvailableQueries();
+        return [];
+    }, [context]);
 
     return (
         <div className={styles.container}>
             <ElementsList
+                data={context?.data || []}
                 elements={value}
-                queries={queries}
+                queries={getAvailableQueries()}
                 onChange={onChange}
             />
         </div>
