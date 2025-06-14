@@ -19,7 +19,9 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
             case 'value':
                 layoutItems.push({
                     type: layoutItem.type,
-                    value: layoutItem.value
+                    value: layoutItem.value,
+                    icon: layoutItem.icon,
+                    label: layoutItem.label
                 })
                 break;
             case 'dashboard':
@@ -38,6 +40,7 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
                         layoutItems.push({
                             type: layoutItem.type,
                             label: layoutItem.label,
+                            icon: layoutItem.icon,
                             value: {
                                 data: result[0].fields[1].values[0]
                             }
@@ -46,6 +49,7 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
                         layoutItems.push({
                             type: layoutItem.type,
                             label: layoutItem.label,
+                            icon: layoutItem.icon,
                             value: {
                                 data: result[0].fields[1].labels?.[layoutItem.field] || ''
                             }
