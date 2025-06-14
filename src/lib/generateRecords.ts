@@ -19,19 +19,32 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
                 "type": layoutItem.type,
                 "value": layoutItem.value
             })
-        } else if (layoutItem.source == element.source) {
-            const layoutItemValue = record?.fields[1].labels['service_name']
+        } else if (layoutItem.sourceMode === 'dashboard') {
+            // Handle dashboard panel reference
+            if (typeof layoutItem.source === 'object' && layoutItem.source.dashboardUid && layoutItem.source.panelId) {
+                layoutItems.push({
+                    "type": layoutItem.type,
+                    "value": {
+                        "data": {
+                            "dashboardUid": layoutItem.source.dashboardUid,
+                            "panelId": layoutItem.source.panelId
+                        }
+                    }
+                })
+            }
+        } else if (typeof layoutItem.source === 'string' && layoutItem.source === element.source) {
+            const layoutItemValue = record?.fields?.[1]?.labels?.['service_name']
             layoutItems.push({
                 "type": layoutItem.type,
                 "value": {
                     "data": layoutItemValue
                 }
             })
-        } else {
+        } else if (typeof layoutItem.source === 'string') {
             const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === layoutItem.source)
             //correlate layoutQueryResult with queryResults
             const result = layoutQueryResult.filter((series: DataFrame) => {
-                return series.fields[1].labels['service_name'] === record?.fields[1].labels['service_name']
+                return series.fields?.[1]?.labels?.['service_name'] === record?.fields?.[1]?.labels?.['service_name']
             })
             console.log(layoutQueryResult, result)
             if (result.length > 0) {
@@ -52,7 +65,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
     const records = []
 
     for (const element of elements) {
-        if (element.source) {
+        if (typeof element.source === 'string' && element.source) {
             const queryResults = dataFrames.filter((frame: DataFrame) => frame.refId === element.source)
             const queryRecords = queryResults.map((series: DataFrame, index: number) => {
                 const layoutItems = generateLayoutItems(element, dataFrames, queryResults[index])
