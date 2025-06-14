@@ -21,7 +21,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         onChange(updated);
     };
 
-    const handleTypeChange = (index: number, type: 'group' | 'element') => {
+    const handleTypeChange = (index: number, type: 'group' | 'element' | 'connection') => {
         const updated = [...elements];
         updated[index] = { ...updated[index], type };
         onChange(updated);
@@ -84,6 +84,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
     const typeOptions = [
         { label: 'Element', value: 'element' },
         { label: 'Group', value: 'group' },
+        { label: 'Connection', value: 'connection' },
     ];
 
     const queryOptions = getQueryOptions(queries);
@@ -103,13 +104,13 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                         <Input
                             value={item.name}
                             onChange={(e) => handleNameChange(elementIndex, e)}
-                            placeholder={`${item.type === 'group' ? 'Group' : 'Element'} name`}
+                            placeholder={`${item.type === 'group' ? 'Group' : item.type === 'connection' ? 'Connection' : 'Element'} name`}
                             width={25}
                         />
                         <Select
                             value={item.type}
                             options={typeOptions}
-                            onChange={(option) => handleTypeChange(elementIndex, option.value as 'group' | 'element')}
+                            onChange={(option) => handleTypeChange(elementIndex, option.value as 'group' | 'element' | 'connection')}
                             width={12}
                             placeholder="Type"
                         />
