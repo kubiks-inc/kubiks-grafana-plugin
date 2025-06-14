@@ -1,10 +1,14 @@
 import React from 'react';
-import { StandardEditorProps, DataQuery } from '@grafana/data';
+import { css } from '@emotion/css';
+import { StandardEditorProps, DataQuery, GrafanaTheme2 } from '@grafana/data';
+import { useStyles2 } from '@grafana/ui';
 import { ElementsList, Element } from './ElementsList';
 
 interface Props extends StandardEditorProps<Element[]> { }
 
 export const ServiceMapEditor: React.FC<Props> = ({ value = [], onChange, context }) => {
+    const styles = useStyles2(getStyles);
+
     // Extract queries from the context data - similar to backup component approach
     const getAvailableQueries = (): DataQuery[] => {
         const queries: DataQuery[] = [];
@@ -33,7 +37,7 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = [], onChange, contex
     const queries = getAvailableQueries();
 
     return (
-        <div>
+        <div className={styles.container}>
             <ElementsList
                 elements={value}
                 queries={queries}
@@ -42,3 +46,10 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = [], onChange, contex
         </div>
     );
 };
+
+const getStyles = (theme: GrafanaTheme2) => ({
+    container: css`
+        background: ${theme.colors.background.primary};
+        color: ${theme.colors.text.primary};
+    `,
+});

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Input, Button, Select } from '@grafana/ui';
-import { DataQuery } from '@grafana/data';
+import { css } from '@emotion/css';
+import { Input, Button, Select, useStyles2 } from '@grafana/ui';
+import { DataQuery, GrafanaTheme2 } from '@grafana/data';
 import { getQueryOptions, isValidQueryRef } from '../utils/queryUtils';
 import { LayoutItem } from '../lib/model/view';
 
@@ -18,6 +19,8 @@ interface ElementsListProps {
 }
 
 export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = [], onChange }) => {
+    const styles = useStyles2(getStyles);
+
     const handleNameChange = (index: number, event: React.FormEvent<HTMLInputElement>) => {
         const updated = [...elements];
         updated[index] = { ...updated[index], name: event.currentTarget.value };
@@ -33,12 +36,6 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
     const handleSourceChange = (index: number, source: string) => {
         const updated = [...elements];
         updated[index] = { ...updated[index], source };
-        onChange(updated);
-    };
-
-    const handleLayoutChange = (elementIndex: number, layoutItems: LayoutItem[]) => {
-        const updated = [...elements];
-        updated[elementIndex] = { ...updated[elementIndex], layout: layoutItems };
         onChange(updated);
     };
 
@@ -111,23 +108,17 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
     const queryOptions = getQueryOptions(queries);
 
     return (
-        <div style={{ padding: '16px' }}>
-            <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
-                <h3>Service Map Configuration</h3>
-                <p style={{ margin: '8px 0', fontSize: '14px', color: '#666' }}>
+        <div className={styles.container}>
+            <div className={styles.headerCard}>
+                <h3 className={styles.title}>Service Map Configuration</h3>
+                <p className={styles.description}>
                     Configure elements and their layout fields. Each element can have multiple layout fields that determine what information is displayed in the service map nodes.
                 </p>
             </div>
 
             {elements.map((item, elementIndex) => (
-                <div key={elementIndex} style={{
-                    border: '1px solid #ccc',
-                    padding: '16px',
-                    marginBottom: '16px',
-                    borderRadius: '4px',
-                    backgroundColor: '#fafafa'
-                }}>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'center' }}>
+                <div key={elementIndex} className={styles.elementCard}>
+                    <div className={styles.elementHeader}>
                         <Input
                             value={item.name}
                             onChange={(e) => handleNameChange(elementIndex, e)}
@@ -160,20 +151,14 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                     </div>
 
                     {/* Layout Configuration */}
-                    <div style={{ marginTop: '12px' }}>
-                        <h4 style={{ marginBottom: '8px', color: '#333' }}>Layout Fields</h4>
-                        <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                    <div className={styles.layoutSection}>
+                        <h4 className={styles.sectionTitle}>Layout Fields</h4>
+                        <p className={styles.sectionDescription}>
                             Configure what fields are displayed in this element's service map node
                         </p>
                         {(item.layout || []).map((layoutItem, layoutIndex) => (
-                            <div key={layoutIndex} style={{
-                                backgroundColor: '#ffffff',
-                                padding: '12px',
-                                marginBottom: '8px',
-                                borderRadius: '4px',
-                                border: '1px solid #ddd'
-                            }}>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <div key={layoutIndex} className={styles.layoutItem}>
+                                <div className={styles.layoutItemHeader}>
                                     <Select
                                         value={layoutItem.type}
                                         options={layoutTypeOptions}
@@ -224,4 +209,76 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
             <Button onClick={addElement}>Add Element</Button>
         </div>
     );
-}; 
+};
+
+const getStyles = (theme: GrafanaTheme2) => ({
+    container: css`
+        padding: ${theme.spacing(2)};
+        background: ${theme.colors.background.primary};
+        color: ${theme.colors.text.primary};
+    `,
+    headerCard: css`
+        margin-bottom: ${theme.spacing(2)};
+        padding: ${theme.spacing(1.5)};
+        background: ${theme.colors.background.secondary};
+        border: 1px solid ${theme.colors.border.medium};
+        border-radius: ${theme.shape.radius.default};
+    `,
+    title: css`
+        margin: 0;
+        margin-bottom: ${theme.spacing(1)};
+        font-size: ${theme.typography.h5.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.text.primary};
+    `,
+    description: css`
+        margin: 0;
+        font-size: ${theme.typography.bodySmall.fontSize};
+        color: ${theme.colors.text.secondary};
+        line-height: 1.4;
+    `,
+    elementCard: css`
+        border: 1px solid ${theme.colors.border.medium};
+        padding: ${theme.spacing(2)};
+        margin-bottom: ${theme.spacing(2)};
+        border-radius: ${theme.shape.radius.default};
+        background: ${theme.colors.background.secondary};
+    `,
+    elementHeader: css`
+        display: flex;
+        gap: ${theme.spacing(1)};
+        margin-bottom: ${theme.spacing(1.5)};
+        align-items: center;
+        flex-wrap: wrap;
+    `,
+    layoutSection: css`
+        margin-top: ${theme.spacing(1.5)};
+    `,
+    sectionTitle: css`
+        margin: 0;
+        margin-bottom: ${theme.spacing(1)};
+        font-size: ${theme.typography.body.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.text.primary};
+    `,
+    sectionDescription: css`
+        margin: 0;
+        margin-bottom: ${theme.spacing(1)};
+        font-size: ${theme.typography.bodySmall.fontSize};
+        color: ${theme.colors.text.secondary};
+        line-height: 1.4;
+    `,
+    layoutItem: css`
+        background: ${theme.colors.background.canvas};
+        padding: ${theme.spacing(1.5)};
+        margin-bottom: ${theme.spacing(1)};
+        border-radius: ${theme.shape.radius.default};
+        border: 1px solid ${theme.colors.border.weak};
+    `,
+    layoutItemHeader: css`
+        display: flex;
+        gap: ${theme.spacing(1)};
+        align-items: center;
+        flex-wrap: wrap;
+    `,
+}); 
