@@ -14,50 +14,30 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
     const layoutItems = []
 
     for (const layoutItem of element.layout ?? []) {
-        if (layoutItem.sourceMode === 'manual') {
-            layoutItems.push({
-                "type": layoutItem.type,
-                "value": layoutItem.value
-            })
-        } else if (layoutItem.sourceMode === 'dashboard') {
-            // Handle dashboard panel reference
-            if (typeof layoutItem.source === 'object' && layoutItem.source.dashboardUid && layoutItem.source.panelId) {
+        switch (layoutItem.sourceType) {
+            case 'value':
+                layoutItems.push({
+                    "type": layoutItem.type,
+                    "value": layoutItem.value
+                })
+                break;
+            case 'dashboard':
+                layoutItems.push({
+                    "type": layoutItem.type,
+                    "value": layoutItem.source,
+                })
+                break;
+            case 'query':
+                const layoutItemValue = record?.fields?.[1]?.labels?.['service_name']
                 layoutItems.push({
                     "type": layoutItem.type,
                     "value": {
-                        "data": {
-                            "dashboardUid": layoutItem.source.dashboardUid,
-                            "panelId": layoutItem.source.panelId
-                        }
+                        "data": layoutItemValue
                     }
                 })
-            }
-        } else if (typeof layoutItem.source === 'string' && layoutItem.source === element.source) {
-            const layoutItemValue = record?.fields?.[1]?.labels?.['service_name']
-            layoutItems.push({
-                "type": layoutItem.type,
-                "value": {
-                    "data": layoutItemValue
-                }
-            })
-        } else if (typeof layoutItem.source === 'string') {
-            const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === layoutItem.source)
-            //correlate layoutQueryResult with queryResults
-            const result = layoutQueryResult.filter((series: DataFrame) => {
-                return series.fields?.[1]?.labels?.['service_name'] === record?.fields?.[1]?.labels?.['service_name']
-            })
-            console.log(layoutQueryResult, result)
-            if (result.length > 0) {
-                layoutItems.push({
-                    "type": layoutItem.type,
-                    "value": {
-                        "data": result[0].fields[1].values[0]
-                    }
-                })
-            }
+                break;
         }
     }
-
     return layoutItems
 }
 
@@ -65,15 +45,15 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
     const records = []
 
     for (const element of elements) {
-        if (typeof element.source === 'string' && element.source) {
+        if (element?.source) {
             const queryResults = dataFrames.filter((frame: DataFrame) => frame.refId === element.source)
-            const queryRecords = queryResults.map((series: DataFrame, index: number) => {
-                const layoutItems = generateLayoutItems(element, dataFrames, queryResults[index])
+            const queryRecords = queryResults.map((series: DataFrame) => {
+                const layoutItems = generateLayoutItems(element, dataFrames, series)
                 return {
                     "component": element.type,
                     "icon": getIcon(element),
-                    "id": index.toString(),
-                    "key": index.toString(),
+                    "id": crypto.randomUUID(),
+                    "key": crypto.randomUUID(),
                     "layout": layoutItems,
                     "layoutSpec": element,
                     "parentId": "",

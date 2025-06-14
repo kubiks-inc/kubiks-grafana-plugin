@@ -1,15 +1,24 @@
 export interface Element {
   name: string;
   type: 'group' | 'element' | 'connection';
-  source?: string; // Query reference ID
-  layout?: LayoutItem[]; // Array of configurable layout items
-  details?: LayoutItem[]; // Array of layout items for details view
+  source?: string;
+  layout?: LayoutItem[];
+  details?: LayoutItem[];
+}
+
+export interface QueryElementSource {
+  queryRef: string
+}
+
+export interface DashboardElementSource {
+  panelId: string
+  dashboardUid: string
 }
 
 export interface LayoutItem {
   type: 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'links' | 'icon' | 'status' | 'panel'
-  source?: string | { panelId: string; dashboardUid: string } // Query reference or dashboard panel reference
-  sourceMode?: 'query' | 'manual' | 'dashboard' // Mode for source selection
+  source?: QueryElementSource | DashboardElementSource
+  sourceType?: 'query' | 'value' | 'dashboard'
   label?: string
   value?: { data: number | string | object }
 }
