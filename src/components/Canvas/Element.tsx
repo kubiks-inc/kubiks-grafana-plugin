@@ -12,12 +12,12 @@ import {
   ZoomIn,
 } from 'lucide-react'
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { cn } from '@/lib/utils'
+import { css } from '@emotion/css'
+import { GrafanaTheme2 } from '@grafana/data'
+import { Button, useStyles2, Icon, Badge, Tooltip } from '@grafana/ui'
 import { getTitle, getExploreLink } from './helpers'
 import { useViewStore } from '@/store/ViewStoreProvider'
 import { getIconUrlWithFallback } from '@/utils/iconMapper'
-// import { useViewStore } from './view-store-provider'
-// import { getTitle, getExploreLink } from './helpers'
 
 function getStatus(record: LayoutItem[]): Status | undefined {
   const statusItem = record?.find((item) => item.type === 'status')
@@ -77,11 +77,6 @@ const statusDotColors: Record<Status, string> = {
   Online: 'bg-green-500',
 }
 
-// function getStatus(record: LayoutItem[]): Status | undefined {
-//   const statusItem = record?.find((item) => item.type === 'status')
-//   return statusItem?.value?.data as Status | undefined
-// }
-
 const getStatusTextColor = (status?: Status | string) => {
   switch (status) {
     case 'Success':
@@ -107,6 +102,7 @@ const CopyableText = ({
   disabled?: boolean
 }) => {
   const [copied, setCopied] = useState(false)
+  const styles = useStyles2(getCopyableTextStyles)
 
   const handleCopy = () => {
     if (disabled) return
@@ -118,17 +114,12 @@ const CopyableText = ({
   return (
     <span
       onClick={disabled ? undefined : handleCopy}
-      className={cn(
-        'text-white px-2 py-0.5 rounded-md relative group inline-block truncate',
-        disabled ? 'cursor-default' : 'cursor-pointer',
-        copied ? 'bg-white/10' : disabled ? '' : 'hover:bg-white/5',
-        className
-      )}
+      className={`${styles.copyableText} ${disabled ? styles.disabled : styles.enabled} ${className || ''}`}
       title={text}
     >
-      <span className="block truncate">{text}</span>
+      <span className={styles.textContent}>{text}</span>
       {copied && !disabled && (
-        <span className="absolute inset-0 flex items-center justify-center text-white/90 bg-[#2c2c30] rounded-md text-2xl font-medium">
+        <span className={styles.copiedOverlay}>
           Copied
         </span>
       )}
@@ -139,42 +130,35 @@ const CopyableText = ({
 // Component to visualize pods as blocks
 const BlocksComponent = ({
   blocks,
-  // router,
   disabled = false,
 }: {
   blocks: { name: string; status: Status; url: string }[]
-  //   router: AppRouterInstance
   disabled?: boolean
 }) => {
+  const styles = useStyles2(getBlocksStyles)
+
   return (
-    <div className="mt-2">
-      <div className="flex flex-col gap-1.5">
+    <div className={styles.container}>
+      <div className={styles.blocksGrid}>
         {blocks?.map((block, index) => (
           <div
             key={index}
-            className={cn(
-              'px-2 py-1.5 rounded-md border-4 border-[#3a3a3c] transition-colors',
-              'flex items-center justify-between',
-              disabled
-                ? 'cursor-default'
-                : block.url
-                  ? 'hover:border-[#525252] cursor-pointer'
-                  : 'cursor-default'
-            )}
+            className={`${styles.block} ${disabled
+              ? styles.blockDisabled
+              : block.url
+                ? styles.blockClickable
+                : styles.blockDefault
+              }`}
           >
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div
-                className={cn(
-                  'w-2 h-2 rounded-full shrink-0',
-                  statusDotColors[block.status] || 'bg-white/50'
-                )}
-              />
-              <span className="text-2xl font-medium truncate text-white">{block.name}</span>
+            <div className={styles.blockHeader}>
+              <div className={`${styles.statusDot} ${styles[`statusDot${block.status}` as keyof typeof styles]}`} />
+              <span className={styles.blockName}>{block.name}</span>
             </div>
-            <div className="flex items-center text-2xl text-white/60 gap-3 shrink-0">
-              <div className={cn('text-center', getStatusTextColor(block.status))}>
-                {block.status}
-              </div>
+            <div className={styles.blockStatus}>
+              <Badge
+                text={block.status}
+                color={getStatusBadgeColor(block.status)}
+              />
             </div>
           </div>
         ))}
@@ -183,17 +167,32 @@ const BlocksComponent = ({
   )
 }
 
+const getStatusBadgeColor = (status: Status) => {
+  switch (status) {
+    case 'Success':
+    case 'Running':
+    case 'Online':
+      return 'green'
+    case 'Warning':
+      return 'orange'
+    case 'Failed':
+      return 'red'
+    default:
+      return 'blue'
+  }
+}
+
 export const ElementComponent = ({ data }: GenericNodeProps) => {
   const Icon = icons[data.type as keyof typeof icons] || ServerIcon
   const status = getStatus(data.layout)
   const title = getTitle(data.layout)
-  // const router = useRouter()
   const [showDeploymentSticker, setShowDeploymentSticker] = useState(false)
   const { setIsServiceDrawerOpen, setSelectedServiceDetails } = useViewStore((state) => state)
   const containerRef = useRef<HTMLDivElement>(null)
   const exploreLink = getExploreLink(data.layout)
+  const styles = useStyles2(getElementStyles)
 
-  const isSimplifiedView = false //data.isSimplified
+  const isSimplifiedView = false
 
   // Find link items from layout
   const linkItems = data.layout?.filter((item) => item.type === 'link') || []
@@ -215,7 +214,6 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
 
       setSelectedServiceDetails(data.key)
       setIsServiceDrawerOpen(true)
-      // Pass the event to show context menu
       if (data.onClick) {
         data.onClick(data.key)
       }
@@ -238,41 +236,36 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
       case 'status':
         const statusValue = item.value?.data as Status | undefined
         return (
-          <div className="flex items-center gap-2 mb-2" key={`${data.key}-status-${i}`}>
+          <div className={styles.statusContainer} key={`${data.key}-status-${i}`}>
             {statusValue && (
-              <div
-                className={cn(
-                  'w-3 h-3 rounded-full',
-                  statusDotColors[statusValue] || 'bg-white/50'
-                )}
-              />
+              <div className={`${styles.statusDot} ${styles[`statusDot${statusValue}` as keyof typeof styles]}`} />
             )}
-            <span className={cn('text-xl font-medium', getStatusTextColor(statusValue))}>
-              {statusValue || 'Unknown'}
-            </span>
+            <Badge
+              text={statusValue || 'Unknown'}
+              color={getStatusBadgeColor(statusValue as Status)}
+            />
           </div>
         )
       case 'text':
         return (
-          <div className="text-2xl flex items-center gap-1.5" key={`${data.key}-label-${i}`}>
+          <div className={styles.textField} key={`${data.key}-label-${i}`}>
             {item.label && (
-              <span className="font-medium text-white/60 shrink-0">{item.label}:</span>
+              <span className={styles.fieldLabel}>{item.label}:</span>
             )}
-            <CopyableText text={item.value?.data as string} className="" disabled={true} />
+            <CopyableText text={item.value?.data as string} disabled={true} />
           </div>
         )
       case 'tags':
         return (
-          <div className="space-y-1 max-w-[600px]" key={`${data.key}-label-${i}`}>
-            <div className="flex items-center gap-1 flex-wrap">
-              <div className="text-2xl font-medium text-white/60 shrink-0">{item.label}:</div>
-              <div className="flex gap-1 flex-wrap">
+          <div className={styles.tagsContainer} key={`${data.key}-label-${i}`}>
+            <div className={styles.tagsHeader}>
+              <div className={styles.fieldLabel}>{item.label}:</div>
+              <div className={styles.tagsGrid}>
                 {Object.entries(item.value?.data || {}).map(([_, val]) => (
-                  <CopyableText
+                  <Badge
                     key={val}
                     text={val}
-                    className="text-2xl bg-white/5"
-                    disabled={true}
+                    color="blue"
                   />
                 ))}
               </div>
@@ -281,12 +274,12 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
         )
       case 'keyValue':
         return (
-          <div key={item.label} className="space-y-1">
-            {item.label && <div className="text-2xl font-medium text-white/60">{item.label}</div>}
-            <div className="grid grid-cols-1 gap-x-2 gap-y-1">
+          <div key={item.label} className={styles.keyValueContainer}>
+            {item.label && <div className={styles.fieldLabel}>{item.label}</div>}
+            <div className={styles.keyValueGrid}>
               {Object.entries(item.value?.data || {}).map(([key, val], index) => (
-                <div key={index} className="text-2xl">
-                  <span className="text-white/60">{key}:</span>{' '}
+                <div key={index} className={styles.keyValuePair}>
+                  <span className={styles.keyValueKey}>{key}:</span>{' '}
                   <CopyableText text={val as string} disabled={true} />
                 </div>
               ))}
@@ -299,39 +292,24 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
         const isDanger = percentage >= 80
         return (
           <div
-            className={cn(isSimplifiedView ? 'space-y-5' : 'space-y-3', isSimplifiedView && 'mb-2')}
+            className={`${styles.progressContainer} ${isSimplifiedView ? styles.progressSimplified : ''}`}
             key={`${data.key}-label-${i}`}
           >
-            <div className="flex justify-between items-center">
-              <span
-                className={cn(
-                  'text-white/90 font-medium',
-                  isSimplifiedView ? 'text-5xl' : 'text-2xl'
-                )}
-              >
+            <div className={styles.progressHeader}>
+              <span className={`${styles.progressLabel} ${isSimplifiedView ? styles.progressLabelLarge : ''}`}>
                 {item.label}
               </span>
-              <span
-                className={cn(
-                  isDanger ? 'text-red-400' : isWarning ? 'text-yellow-400' : 'text-green-400',
-                  isSimplifiedView ? 'text-5xl' : 'text-2xl',
-                  isSimplifiedView && 'pl-8'
-                )}
-              >
+              <span className={`${styles.progressValue} ${isSimplifiedView ? styles.progressValueLarge : ''} ${isDanger ? styles.progressDanger : isWarning ? styles.progressWarning : styles.progressSuccess
+                }`}>
                 {percentage.toFixed(2)}%
               </span>
             </div>
-            <div
-              className={cn('w-full bg-white/10 rounded-full', isSimplifiedView ? 'h-5' : 'h-3')}
-            >
+            <div className={`${styles.progressBar} ${isSimplifiedView ? styles.progressBarLarge : ''}`}>
               <div
-                className={cn(
-                  'rounded-full transition-all',
-                  isSimplifiedView ? 'h-5' : 'h-3',
-                  isDanger ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-green-500'
-                )}
+                className={`${styles.progressFill} ${isDanger ? styles.progressFillDanger : isWarning ? styles.progressFillWarning : styles.progressFillSuccess
+                  }`}
                 style={{ width: `${Math.min(percentage, 100)}%` }}
-              ></div>
+              />
             </div>
           </div>
         )
@@ -341,54 +319,31 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
         const isInverseWarning = inversePercentage > 20 && inversePercentage <= 30
         return (
           <div
-            className={cn(isSimplifiedView ? 'space-y-5' : 'space-y-3', isSimplifiedView && 'mb-2')}
+            className={`${styles.progressContainer} ${isSimplifiedView ? styles.progressSimplified : ''}`}
             key={`${data.key}-label-${i}`}
           >
-            <div className="flex justify-between items-center">
-              <span
-                className={cn(
-                  'text-white/90 font-medium',
-                  isSimplifiedView ? 'text-5xl' : 'text-2xl'
-                )}
-              >
+            <div className={styles.progressHeader}>
+              <span className={`${styles.progressLabel} ${isSimplifiedView ? styles.progressLabelLarge : ''}`}>
                 {item.label}
               </span>
-              <span
-                className={cn(
-                  isInverseDanger
-                    ? 'text-red-400'
-                    : isInverseWarning
-                      ? 'text-yellow-400'
-                      : 'text-green-400',
-                  isSimplifiedView ? 'text-5xl' : 'text-2xl',
-                  isSimplifiedView && 'pl-8'
-                )}
-              >
+              <span className={`${styles.progressValue} ${isSimplifiedView ? styles.progressValueLarge : ''} ${isInverseDanger ? styles.progressDanger : isInverseWarning ? styles.progressWarning : styles.progressSuccess
+                }`}>
                 {inversePercentage.toFixed(2)}%
               </span>
             </div>
-            <div
-              className={cn('w-full bg-white/10 rounded-full', isSimplifiedView ? 'h-5' : 'h-3')}
-            >
+            <div className={`${styles.progressBar} ${isSimplifiedView ? styles.progressBarLarge : ''}`}>
               <div
-                className={cn(
-                  'rounded-full transition-all',
-                  isSimplifiedView ? 'h-5' : 'h-3',
-                  isInverseDanger
-                    ? 'bg-red-500'
-                    : isInverseWarning
-                      ? 'bg-yellow-500'
-                      : 'bg-green-500'
-                )}
+                className={`${styles.progressFill} ${isInverseDanger ? styles.progressFillDanger : isInverseWarning ? styles.progressFillWarning : styles.progressFillSuccess
+                  }`}
                 style={{ width: `${Math.min(inversePercentage, 100)}%` }}
-              ></div>
+              />
             </div>
           </div>
         )
       case 'blocks':
         return (
-          <div className="space-y-1" key={`${data.key}-blocks-${i}`}>
-            {item.label && <div className="text-2xl font-medium text-white/60">{item.label}</div>}
+          <div className={styles.blocksSection} key={`${data.key}-blocks-${i}`}>
+            {item.label && <div className={styles.fieldLabel}>{item.label}</div>}
             <BlocksComponent blocks={item.value?.data as any} disabled={true} />
           </div>
         )
@@ -400,118 +355,51 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
   const elementContent = (
     <div
       ref={containerRef}
-      className={cn(
-        'rounded-xl flex flex-col relative',
-        isSimplifiedView ? 'border-[6px] p-12' : 'border-[2px] p-5',
-        status && statusColors[status]
-          ? statusColors[status]
-          : 'border-[#424242] hover:border-[#525252]'
-      )}
-      style={{
-        minWidth: isSimplifiedView ? '320px' : '600px',
-        minHeight: isSimplifiedView ? '180px' : '400px',
-        userSelect: 'text',
-        cursor: 'pointer',
-        backgroundColor: 'rgba(28, 28, 32, 0.98)',
-        boxShadow: isSimplifiedView
-          ? `0 0 20px ${statusGlowColors[status || 'Success']}, 0 4px 12px rgba(0, 0, 0, 0.4)`
-          : '0 8px 16px rgba(0, 0, 0, 0.3)',
-        backdropFilter: 'blur(12px)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      }}
-      onMouseOver={(e) => {
-        if (!status) {
-          e.currentTarget.style.boxShadow = isSimplifiedView
-            ? `0 0 25px ${statusGlowColors[status || 'Success']}, 0 8px 16px rgba(0, 0, 0, 0.5)`
-            : '0 10px 20px rgba(0, 0, 0, 0.4)'
-        }
-      }}
-      onMouseOut={(e) => {
-        if (!status) {
-          e.currentTarget.style.boxShadow = isSimplifiedView
-            ? `0 0 20px ${statusGlowColors[status || 'Success']}, 0 4px 12px rgba(0, 0, 0, 0.4)`
-            : '0 8px 16px rgba(0, 0, 0, 0.3)'
-        }
-      }}
+      className={`${styles.elementContainer} ${isSimplifiedView ? styles.elementSimplified : styles.elementDetailed
+        } ${status ? styles[`elementStatus${status}` as keyof typeof styles] : styles.elementDefault}`}
       onClick={handleFocus}
     >
       {/* Deployment Sticker */}
       {showDeploymentSticker && (
-        <div className="absolute -top-6 -right-6 bg-yellow-500 text-black font-bold py-3 px-6 rounded-full shadow-lg flex items-center gap-3 z-10 animate-pulse text-xl">
-          <RefreshCwIcon className="w-8 h-8 animate-spin" />
+        <div className={styles.deploymentSticker}>
+          <Icon name="refresh" className={styles.deploymentIcon} />
           <span>Deploying</span>
         </div>
       )}
 
-      <div className="flex-1 flex flex-col min-h-0">
-        <div
-          className={cn(
-            'flex items-center gap-6 transition-all duration-300',
-            isSimplifiedView ? 'mb-8' : 'mb-6'
-          )}
-        >
+      <div className={styles.elementContent}>
+        <div className={`${styles.elementHeader} ${isSimplifiedView ? styles.elementHeaderSimplified : ''}`}>
           {data.icon && (
             <img
               src={getIconUrlWithFallback(data.icon)}
               alt={`${data.name} icon`}
-              className={cn(
-                'transition-transform duration-300',
-                isSimplifiedView ? 'w-16 h-16' : 'w-16 h-16'
-              )}
+              className={`${styles.elementIcon} ${isSimplifiedView ? styles.elementIconLarge : ''}`}
             />
           )}
           {!data.icon && (
-            <div
-              className={cn(
-                'flex items-center justify-center rounded-full transition-all duration-300',
-                isSimplifiedView ? 'w-14 h-14 bg-[#252528]/80' : 'w-16 h-16 bg-transparent'
-              )}
-            >
+            <div className={`${styles.elementIconPlaceholder} ${isSimplifiedView ? styles.elementIconPlaceholderSimplified : ''}`}>
               <Icon
-                className={cn(
-                  'text-white/90 shrink-0 transition-transform duration-300',
-                  isSimplifiedView ? 'w-16 h-16' : 'w-16 h-16'
-                )}
+                name="cloud"
+                className={`${styles.elementIconSvg} ${isSimplifiedView ? styles.elementIconSvgLarge : ''}`}
               />
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <h1
-              className={cn(
-                'font-semibold text-white truncate tracking-tight transition-all duration-300',
-                isSimplifiedView ? 'text-6xl' : 'text-6xl'
-              )}
-            >
-              <CopyableText text={title} className="max-w-full" />
+          <div className={styles.elementTitleContainer}>
+            <h1 className={`${styles.elementTitle} ${isSimplifiedView ? styles.elementTitleLarge : ''}`}>
+              <CopyableText text={title} />
             </h1>
           </div>
           {status && (
-            <div className={cn('flex items-center gap-4 transition-all duration-300')}>
+            <div className={styles.elementStatusContainer}>
               <div
-                className={cn(
-                  'rounded-full shrink-0 transition-all duration-300',
-                  statusColors[status] || 'bg-white/50',
-                  isSimplifiedView ? 'w-8 h-8' : 'w-3 h-3'
-                )}
-                style={{
-                  boxShadow: isSimplifiedView
-                    ? `0 0 15px ${statusGlowColors[status || 'Success']}`
-                    : 'none',
-                }}
+                className={`${styles.statusIndicator} ${isSimplifiedView ? styles.statusIndicatorLarge : ''} ${styles[`statusIndicator${status}` as keyof typeof styles]
+                  }`}
               />
               {isSimplifiedView && (
-                <span
-                  className={cn(
-                    'font-medium text-5xl transition-opacity duration-300',
-                    status === 'Success'
-                      ? 'text-green-400'
-                      : status === 'Warning'
-                        ? 'text-yellow-400'
-                        : 'text-red-400'
-                  )}
-                >
-                  {status}
-                </span>
+                <Badge
+                  text={status}
+                  color={getStatusBadgeColor(status)}
+                />
               )}
             </div>
           )}
@@ -519,7 +407,7 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
 
         {/* Render all non-link items only when zoom level is sufficient */}
         {!isSimplifiedView && (
-          <div className="space-y-8 animate-fadeIn">
+          <div className={styles.fieldsContainer}>
             {/* Progress items */}
             {nonLinkItems
               .filter((item) => item.type === 'progress' || item.type === 'inversed_progress')
@@ -541,7 +429,7 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
 
         {/* In simplified view, only show progress elements */}
         {isSimplifiedView && (
-          <div className="space-y-12 animate-fadeIn mt-12">
+          <div className={styles.fieldsContainerSimplified}>
             {nonLinkItems
               .filter((item) => item.type === 'progress' || item.type === 'inversed_progress')
               .map((item, i) => renderField(i, item))}
@@ -549,38 +437,33 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
         )}
       </div>
 
-      {/* Show links section only when not in simplified view */}
+      {/* Show links section at the very bottom when not in simplified view */}
       {!isSimplifiedView && linkItems.length > 0 && (
-        <>
-          <div className="flex-grow min-h-[20px]"></div>
-          <div className="w-full h-px bg-[#3a3a3c] my-4"></div>
-          <div className="animate-fadeIn">
-            <div className="flex flex-wrap gap-3">
-              {linkItems.map((item, i) => (
-                <div
-                  key={`${data.key}-link-${i}`}
-                  className="text-white/90 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg cursor-pointer hover:bg-white/5 transition-colors"
-                  aria-label={item.label}
-                  style={{
-                    background: 'rgba(45, 45, 50, 0.4)',
-                    border: '0.5px solid rgba(255, 255, 255, 0.1)',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    window.open(item.value?.data as string, '_blank', 'noopener,noreferrer')
-                  }}
-                >
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#252528]">
-                    <img src={getIconUrlWithFallback(item.icon || '')} alt={item.label} className="w-12 h-12" />
+        <div className={styles.linksContainer}>
+          <div className={styles.linksGrid}>
+            {linkItems.map((item, i) => (
+              <div
+                key={`${data.key}-link-${i}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  window.open(item.value?.data as string, '_blank', 'noopener,noreferrer')
+                }}
+                className={styles.linkButton}
+              >
+                <div className={styles.linkButtonContent}>
+                  <div className={styles.linkIconContainer}>
+                    <img
+                      src={getIconUrlWithFallback(item.icon || '')}
+                      alt={item.label}
+                      className={styles.linkIcon}
+                    />
                   </div>
-                  <span className="text-2xl font-medium">{item.label}</span>
-                  <ExternalLinkIcon className="w-4 h-4 text-white/40 ml-2" />
+                  <span className={styles.linkLabel}>{item.label}</span>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   )
@@ -593,3 +476,544 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
     </>
   )
 }
+
+const getCopyableTextStyles = (theme: GrafanaTheme2) => ({
+  copyableText: css`
+    position: relative;
+    display: inline-block;
+    padding: ${theme.spacing(0.5, 1)};
+    border-radius: ${theme.shape.radius.default};
+    transition: all 0.2s ease;
+    word-break: break-all;
+    max-width: 100%;
+  `,
+  enabled: css`
+    cursor: pointer;
+    background: ${theme.colors.background.canvas};
+    &:hover {
+      background: ${theme.colors.emphasize(theme.colors.background.canvas, 0.03)};
+    }
+  `,
+  disabled: css`
+    cursor: default;
+    background: transparent;
+  `,
+  textContent: css`
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: ${theme.colors.text.primary};
+  `,
+  copiedOverlay: css`
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${theme.colors.background.secondary};
+    color: ${theme.colors.text.primary};
+    border-radius: ${theme.shape.radius.default};
+    font-weight: ${theme.typography.fontWeightMedium};
+    font-size: ${theme.typography.bodySmall.fontSize};
+  `,
+})
+
+const getBlocksStyles = (theme: GrafanaTheme2) => ({
+  container: css`
+    margin-top: ${theme.spacing(1)};
+  `,
+  blocksGrid: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${theme.spacing(1)};
+  `,
+  block: css`
+    padding: ${theme.spacing(1, 1.5)};
+    background: ${theme.colors.background.secondary};
+    border: 1px solid ${theme.colors.border.medium};
+    border-radius: ${theme.shape.radius.default};
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+  `,
+  blockDefault: css`
+    cursor: default;
+  `,
+  blockClickable: css`
+    cursor: pointer;
+    &:hover {
+      border-color: ${theme.colors.border.strong};
+      background: ${theme.colors.emphasize(theme.colors.background.secondary, 0.03)};
+    }
+  `,
+  blockDisabled: css`
+    cursor: default;
+    opacity: 0.6;
+  `,
+  blockHeader: css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(1)};
+    flex: 1;
+    min-width: 0;
+  `,
+  blockName: css`
+    font-size: ${theme.typography.body.fontSize};
+    font-weight: ${theme.typography.fontWeightMedium};
+    color: ${theme.colors.text.primary};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `,
+  blockStatus: css`
+    flex-shrink: 0;
+  `,
+  statusDot: css`
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  `,
+  statusDotSuccess: css`
+    background: ${theme.colors.success.main};
+  `,
+  statusDotWarning: css`
+    background: ${theme.colors.warning.main};
+  `,
+  statusDotFailed: css`
+    background: ${theme.colors.error.main};
+  `,
+  statusDotRunning: css`
+    background: ${theme.colors.success.main};
+  `,
+  statusDotOnline: css`
+    background: ${theme.colors.success.main};
+  `,
+})
+
+const getElementStyles = (theme: GrafanaTheme2) => ({
+  elementContainer: css`
+    background: ${theme.colors.background.primary};
+    border: 2px solid ${theme.colors.border.medium};
+    border-radius: ${theme.shape.radius.default};
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: ${theme.shadows.z1};
+    display: flex;
+    flex-direction: column;
+    
+    &:hover {
+      border-color: ${theme.colors.border.strong};
+      box-shadow: ${theme.shadows.z2};
+    }
+  `,
+  elementDetailed: css`
+    min-width: 600px;
+    min-height: 400px;
+    padding: ${theme.spacing(3)};
+  `,
+  elementSimplified: css`
+    min-width: 320px;
+    min-height: 180px;
+    padding: ${theme.spacing(2)};
+    border-width: 6px;
+  `,
+  elementDefault: css`
+    border-color: ${theme.colors.border.medium};
+    &:hover {
+      border-color: ${theme.colors.border.strong};
+    }
+  `,
+  elementStatusSuccess: css`
+    border-color: ${theme.colors.success.border};
+    box-shadow: 0 0 20px ${theme.colors.success.transparent};
+  `,
+  elementStatusWarning: css`
+    border-color: ${theme.colors.warning.border};
+    box-shadow: 0 0 20px ${theme.colors.warning.transparent};
+  `,
+  elementStatusFailed: css`
+    border-color: ${theme.colors.error.border};
+    box-shadow: 0 0 20px ${theme.colors.error.transparent};
+  `,
+  elementStatusRunning: css`
+    border-color: ${theme.colors.success.border};
+    box-shadow: 0 0 20px ${theme.colors.success.transparent};
+  `,
+  elementStatusOnline: css`
+    border-color: ${theme.colors.success.border};
+    box-shadow: 0 0 20px ${theme.colors.success.transparent};
+  `,
+  deploymentSticker: css`
+    position: absolute;
+    top: -${theme.spacing(3)};
+    right: -${theme.spacing(3)};
+    background: ${theme.colors.warning.main};
+    color: ${theme.colors.warning.contrastText};
+    font-weight: ${theme.typography.fontWeightBold};
+    padding: ${theme.spacing(1, 2)};
+    border-radius: ${theme.shape.radius.pill};
+    box-shadow: ${theme.shadows.z2};
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(1)};
+    z-index: 10;
+    animation: pulse 2s infinite;
+    font-size: ${theme.typography.bodySmall.fontSize};
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  `,
+  deploymentIcon: css`
+    animation: spin 1s linear infinite;
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  `,
+  elementContent: css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  `,
+  elementHeader: css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(2)};
+    margin-bottom: ${theme.spacing(2)};
+    transition: all 0.3s ease;
+  `,
+  elementHeaderSimplified: css`
+    margin-bottom: ${theme.spacing(3)};
+  `,
+  elementIcon: css`
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  `,
+  elementIconLarge: css`
+    width: 80px;
+    height: 80px;
+  `,
+  elementIconPlaceholder: css`
+    width: 64px;
+    height: 64px;
+    background: ${theme.colors.background.secondary};
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  `,
+  elementIconPlaceholderSimplified: css`
+    width: 80px;
+    height: 80px;
+    background: ${theme.colors.emphasize(theme.colors.background.secondary, 0.8)};
+  `,
+  elementIconSvg: css`
+    width: 32px;
+    height: 32px;
+    color: ${theme.colors.text.secondary};
+    transition: transform 0.3s ease;
+  `,
+  elementIconSvgLarge: css`
+    width: 40px;
+    height: 40px;
+  `,
+  elementTitleContainer: css`
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  `,
+  elementTitle: css`
+    font-size: calc(${theme.typography.h2.fontSize} * 2);
+    font-weight: ${theme.typography.fontWeightBold};
+    color: ${theme.colors.text.primary};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: -0.025em;
+    transition: all 0.3s ease;
+    margin: 0;
+  `,
+  elementTitleLarge: css`
+    font-size: calc(${theme.typography.h1.fontSize} * 2);
+  `,
+  elementStatusContainer: css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(1)};
+    transition: all 0.3s ease;
+  `,
+  statusIndicator: css`
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  `,
+  statusIndicatorLarge: css`
+    width: 24px;
+    height: 24px;
+  `,
+  statusIndicatorSuccess: css`
+    background: ${theme.colors.success.main};
+    box-shadow: 0 0 8px ${theme.colors.success.transparent};
+  `,
+  statusIndicatorWarning: css`
+    background: ${theme.colors.warning.main};
+    box-shadow: 0 0 8px ${theme.colors.warning.transparent};
+  `,
+  statusIndicatorFailed: css`
+    background: ${theme.colors.error.main};
+    box-shadow: 0 0 8px ${theme.colors.error.transparent};
+  `,
+  statusIndicatorRunning: css`
+    background: ${theme.colors.success.main};
+    box-shadow: 0 0 8px ${theme.colors.success.transparent};
+  `,
+  statusIndicatorOnline: css`
+    background: ${theme.colors.success.main};
+    box-shadow: 0 0 8px ${theme.colors.success.transparent};
+  `,
+  fieldsContainer: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${theme.spacing(3)};
+    animation: fadeIn 0.3s ease-in-out;
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `,
+  fieldsContainerSimplified: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${theme.spacing(4)};
+    margin-top: ${theme.spacing(4)};
+    animation: fadeIn 0.3s ease-in-out;
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `,
+  statusContainer: css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(1)};
+    margin-bottom: ${theme.spacing(1)};
+  `,
+  statusDot: css`
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  `,
+  statusDotSuccess: css`
+    background: ${theme.colors.success.main};
+  `,
+  statusDotWarning: css`
+    background: ${theme.colors.warning.main};
+  `,
+  statusDotFailed: css`
+    background: ${theme.colors.error.main};
+  `,
+  statusDotRunning: css`
+    background: ${theme.colors.success.main};
+  `,
+  statusDotOnline: css`
+    background: ${theme.colors.success.main};
+  `,
+  textField: css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(1)};
+    font-size: ${theme.typography.body.fontSize};
+  `,
+  fieldLabel: css`
+    font-weight: ${theme.typography.fontWeightMedium};
+    color: ${theme.colors.text.secondary};
+    flex-shrink: 0;
+  `,
+  tagsContainer: css`
+    max-width: 600px;
+  `,
+  tagsHeader: css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(1)};
+    flex-wrap: wrap;
+  `,
+  tagsGrid: css`
+    display: flex;
+    gap: ${theme.spacing(0.5)};
+    flex-wrap: wrap;
+  `,
+  keyValueContainer: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${theme.spacing(0.5)};
+  `,
+  keyValueGrid: css`
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: ${theme.spacing(0.5)};
+  `,
+  keyValuePair: css`
+    font-size: ${theme.typography.body.fontSize};
+  `,
+  keyValueKey: css`
+    color: ${theme.colors.text.secondary};
+  `,
+  progressContainer: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${theme.spacing(1)};
+  `,
+  progressSimplified: css`
+    gap: ${theme.spacing(2)};
+    margin-bottom: ${theme.spacing(1)};
+  `,
+  progressHeader: css`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  `,
+  progressLabel: css`
+    color: ${theme.colors.text.primary};
+    font-weight: ${theme.typography.fontWeightMedium};
+    font-size: ${theme.typography.body.fontSize};
+  `,
+  progressLabelLarge: css`
+    font-size: ${theme.typography.h4.fontSize};
+  `,
+  progressValue: css`
+    font-size: ${theme.typography.body.fontSize};
+    font-weight: ${theme.typography.fontWeightMedium};
+    padding-left: ${theme.spacing(2)};
+  `,
+  progressValueLarge: css`
+    font-size: ${theme.typography.h4.fontSize};
+    padding-left: ${theme.spacing(3)};
+  `,
+  progressSuccess: css`
+    color: ${theme.colors.success.text};
+  `,
+  progressWarning: css`
+    color: ${theme.colors.warning.text};
+  `,
+  progressDanger: css`
+    color: ${theme.colors.error.text};
+  `,
+  progressBar: css`
+    width: 100%;
+    background: ${theme.colors.background.canvas};
+    border-radius: ${theme.shape.radius.default};
+    height: 12px;
+    overflow: hidden;
+  `,
+  progressBarLarge: css`
+    height: 20px;
+  `,
+  progressFill: css`
+    height: 100%;
+    border-radius: ${theme.shape.radius.default};
+    transition: all 0.3s ease;
+  `,
+  progressFillSuccess: css`
+    background: ${theme.colors.success.main};
+  `,
+  progressFillWarning: css`
+    background: ${theme.colors.warning.main};
+  `,
+  progressFillDanger: css`
+    background: ${theme.colors.error.main};
+  `,
+  blocksSection: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${theme.spacing(0.5)};
+  `,
+  linksSeparator: css`
+    flex-grow: 1;
+    min-height: 20px;
+    border-top: 1px solid ${theme.colors.border.weak};
+    margin-top: ${theme.spacing(2)};
+    margin-bottom: ${theme.spacing(2)};
+  `,
+  linksContainer: css`
+    margin-top: auto;
+    padding-top: ${theme.spacing(3)};
+    border-top: 1px solid ${theme.colors.border.weak};
+    animation: fadeIn 0.3s ease-in-out;
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `,
+  linksGrid: css`
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${theme.spacing(2)};
+  `,
+  linkButton: css`
+    background: ${theme.colors.background.secondary};
+    border: 1px solid ${theme.colors.border.medium};
+    border-radius: ${theme.shape.radius.default};
+    box-shadow: ${theme.shadows.z1};
+    padding: ${theme.spacing(2, 3)};
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: ${theme.colors.emphasize(theme.colors.background.secondary, 0.03)};
+      border-color: ${theme.colors.border.strong};
+      box-shadow: ${theme.shadows.z2};
+    }
+    
+    &:active {
+      transform: translateY(1px);
+    }
+  `,
+  linkButtonContent: css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(2)};
+  `,
+  linkIconContainer: css`
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${theme.colors.background.canvas};
+    border-radius: 50%;
+  `,
+  linkIcon: css`
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  `,
+  linkLabel: css`
+    font-size: ${theme.typography.h6.fontSize};
+    font-weight: ${theme.typography.fontWeightMedium};
+  `,
+  externalLinkIcon: css`
+    width: 16px;
+    height: 16px;
+    color: ${theme.colors.text.secondary};
+    margin-left: ${theme.spacing(1)};
+  `,
+})
