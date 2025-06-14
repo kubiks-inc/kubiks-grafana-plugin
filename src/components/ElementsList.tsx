@@ -3,14 +3,7 @@ import { css } from '@emotion/css';
 import { Input, Button, Select, useStyles2 } from '@grafana/ui';
 import { DataQuery, GrafanaTheme2 } from '@grafana/data';
 import { getQueryOptions, isValidQueryRef } from '../utils/queryUtils';
-import { LayoutItem } from '../lib/model/view';
-
-export interface Element {
-    name: string;
-    type: 'group' | 'element';
-    source?: string; // Query reference ID
-    layout?: LayoutItem[]; // Array of configurable layout items
-}
+import { Element, LayoutItem } from '../lib/model/view';
 
 interface ElementsListProps {
     elements: Element[];

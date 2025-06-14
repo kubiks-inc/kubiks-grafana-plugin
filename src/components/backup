@@ -30,7 +30,7 @@ interface LayoutItem {
 
 interface ServiceMapElement {
     id: number;
-    component: 'group_component' | 'element_component';
+    component: 'group_component' | 'element';
     icon?: string;
     integrationId?: number;
     layout: LayoutItem[];
@@ -69,7 +69,7 @@ const selectorTypeOptions = [
 
 const componentTypeOptions = [
     { label: 'Group', value: 'group_component' },
-    { label: 'Element', value: 'element_component' },
+    { label: 'Element', value: 'element' },
 ];
 
 export const ServiceMapEditor: React.FC<Props> = ({
@@ -164,7 +164,7 @@ export const ServiceMapEditor: React.FC<Props> = ({
     const addElement = (isCustom: boolean = false) => {
         const newElement: ServiceMapElement = {
             id: Date.now(),
-            component: 'element_component',
+            component: 'element',
             layout: [],
             order: isCustom ? customElements?.length || 0 : elements?.length || 0,
             title: 'New Element'
@@ -460,7 +460,7 @@ tooltip = "Remove element"
                 <RadioButtonGroup
                                     value={ element.component }
 options = { componentTypeOptions }
-onChange = {(value) => updateElement(element.id, { component: value as 'group_component' | 'element_component' }, isCustom)}
+onChange = {(value) => updateElement(element.id, { component: value as 'group_component' | 'element' }, isCustom)}
                                 />
     </Field>
     </HorizontalGroup>

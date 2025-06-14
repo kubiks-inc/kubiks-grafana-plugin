@@ -36,7 +36,7 @@ const edgeTypes: EdgeTypes = {
 }
 
 const nodeTypes: NodeTypes = {
-  element_component: ElementComponent,
+  element: ElementComponent,
   node_label: NodeLabel,
 }
 
@@ -138,8 +138,8 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
   const updateLayout = async (positions: { [key: string]: { x: number; y: number } }) => {
     const allNodesMeasured = nodes.every(
       (node) =>
-        (node.type === 'element_component' && node.measured?.width && node.measured?.height) ||
-        node.type !== 'element_component'
+        (node.type === 'element' && node.measured?.width && node.measured?.height) ||
+        node.type !== 'element'
     )
 
     // If not all nodes are measured, return null

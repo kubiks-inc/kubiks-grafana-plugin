@@ -50,8 +50,8 @@ function layoutChildrenInGrid(
     const row = Math.floor(index / cols)
 
     // Calculate position within the group
-    const nodeWidth = child.type === 'element_component' ? child.measured?.width || 200 : 100
-    const nodeHeight = child.type === 'element_component' ? child.measured?.height || 100 : 50
+    const nodeWidth = child.type === 'element' ? child.measured?.width || 200 : 100
+    const nodeHeight = child.type === 'element' ? child.measured?.height || 100 : 50
 
     // Center the node within its grid cell
     const x = padding + col * cellWidth + (cellWidth - nodeWidth) / 2
@@ -87,8 +87,8 @@ function calculateGroupSize(children: Node[]): { width: number; height: number }
   let maxChildHeight = 100
 
   children.forEach((child) => {
-    const width = child.type === 'element_component' ? child.measured?.width || 200 : 100
-    const height = child.type === 'element_component' ? child.measured?.height || 100 : 50
+    const width = child.type === 'element' ? child.measured?.width || 200 : 100
+    const height = child.type === 'element' ? child.measured?.height || 100 : 50
     maxChildWidth = Math.max(maxChildWidth, width)
     maxChildHeight = Math.max(maxChildHeight, height)
   })
@@ -121,11 +121,11 @@ export const layoutElements = async (
   dagreGraph.setDefaultEdgeLabel(() => ({}))
 
   const groupNodes = nodes.filter((node) => node.type === 'group' || node.data?.isGroup)
-  const elementNodes = nodes.filter((node) => node.type === 'element_component' && !node.parentId)
-  const childNodes = nodes.filter((node) => node.type === 'element_component' && node.parentId)
+  const elementNodes = nodes.filter((node) => node.type === 'element' && !node.parentId)
+  const childNodes = nodes.filter((node) => node.type === 'element' && node.parentId)
   const labelNodes = nodes.filter((node) => node.type === 'node_label')
   const otherNodes = nodes.filter(
-    (node) => node.type && !['group', 'element_component', 'node_label'].includes(node.type)
+    (node) => node.type && !['group', 'element', 'node_label'].includes(node.type)
   )
 
   // Create mapping of group children
@@ -179,7 +179,7 @@ export const layoutElements = async (
     let width = nodeWidth / 2
     let height = nodeHeight / 2
 
-    if (node.type === 'element_component') {
+    if (node.type === 'element') {
       width = node.measured?.width || nodeWidth
       height = node.measured?.height || nodeHeight
     } else if (node.type === 'group' || node.data?.isGroup) {
@@ -217,7 +217,7 @@ export const layoutElements = async (
       let width = nodeWidth / 2
       let height = nodeHeight / 2
 
-      if (node.type === 'element_component') {
+      if (node.type === 'element') {
         width = node.measured?.width || nodeWidth
         height = node.measured?.height || nodeHeight
       } else if (node.type === 'group' || node.data?.isGroup) {
@@ -241,9 +241,9 @@ export const layoutElements = async (
           transition: 'all 300ms ease-in-out',
           ...(node.type === 'group' || node.data?.isGroup
             ? {
-                width,
-                height,
-              }
+              width,
+              height,
+            }
             : {}),
         },
         draggable: false,
