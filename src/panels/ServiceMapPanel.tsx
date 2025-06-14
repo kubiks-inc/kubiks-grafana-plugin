@@ -8,7 +8,7 @@ import { prefixRoute } from '../utils/utils.routing';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
 import { InfiniteCanvas } from '@/containers/Canvas/InfiniteCanvas';
-import { generateView } from '../lib/canvas/generate';
+import { generateRecords } from '../lib/generateView';
 import { useViewStore, ViewStoreProvider } from '@/store/ViewStoreProvider';
 import { useEffect, useState } from 'react';
 import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';
@@ -32,50 +32,17 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
     const s = useStyles2(getStyles);
 
     const { setFilteredRecords, isServiceDrawerOpen, setIsServiceDrawerOpen, setViewState, setOriginalViewState } = useViewStore(state => state)
+    const { elements } = props.options;
 
     useEffect(() => {
-        console.log('Panel data series:', props.data.series);
-        console.log('Panel configuration (options):', props.options);
-        console.log('Panel field config:', props.fieldConfig);
-        console.log('Panel props:', {
-            id: props.id,
-            width: props.width,
-            height: props.height,
-            timeRange: props.timeRange,
-            timeZone: props.timeZone,
-            title: props.title,
-            transparent: props.transparent,
-            replaceVariables: typeof props.replaceVariables
-        });
+        const records = generateRecords(elements, props.data.series)
 
-        const newData = props.data.series.map((series: DataFrame, index: number) => {
-            return {
-                "component": "element_component",
-                "icon": "/icons/cloudflare.svg",
-                "id": index.toString(),
-                "key": index.toString(),
-                "layout": [
-                    {
-                        "label": "",
-                        "selector": ".value.metadata.name",
-                        "selectorType": "record",
-                        "type": "title",
-                        "value": {
-                            "data": series.fields[1].labels['service_name']
-                        },
-                    },
-                ],
-                "parentId": "",
-                "type": ""
-            }
-        })
-
-        setFilteredRecords(newData)
+        setFilteredRecords(records)
         setViewState({
-            records: newData
+            records: records
         })
         setOriginalViewState({
-            records: newData
+            records: records
         })
     }, [props.data.series]);
 
