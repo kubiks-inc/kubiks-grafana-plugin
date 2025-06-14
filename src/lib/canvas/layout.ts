@@ -89,48 +89,6 @@ export function createNodesAndEdges(
       nodes.find((node) => node.id === edge.source) && nodes.find((node) => node.id === edge.target)
   )
 
-  if (edges.length === 0) {
-    // Create demo connections between nodes
-    const elementNodes = nodes.filter((node) => node.type === 'element_component')
-
-    if (elementNodes.length > 1) {
-      edges = []
-
-      // Create connections between nodes for demo purposes
-      for (let i = 0; i < elementNodes.length; i++) {
-        const sourceNode = elementNodes[i]
-
-        // Connect each node to the next 1-2 nodes in a circular pattern
-        for (let j = 1; j <= Math.min(2, elementNodes.length - 1); j++) {
-          const targetIndex = (i + j) % elementNodes.length
-          const targetNode = elementNodes[targetIndex]
-
-          if (sourceNode.id !== targetNode.id) {
-            edges.push({
-              id: `demo-edge-${sourceNode.id}-to-${targetNode.id}`,
-              source: sourceNode.id,
-              target: targetNode.id,
-              type: 'highlighted',
-              data: {
-                sourceName: sourceNode.data?.name || 'Demo Source',
-                targetName: targetNode.data?.name || 'Demo Target',
-              },
-              sourceHandle: null,
-              targetHandle: null,
-              animated: false,
-              selected: false,
-              updatable: true,
-              zIndex: 10,
-            })
-          }
-        }
-      }
-    } else {
-      // Fallback for single node or no element nodes
-      edges = []
-    }
-  }
-
   // Sort nodes so that group nodes come first
   const sortedNodes = [
     ...nodes.filter((node) => node.type === 'group'),

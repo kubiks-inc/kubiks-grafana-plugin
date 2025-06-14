@@ -1,5 +1,5 @@
 import React from 'react';
-import { PanelProps } from '@grafana/data';
+import { DataFrame, PanelProps } from '@grafana/data';
 import { css } from '@emotion/css';
 import { GrafanaTheme2, PageLayoutType } from '@grafana/data';
 import { LinkButton, useStyles2 } from '@grafana/ui';
@@ -10,7 +10,7 @@ import { PluginPage } from '@grafana/runtime';
 import { InfiniteCanvas } from '@/containers/Canvas/InfiniteCanvas';
 import { generateView } from '../lib/canvas/generate';
 import { useViewStore, ViewStoreProvider } from '@/store/ViewStoreProvider';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';
 import { CanvasNavbar } from '@/components/Canvas/Navbar';
 import { ReactFlowProvider } from '@xyflow/react'
@@ -34,14 +34,38 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
     const { setFilteredRecords, isServiceDrawerOpen, setIsServiceDrawerOpen, setViewState, setOriginalViewState } = useViewStore(state => state)
 
     useEffect(() => {
-        setFilteredRecords(generateView())
+        console.log('Panel data series:', props.data.series);
+        const newData = props.data.series.map((series: DataFrame, index: number) => {
+            return {
+                "component": "element_component",
+                "icon": "/icons/cloudflare.svg",
+                "id": index.toString(),
+                "key": index.toString(),
+                "layout": [
+                    {
+                        "label": "",
+                        "selector": ".value.metadata.name",
+                        "selectorType": "record",
+                        "type": "title",
+                        "value": {
+                            "data": series.fields[1].labels['service_name']
+                        },
+                    },
+                ],
+                "parentId": "",
+                "type": ""
+            }
+        })
+
+        setFilteredRecords(newData)
         setViewState({
-            records: generateView()
+            records: newData
         })
         setOriginalViewState({
-            records: generateView()
+            records: newData
         })
-    }, [])
+    }, [props.data.series]);
+
 
     return (
         <PluginPage layout={PageLayoutType.Custom}>
