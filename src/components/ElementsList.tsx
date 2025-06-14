@@ -38,7 +38,8 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
             name: `Element ${elements.length + 1}`,
             type: 'element',
             source: '',
-            layout: []
+            layout: [],
+            details: []
         }]);
     };
 
@@ -78,6 +79,40 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         const currentLayout = [...(updated[elementIndex].layout || [])];
         currentLayout[layoutIndex] = { ...currentLayout[layoutIndex], ...updates };
         updated[elementIndex] = { ...updated[elementIndex], layout: currentLayout };
+        onChange(updated);
+    };
+
+    const addDetailsItem = (elementIndex: number) => {
+        const updated = [...elements];
+        const currentDetails = updated[elementIndex].details || [];
+        const newDetailsItem: LayoutItem = {
+            type: 'text',
+            label: `Details Field ${currentDetails.length + 1}`,
+            source: '',
+            sourceMode: 'query'
+        };
+        updated[elementIndex] = {
+            ...updated[elementIndex],
+            details: [...currentDetails, newDetailsItem]
+        };
+        onChange(updated);
+    };
+
+    const removeDetailsItem = (elementIndex: number, detailsIndex: number) => {
+        const updated = [...elements];
+        const currentDetails = updated[elementIndex].details || [];
+        updated[elementIndex] = {
+            ...updated[elementIndex],
+            details: currentDetails.filter((_, i) => i !== detailsIndex)
+        };
+        onChange(updated);
+    };
+
+    const updateDetailsItem = (elementIndex: number, detailsIndex: number, updates: Partial<LayoutItem>) => {
+        const updated = [...elements];
+        const currentDetails = [...(updated[elementIndex].details || [])];
+        currentDetails[detailsIndex] = { ...currentDetails[detailsIndex], ...updates };
+        updated[elementIndex] = { ...updated[elementIndex], details: currentDetails };
         onChange(updated);
     };
 
@@ -142,6 +177,23 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                         onAddLayoutItem={addLayoutItem}
                         onRemoveLayoutItem={removeLayoutItem}
                     />
+
+                    {/* Details View Configuration */}
+                    <div className={styles.detailsSection}>
+                        <h4 className={styles.sectionTitle}>Details View</h4>
+                        <p className={styles.sectionDescription}>
+                            Configure layout items that will be displayed when a user clicks on this element in the service map.
+                        </p>
+                        <LayoutItemsConfig
+                            element={{ ...item, layout: item.details || [] }}
+                            elementIndex={elementIndex}
+                            elements={elements}
+                            queries={queries}
+                            onUpdateLayoutItem={updateDetailsItem}
+                            onAddLayoutItem={addDetailsItem}
+                            onRemoveLayoutItem={removeDetailsItem}
+                        />
+                    </div>
                 </div>
             ))}
             <Button onClick={addElement}>Add Element</Button>
@@ -188,6 +240,25 @@ const getStyles = (theme: GrafanaTheme2) => ({
         margin-bottom: ${theme.spacing(1.5)};
         align-items: center;
         flex-wrap: wrap;
+    `,
+    detailsSection: css`
+        margin-top: ${theme.spacing(2)};
+        padding-top: ${theme.spacing(2)};
+        border-top: 1px solid ${theme.colors.border.weak};
+    `,
+    sectionTitle: css`
+        margin: 0;
+        margin-bottom: ${theme.spacing(0.5)};
+        font-size: ${theme.typography.h6.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.text.primary};
+    `,
+    sectionDescription: css`
+        margin: 0;
+        margin-bottom: ${theme.spacing(1.5)};
+        font-size: ${theme.typography.bodySmall.fontSize};
+        color: ${theme.colors.text.secondary};
+        line-height: 1.4;
     `,
 
 }); 

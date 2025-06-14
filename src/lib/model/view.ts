@@ -21,6 +21,7 @@ export interface Element {
   type: 'group' | 'element' | 'connection';
   source?: string; // Query reference ID
   layout?: LayoutItem[]; // Array of configurable layout items
+  details?: LayoutItem[]; // Array of layout items for details view
 }
 
 export interface LayoutItem {
