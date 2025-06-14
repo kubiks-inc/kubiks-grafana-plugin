@@ -51,28 +51,28 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
             const queryRecords = queryResults.map((series: DataFrame) => {
                 const layoutItems = generateLayoutItems(element, dataFrames, series)
                 return {
-                    "component": element.type,
-                    "icon": getIcon(element),
-                    "id": crypto.randomUUID(),
-                    "key": crypto.randomUUID(),
-                    "layout": layoutItems,
-                    "layoutSpec": element,
-                    "parentId": "",
-                    "type": ""
-                } as Record
+                    component: element.type,
+                    icon: getIcon(element) || "",
+                    id: crypto.randomUUID(),
+                    key: crypto.randomUUID(),
+                    layout: layoutItems,
+                    layoutSpec: element,
+                    parentId: "",
+                    type: ""
+                }
             })
             records.push(...queryRecords)
         } else {
             records.push({
-                "component": element.type,
-                "icon": getIcon(element),
-                "id": element.name,
-                "key": element.name,
-                "layout": generateLayoutItems(element, dataFrames, null),
-                "layoutSpec": element,
-                "parentId": "",
-                "type": ""
-            } as Record)
+                component: element.type,
+                icon: getIcon(element) || "",
+                id: element.name,
+                key: element.name,
+                layout: generateLayoutItems(element, dataFrames, null),
+                layoutSpec: element,
+                parentId: "",
+                type: ""
+            })
         }
     }
 
