@@ -119,17 +119,6 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                 placeholder="Field Type"
                             />
                         </div>
-                        <div className={styles.inputGroup}>
-                            <label className={styles.inputLabel}>Display Label</label>
-                            <Input
-                                value={layoutItem.label || ''}
-                                onChange={(e) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                    label: e.currentTarget.value
-                                })}
-                                placeholder="Display label"
-                                width={20}
-                            />
-                        </div>
                         {layoutItem.type === 'icon' ? (
                             <div className={styles.iconSelectorContainer}>
                                 <div className={styles.inputGroup}>
@@ -265,7 +254,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                             onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
                                                 source: option.value ? { queryRef: option.value } : undefined
                                             })}
-                                            width={20}
+                                            width={25}
                                             placeholder="Data source query"
                                             isClearable
                                         />
@@ -277,6 +266,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                             variant="destructive"
                             size="sm"
                             onClick={() => onRemoveLayoutItem(elementIndex, layoutIndex)}
+                            className={styles.removeButton}
                         >
                             Remove
                         </Button>
@@ -322,7 +312,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     layoutItemHeader: css`
         display: flex;
         gap: ${theme.spacing(1)};
-        align-items: center;
+        align-items: flex-end;
         flex-wrap: wrap;
     `,
     iconSelectorContainer: css`
@@ -360,5 +350,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
         font-size: ${theme.typography.bodySmall.fontSize};
         font-weight: ${theme.typography.fontWeightMedium};
         color: ${theme.colors.text.secondary};
+    `,
+    removeButton: css`
+        height: 32px;
+        align-self: flex-end;
     `,
 }); 
