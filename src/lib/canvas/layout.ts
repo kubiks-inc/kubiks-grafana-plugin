@@ -29,7 +29,7 @@ export function createNodesAndEdges(
 
   unique.forEach((record) => {
     if (
-      record.component === 'group_component' ||
+      record.component === 'group' ||
       (record.component === 'element' && elementsToExplore.includes(record.key))
     ) {
       const groupId = record.key
@@ -124,7 +124,7 @@ function createEdgesFromLayout(records: ViewRecord[]): EdgeData[] {
   // Create a map of node IDs to their names for quick lookup
   const nodeNameMap: Record<string, string> = {}
   records
-    .filter((r) => r.component === 'element' || r.component === 'group_component')
+    .filter((r) => r.component === 'element' || r.component === 'group')
     .forEach((record) => {
       // Get display name from the record (type, component name, or ID)
       nodeNameMap[record.key] = getTitle(record.layout as LayoutItem[])
