@@ -35,6 +35,19 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
 
     useEffect(() => {
         console.log('Panel data series:', props.data.series);
+        console.log('Panel configuration (options):', props.options);
+        console.log('Panel field config:', props.fieldConfig);
+        console.log('Panel props:', {
+            id: props.id,
+            width: props.width,
+            height: props.height,
+            timeRange: props.timeRange,
+            timeZone: props.timeZone,
+            title: props.title,
+            transparent: props.transparent,
+            replaceVariables: typeof props.replaceVariables
+        });
+
         const newData = props.data.series.map((series: DataFrame, index: number) => {
             return {
                 "component": "element_component",
