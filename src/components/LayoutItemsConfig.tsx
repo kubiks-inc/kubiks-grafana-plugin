@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { Input, Button, Select, useStyles2 } from '@grafana/ui';
 import { DataQuery, GrafanaTheme2 } from '@grafana/data';
-import { getQueryOptions } from '../utils/queryUtils';
+import { getQueryOptions, getQueryByRef, getFieldOptionsFromQuery } from '../utils/queryUtils';
 import { getIconOptions, getIconUrlWithFallback } from '../utils/iconMapper';
 import { getDashboardOptions, getPanelOptions, DashboardOption, PanelOption } from '../utils/dashboardUtils';
 import { Element, LayoutItem } from '../lib/model/view';
@@ -246,19 +246,42 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Data Source Query</label>
-                                        <Select
-                                            value={typeof layoutItem.source === 'object' && 'queryRef' in layoutItem.source ? layoutItem.source.queryRef : ''}
-                                            options={queryOptions}
-                                            onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                                source: option.value ? { queryRef: option.value } : undefined
-                                            })}
-                                            width={25}
-                                            placeholder="Data source query"
-                                            isClearable
-                                        />
-                                    </div>
+                                    <>
+                                        <div className={styles.inputGroup}>
+                                            <label className={styles.inputLabel}>Data Source Query</label>
+                                            <Select
+                                                value={typeof layoutItem.source === 'object' && 'queryRef' in layoutItem.source ? layoutItem.source.queryRef : ''}
+                                                options={queryOptions}
+                                                onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                    source: option.value ? { queryRef: option.value } : undefined,
+                                                    field: undefined // Reset field when query changes
+                                                })}
+                                                width={25}
+                                                placeholder="Data source query"
+                                                isClearable
+                                            />
+                                        </div>
+                                        {/* Field selector - only show when a query is selected */}
+                                        {typeof layoutItem.source === 'object' && 'queryRef' in layoutItem.source && layoutItem.source.queryRef && (
+                                            <div className={styles.inputGroup}>
+                                                <label className={styles.inputLabel}>Field</label>
+                                                <Select
+                                                    value={layoutItem.field || ''}
+                                                    options={(() => {
+                                                        const selectedQuery = getQueryByRef(layoutItem.source.queryRef, queries);
+                                                        return selectedQuery ? getFieldOptionsFromQuery(selectedQuery) : [];
+                                                    })()}
+                                                    onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                        field: option.value || undefined
+                                                    })}
+                                                    width={20}
+                                                    placeholder="Select field from query"
+                                                    isClearable
+                                                    className={styles.fieldSelector}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </>
                         )}
@@ -354,5 +377,26 @@ const getStyles = (theme: GrafanaTheme2) => ({
     removeButton: css`
         height: 32px;
         align-self: flex-end;
+    `,
+    fieldSelector: css`
+        & .css-1dcbz2m-control,
+        & .css-1pahdxg-control,
+        & [class*="control"] {
+            min-height: 32px !important;
+            height: 32px !important;
+        }
+        & .css-1wa3eu0-placeholder,
+        & .css-1dimb5e-singleValue,
+        & [class*="placeholder"],
+        & [class*="singleValue"] {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            max-width: 100% !important;
+        }
+        & .css-14el2xx-container,
+        & [class*="container"] {
+            height: 32px !important;
+        }
     `,
 }); 

@@ -246,8 +246,6 @@ export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps
     const { selectedServiceDetails } = useViewStore((state) => state)
     const styles = useStyles2(getStyles)
 
-    console.log('record', record?.layoutSpec?.details)
-
     const items = record?.layoutSpec?.details?.map((item, index) => {
         switch (item.type) {
             case 'panel':

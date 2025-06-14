@@ -19,6 +19,7 @@ export interface LayoutItem {
   type: 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'links' | 'icon' | 'status' | 'panel'
   source?: QueryElementSource | DashboardElementSource
   sourceType?: 'query' | 'value' | 'dashboard'
+  field?: string
   label?: string
   value?: { data: number | string | object }
 }
