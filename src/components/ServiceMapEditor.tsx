@@ -72,9 +72,21 @@ const componentTypeOptions = [
     { label: 'Element', value: 'element_component' },
 ];
 
-export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], customElements: [] }, onChange, context }) => {
+export const ServiceMapEditor: React.FC<Props> = ({
+    value = { elements: [], customElements: [] },
+    onChange,
+    context
+}) => {
     const [expandedElements, setExpandedElements] = useState<Set<number>>(new Set());
     const [expandedLayout, setExpandedLayout] = useState<Set<string>>(new Set());
+
+    // Debug logging to see what's being loaded
+    console.log('ServiceMapEditor loaded with value:', value);
+    console.log('onChange function:', onChange);
+
+    // Ensure we have proper arrays (no separate config object needed)
+    const elements = value.elements || [];
+    const customElements = value.customElements || [];
 
     // Get available queries from panel context
     const getQueryOptions = () => {
@@ -154,38 +166,57 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
             id: Date.now(),
             component: 'element_component',
             layout: [],
-            order: isCustom ? value.customElements?.length || 0 : value.elements?.length || 0,
+            order: isCustom ? customElements?.length || 0 : elements?.length || 0,
             title: 'New Element'
         };
 
-        const newConfig = { ...value };
-        if (isCustom) {
-            newConfig.customElements = [...newConfig.customElements ?? [], newElement];
-        } else {
-            newConfig.elements = [...newConfig.elements ?? [], newElement];
-        }
-        onChange(newConfig);
+        const newValue = {
+            elements: isCustom ? [...elements] : [...elements, newElement],
+            customElements: isCustom ? [...customElements, newElement] : [...customElements]
+        };
+
+        console.log('=== ADD ELEMENT DEBUG ===');
+        console.log('Old value:', value);
+        console.log('New value:', newValue);
+        console.log('Objects are different?', value !== newValue);
+        console.log('Elements array is different?', value.elements !== newValue.elements);
+        console.log('CustomElements array is different?', value.customElements !== newValue.customElements);
+        console.log('onChange function:', onChange);
+        console.log('Calling onChange now...');
+
+        // Automatically expand the new element
+        setExpandedElements(prev => new Set([...prev, newElement.id]));
+
+        // Call onChange to notify Grafana of changes
+        onChange(newValue);
+
+        console.log('onChange called successfully');
+        console.log('=== END DEBUG ===');
     };
 
     const updateElement = (id: number, updates: Partial<ServiceMapElement>, isCustom: boolean = false) => {
-        const newConfig = { ...value };
-        const elements = isCustom ? newConfig.customElements : newConfig.elements;
-        const index = elements.findIndex(el => el.id === id);
+        const targetArray = isCustom ? customElements : elements;
+        const index = targetArray.findIndex(el => el.id === id);
 
         if (index !== -1) {
-            elements[index] = { ...elements[index], ...updates };
-            onChange(newConfig);
+            // Create new array with updated element
+            const updatedArray = [...targetArray];
+            updatedArray[index] = { ...updatedArray[index], ...updates };
+
+            // Call onChange to notify Grafana of changes
+            onChange({
+                elements: isCustom ? [...elements] : updatedArray,
+                customElements: isCustom ? updatedArray : [...customElements]
+            });
         }
     };
 
     const removeElement = (id: number, isCustom: boolean = false) => {
-        const newConfig = { ...value };
-        if (isCustom) {
-            newConfig.customElements = newConfig.customElements.filter(el => el.id !== id);
-        } else {
-            newConfig.elements = newConfig.elements.filter(el => el.id !== id);
-        }
-        onChange(newConfig);
+        // Call onChange to notify Grafana of changes
+        onChange({
+            elements: isCustom ? [...elements] : elements.filter(el => el.id !== id),
+            customElements: isCustom ? customElements.filter(el => el.id !== id) : [...customElements]
+        });
     };
 
     const addLayoutItem = (elementId: number, isCustom: boolean = false, isDetails: boolean = false) => {
@@ -197,53 +228,84 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
             type: 'text'
         };
 
-        const newConfig = { ...value };
-        const elements = isCustom ? newConfig.customElements : newConfig.elements;
-        const element = elements.find(el => el.id === elementId);
+        const targetArray = isCustom ? customElements : elements;
+        const elementIndex = targetArray.findIndex(el => el.id === elementId);
 
-        if (element) {
+        if (elementIndex !== -1) {
+            // Create new array with updated element
+            const updatedArray = [...targetArray];
+            const element = { ...updatedArray[elementIndex] };
+
             if (isDetails) {
                 element.detailsLayout = [...(element.detailsLayout || []), newLayoutItem];
             } else {
                 element.layout = [...element.layout, newLayoutItem];
             }
-            onChange(newConfig);
+
+            updatedArray[elementIndex] = element;
+
+            // Call onChange to notify Grafana of changes
+            onChange({
+                elements: isCustom ? [...elements] : updatedArray,
+                customElements: isCustom ? updatedArray : [...customElements]
+            });
         }
     };
 
     const updateLayoutItem = (elementId: number, layoutId: number, updates: Partial<LayoutItem>, isCustom: boolean = false, isDetails: boolean = false) => {
-        const newConfig = { ...value };
-        const elements = isCustom ? newConfig.customElements : newConfig.elements;
-        const element = elements.find(el => el.id === elementId);
+        const targetArray = isCustom ? customElements : elements;
+        const elementIndex = targetArray.findIndex(el => el.id === elementId);
 
-        if (element) {
-            const layout = isDetails ? (element.detailsLayout || []) : element.layout;
-            const index = layout.findIndex(item => item.id === layoutId);
+        if (elementIndex !== -1) {
+            // Create new array with updated element
+            const updatedArray = [...targetArray];
+            const element = { ...updatedArray[elementIndex] };
 
-            if (index !== -1) {
-                layout[index] = { ...layout[index], ...updates };
+            const layout = isDetails ? [...(element.detailsLayout || [])] : [...element.layout];
+            const layoutIndex = layout.findIndex(item => item.id === layoutId);
+
+            if (layoutIndex !== -1) {
+                layout[layoutIndex] = { ...layout[layoutIndex], ...updates };
+
                 if (isDetails) {
                     element.detailsLayout = layout;
                 } else {
                     element.layout = layout;
                 }
-                onChange(newConfig);
+
+                updatedArray[elementIndex] = element;
+
+                // Call onChange to notify Grafana of changes
+                onChange({
+                    elements: isCustom ? [...elements] : updatedArray,
+                    customElements: isCustom ? updatedArray : [...customElements]
+                });
             }
         }
     };
 
     const removeLayoutItem = (elementId: number, layoutId: number, isCustom: boolean = false, isDetails: boolean = false) => {
-        const newConfig = { ...value };
-        const elements = isCustom ? newConfig.customElements : newConfig.elements;
-        const element = elements.find(el => el.id === elementId);
+        const targetArray = isCustom ? customElements : elements;
+        const elementIndex = targetArray.findIndex(el => el.id === elementId);
 
-        if (element) {
+        if (elementIndex !== -1) {
+            // Create new array with updated element
+            const updatedArray = [...targetArray];
+            const element = { ...updatedArray[elementIndex] };
+
             if (isDetails) {
                 element.detailsLayout = (element.detailsLayout || []).filter(item => item.id !== layoutId);
             } else {
                 element.layout = element.layout.filter(item => item.id !== layoutId);
             }
-            onChange(newConfig);
+
+            updatedArray[elementIndex] = element;
+
+            // Call onChange to notify Grafana of changes
+            onChange({
+                elements: isCustom ? [...elements] : updatedArray,
+                customElements: isCustom ? updatedArray : [...customElements]
+            });
         }
     };
 
@@ -327,9 +389,9 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
         const isExpanded = expandedElements.has(element.id);
         const parentOptions = [
             { label: 'None', value: '' },
-            ...(value.elements ?? []).filter(el => el.component === 'group_component' && el.id !== element.id)
+            ...(elements ?? []).filter(el => el.component === 'group_component' && el.id !== element.id)
                 .map(el => ({ label: el.title || `Element ${el.id}`, value: el.id.toString() })),
-            ...(value.customElements ?? []).filter(el => el.component === 'group_component' && el.id !== element.id)
+            ...(customElements ?? []).filter(el => el.component === 'group_component' && el.id !== element.id)
                 .map(el => ({ label: el.title || `Custom Element ${el.id}`, value: el.id.toString() }))
         ];
 
@@ -446,7 +508,7 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                 <p style={{ color: '#888', marginBottom: '16px' }}>
                     Elements linked to query results from the query editor. These will filter data based on query references.
                 </p>
-                {value.elements?.map(element => renderElement(element, false))}
+                {elements?.map(element => renderElement(element, false))}
                 <Button onClick={() => addElement(false)}>Add Query-Linked Element</Button>
             </FieldSet>
 
@@ -454,7 +516,7 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                 <p style={{ color: '#888', marginBottom: '16px' }}>
                     Static elements with predefined data, not linked to queries.
                 </p>
-                {value.customElements?.map(element => renderElement(element, true))}
+                {customElements?.map(element => renderElement(element, true))}
                 <Button variant="secondary" onClick={() => addElement(true)}>Add Custom Element</Button>
             </FieldSet>
 
