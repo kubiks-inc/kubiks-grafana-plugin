@@ -20,10 +20,12 @@ import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { Button, useStyles2, Alert, Field, Input, Tooltip } from '@grafana/ui'
 import { useViewStore } from '@/store/ViewStoreProvider'
+import { Record } from '@/lib/model/view'
 
 interface ServiceDrawerProps {
     open: boolean
     onOpenChange: (open: boolean) => void
+    record: Record
 }
 
 const Tag = ({
@@ -113,9 +115,11 @@ const AvatarFallback = ({ children, className = '' }: { children: React.ReactNod
     return <span className={`${styles.avatarFallback} ${className}`}>{children}</span>
 }
 
-export function ServiceDrawer({ open, onOpenChange }: ServiceDrawerProps) {
+export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps) {
     const { selectedServiceDetails } = useViewStore((state) => state)
     const styles = useStyles2(getStyles)
+
+    console.log('record', record)
 
     if (!open) return null
 

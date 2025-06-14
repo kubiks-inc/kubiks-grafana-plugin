@@ -75,6 +75,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
                     "id": index.toString(),
                     "key": index.toString(),
                     "layout": layoutItems,
+                    "layoutSpec": element,
                     "parentId": "",
                     "type": ""
                 }
@@ -87,6 +88,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
                 "id": element.name,
                 "key": element.name,
                 "layout": generateLayoutItems(element, dataFrames, null),
+                "layoutSpec": element,
                 "parentId": "",
                 "type": ""
             })
