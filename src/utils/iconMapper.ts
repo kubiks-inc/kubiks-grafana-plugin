@@ -70,6 +70,12 @@ const iconMap: Record<string, string> = {
     '/icons/waf.svg': wafIcon,
 }
 
+export interface IconOption {
+    label: string;
+    value: string;
+    iconUrl: string;
+}
+
 /**
  * Maps icon paths to properly imported SVG URLs
  * @param iconPath - The icon path (e.g., "/icons/cloudflare.svg")
@@ -86,4 +92,26 @@ export const getIconUrl = (iconPath: string): string | undefined => {
  */
 export const getIconUrlWithFallback = (iconPath: string): string => {
     return iconMap[iconPath] || iconPath
+}
+
+/**
+ * Gets all available icon options for dropdown display
+ * @returns Array of icon options with labels, values, and URLs
+ */
+export const getIconOptions = (): IconOption[] => {
+    return Object.entries(iconMap).map(([path, url]) => {
+        // Extract the icon name from the path (e.g., "/icons/cloudflare.svg" -> "Cloudflare")
+        const iconName = path
+            .replace('/icons/', '')
+            .replace('.svg', '')
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
+        return {
+            label: iconName,
+            value: path,
+            iconUrl: url
+        };
+    }).sort((a, b) => a.label.localeCompare(b.label));
 } 

@@ -3,6 +3,7 @@ import { css } from '@emotion/css';
 import { Input, Button, Select, useStyles2 } from '@grafana/ui';
 import { DataQuery, GrafanaTheme2 } from '@grafana/data';
 import { getQueryOptions, isValidQueryRef } from '../utils/queryUtils';
+import { getIconOptions, getIconUrlWithFallback, IconOption } from '../utils/iconMapper';
 import { Element, LayoutItem } from '../lib/model/view';
 
 interface ElementsListProps {
@@ -105,6 +106,13 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
     ];
 
     const queryOptions = getQueryOptions(queries);
+    const iconOptions = getIconOptions();
+
+    // Convert icon options to Select format
+    const iconSelectOptions = iconOptions.map(icon => ({
+        label: icon.label,
+        value: icon.value
+    }));
 
     return (
         <div className={styles.container}>
@@ -175,36 +183,68 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                                         placeholder="Display label"
                                         width={20}
                                     />
-                                    <Select
-                                        value={layoutItem.sourceMode || 'query'}
-                                        options={sourceModeOptions}
-                                        onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
-                                            sourceMode: option.value as 'query' | 'manual',
-                                            ...(option.value === 'query' ? { value: undefined } : { source: '' })
-                                        })}
-                                        width={12}
-                                        placeholder="Source Mode"
-                                    />
-                                    {layoutItem.sourceMode === 'manual' ? (
-                                        <Input
-                                            value={layoutItem.value?.data?.toString() || ''}
-                                            onChange={(e) => updateLayoutItem(elementIndex, layoutIndex, {
-                                                value: { data: e.currentTarget.value }
-                                            })}
-                                            placeholder="Enter value"
-                                            width={20}
-                                        />
+                                    {layoutItem.type === 'icon' ? (
+                                        <>
+                                            <div className={styles.iconSelectorContainer}>
+                                                <Select
+                                                    value={layoutItem.source || ''}
+                                                    options={iconSelectOptions}
+                                                    onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
+                                                        source: option.value || ''
+                                                    })}
+                                                    width={25}
+                                                    placeholder="Select icon"
+                                                    isClearable
+                                                    formatOptionLabel={(option) => {
+                                                        const iconOption = iconOptions.find(icon => icon.value === option.value);
+                                                        return (
+                                                            <div className={styles.iconOption}>
+                                                                <img
+                                                                    src={iconOption?.iconUrl || getIconUrlWithFallback(option.value || '')}
+                                                                    alt={option.label}
+                                                                    className={styles.iconPreview}
+                                                                />
+                                                                <span>{option.label}</span>
+                                                            </div>
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+                                        </>
                                     ) : (
-                                        <Select
-                                            value={layoutItem.source || ''}
-                                            options={queryOptions}
-                                            onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
-                                                source: option.value || ''
-                                            })}
-                                            width={20}
-                                            placeholder="Data source query"
-                                            isClearable
-                                        />
+                                        <>
+                                            <Select
+                                                value={layoutItem.sourceMode || 'query'}
+                                                options={sourceModeOptions}
+                                                onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
+                                                    sourceMode: option.value as 'query' | 'manual',
+                                                    ...(option.value === 'query' ? { value: undefined } : { source: '' })
+                                                })}
+                                                width={12}
+                                                placeholder="Source Mode"
+                                            />
+                                            {layoutItem.sourceMode === 'manual' ? (
+                                                <Input
+                                                    value={layoutItem.value?.data?.toString() || ''}
+                                                    onChange={(e) => updateLayoutItem(elementIndex, layoutIndex, {
+                                                        value: { data: e.currentTarget.value }
+                                                    })}
+                                                    placeholder="Enter value"
+                                                    width={20}
+                                                />
+                                            ) : (
+                                                <Select
+                                                    value={layoutItem.source || ''}
+                                                    options={queryOptions}
+                                                    onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
+                                                        source: option.value || ''
+                                                    })}
+                                                    width={20}
+                                                    placeholder="Data source query"
+                                                    isClearable
+                                                />
+                                            )}
+                                        </>
                                     )}
                                     <Button
                                         variant="destructive"
@@ -300,5 +340,34 @@ const getStyles = (theme: GrafanaTheme2) => ({
         gap: ${theme.spacing(1)};
         align-items: center;
         flex-wrap: wrap;
+    `,
+    iconSelectorContainer: css`
+        display: flex;
+        align-items: center;
+        gap: ${theme.spacing(1)};
+    `,
+    iconOption: css`
+        display: flex;
+        align-items: center;
+        gap: ${theme.spacing(1)};
+    `,
+    iconPreview: css`
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+        flex-shrink: 0;
+    `,
+    iconPreviewContainer: css`
+        display: flex;
+        align-items: center;
+        padding: ${theme.spacing(0.5)};
+        background: ${theme.colors.background.secondary};
+        border: 1px solid ${theme.colors.border.medium};
+        border-radius: ${theme.shape.radius.default};
+    `,
+    selectedIconPreview: css`
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
     `,
 }); 
