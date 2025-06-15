@@ -187,10 +187,11 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                                         <>
                                             <div className={styles.iconSelectorContainer}>
                                                 <Select
-                                                    value={layoutItem.source || ''}
+                                                    value={layoutItem.value?.data?.toString() || ''}
                                                     options={iconSelectOptions}
                                                     onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
-                                                        source: option.value || ''
+                                                        source: '',
+                                                        value: { data: option.value || '' }
                                                     })}
                                                     width={25}
                                                     placeholder="Select icon"

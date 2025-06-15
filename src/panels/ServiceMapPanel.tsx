@@ -35,6 +35,7 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
     const { elements } = props.options;
 
     useEffect(() => {
+        console.log(elements)
         const records = generateRecords(elements, props.data.series)
 
         setFilteredRecords(records)
@@ -44,7 +45,7 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
         setOriginalViewState({
             records: records
         })
-    }, [props.data.series]);
+    }, [props]);
 
 
     return (
