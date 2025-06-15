@@ -55,7 +55,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
             type: 'text',
             label: `Field ${currentLayout.length + 1}`,
             source: '',
-            sourceMode: 'query'
+            sourceType: 'query'
         };
         updated[elementIndex] = {
             ...updated[elementIndex],
@@ -89,7 +89,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
             type: 'text',
             label: `Details Field ${currentDetails.length + 1}`,
             source: '',
-            sourceMode: 'query'
+            sourceType: 'query'
         };
         updated[elementIndex] = {
             ...updated[elementIndex],
@@ -150,7 +150,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                             placeholder="Type"
                         />
                         <Select
-                            value={typeof item.source === 'string' ? item.source : ''}
+                            value={item.source}
                             options={queryOptions}
                             onChange={(option) => handleSourceChange(elementIndex, option.value || '')}
                             width={20}

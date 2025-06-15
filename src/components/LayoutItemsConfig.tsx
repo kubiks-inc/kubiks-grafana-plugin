@@ -49,7 +49,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
 
     const sourceModeOptions = [
         { label: 'Query', value: 'query' },
-        { label: 'Value', value: 'manual' },
+        { label: 'Value', value: 'value' },
         { label: 'Dashboard', value: 'dashboard' },
     ];
 
@@ -161,7 +161,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                     options={groupElements}
                                     onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
                                         source: '',
-                                        sourceMode: 'manual',
+                                        sourceType: 'value',
                                         value: { data: option.value || '' }
                                     })}
                                     width={25}
@@ -172,18 +172,18 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                         ) : (
                             <>
                                 <Select
-                                    value={layoutItem.sourceMode || 'query'}
+                                    value={layoutItem.sourceType || 'query'}
                                     options={sourceModeOptions}
                                     onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                        sourceMode: option.value as 'query' | 'manual' | 'dashboard',
+                                        sourceType: option.value as 'query' | 'value' | 'dashboard',
                                         ...(option.value === 'query' ? { value: undefined, source: '' } :
-                                            option.value === 'manual' ? { source: '' } :
+                                            option.value === 'value' ? { source: '' } :
                                                 option.value === 'dashboard' ? { source: { panelId: '', dashboardUid: '' }, value: undefined } : {})
                                     })}
                                     width={12}
                                     placeholder="Source Mode"
                                 />
-                                {layoutItem.sourceMode === 'manual' ? (
+                                {layoutItem.sourceType === 'value' ? (
                                     <Input
                                         value={layoutItem.value?.data?.toString() || ''}
                                         onChange={(e) => onUpdateLayoutItem(elementIndex, layoutIndex, {
@@ -192,7 +192,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                         placeholder="Enter value"
                                         width={20}
                                     />
-                                ) : layoutItem.sourceMode === 'dashboard' ? (
+                                ) : layoutItem.sourceType === 'dashboard' ? (
                                     <div className={styles.panelSelectorContainer}>
                                         <Select
                                             value={typeof layoutItem.source === 'object' ? layoutItem.source.dashboardUid : ''}
