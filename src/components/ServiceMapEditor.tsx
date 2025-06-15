@@ -80,18 +80,50 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
     const getQueryOptions = () => {
         const options = [{ label: 'None', value: '' }];
 
-        if (context?.data) {
-            // Get queries from panel targets
-            const queries = context.data;
-            queries.forEach((query: any, index: number) => {
-                const refId = query.refId || String.fromCharCode(65 + index); // A, B, C, etc.
+        // Debug: log the context structure
+        console.log('ServiceMapEditor context:', context);
+
+        // Try multiple paths to find the targets
+        let targets = null;
+
+        if (context?.options?.targets) {
+            targets = context.options.targets;
+            console.log('Found targets in context.options.targets:', targets);
+        } else if (context?.options?.queries) {
+            targets = context.options.queries;
+            console.log('Found targets in context.options.queries:', targets);
+        } else if (context?.data) {
+            // If we can't find targets, extract unique refIds from data
+            const uniqueRefIds = new Set();
+            context.data.forEach((dataFrame: any) => {
+                if (dataFrame.refId) {
+                    uniqueRefIds.add(dataFrame.refId);
+                }
+            });
+            console.log('Extracted refIds from data:', Array.from(uniqueRefIds));
+
+            Array.from(uniqueRefIds).forEach((refId: any) => {
                 options.push({
-                    label: `Query ${refId}${query.datasource?.name ? ` (${query.datasource.name})` : ''}`,
+                    label: `Query ${refId}`,
                     value: refId
                 });
             });
+            return options;
         }
 
+        // Process targets if found
+        if (targets && Array.isArray(targets)) {
+            targets.forEach((target: any) => {
+                if (target.refId) {
+                    options.push({
+                        label: `Query ${target.refId}${target.datasource?.name ? ` (${target.datasource.name})` : ''}`,
+                        value: target.refId
+                    });
+                }
+            });
+        }
+
+        console.log('Final query options:', options);
         return options;
     };
 
