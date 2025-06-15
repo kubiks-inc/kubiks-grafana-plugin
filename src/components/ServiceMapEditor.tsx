@@ -33,11 +33,9 @@ interface ServiceMapElement {
     component: 'group_component' | 'element_component';
     icon?: string;
     integrationId?: number;
-    key: string;
     layout: LayoutItem[];
     order: number;
     parentId?: string;
-    type: string;
     queryRef?: string;
     title?: string;
     detailsLayout?: LayoutItem[];
@@ -74,9 +72,30 @@ const componentTypeOptions = [
     { label: 'Element', value: 'element_component' },
 ];
 
-export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], customElements: [] }, onChange }) => {
+export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], customElements: [] }, onChange, context }) => {
     const [expandedElements, setExpandedElements] = useState<Set<number>>(new Set());
     const [expandedLayout, setExpandedLayout] = useState<Set<string>>(new Set());
+
+    // Get available queries from panel context
+    const getQueryOptions = () => {
+        const options = [{ label: 'None', value: '' }];
+
+        if (context?.data) {
+            // Get queries from panel targets
+            const queries = context.data;
+            queries.forEach((query: any, index: number) => {
+                const refId = query.refId || String.fromCharCode(65 + index); // A, B, C, etc.
+                options.push({
+                    label: `Query ${refId}${query.datasource?.name ? ` (${query.datasource.name})` : ''}`,
+                    value: refId
+                });
+            });
+        }
+
+        return options;
+    };
+
+    const queryOptions = getQueryOptions();
 
     const toggleElementExpanded = (id: number) => {
         const newExpanded = new Set(expandedElements);
@@ -102,15 +121,12 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
         const newElement: ServiceMapElement = {
             id: Date.now(),
             component: 'element_component',
-            key: `${isCustom ? 'custom-' : ''}element-${Date.now()}`,
             layout: [],
             order: isCustom ? value.customElements?.length || 0 : value.elements?.length || 0,
-            type: '',
             title: 'New Element'
         };
 
         const newConfig = { ...value };
-
         if (isCustom) {
             newConfig.customElements = [...newConfig.customElements ?? [], newElement];
         } else {
@@ -225,7 +241,7 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                     </HorizontalGroup>
                 </HorizontalGroup>
 
-                <Collapse isOpen={isExpanded}>
+                <Collapse label="Layout Item Configuration" isOpen={isExpanded}>
                     <VerticalGroup spacing="sm">
                         <Field label="Label">
                             <Input
@@ -261,10 +277,12 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                         </Field>
 
                         <Field label="Query Reference (Optional)">
-                            <Input
+                            <Select
                                 value={layoutItem.queryRef || ''}
-                                onChange={(e) => updateLayoutItem(elementId, layoutItem.id, { queryRef: e.currentTarget.value }, isCustom, isDetails)}
-                                placeholder="e.g., A, B, C"
+                                options={queryOptions}
+                                onChange={(option) => updateLayoutItem(elementId, layoutItem.id, { queryRef: option.value || undefined }, isCustom, isDetails)}
+                                placeholder="Select a query"
+                                isClearable
                             />
                         </Field>
                     </VerticalGroup>
@@ -278,9 +296,9 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
         const parentOptions = [
             { label: 'None', value: '' },
             ...(value.elements ?? []).filter(el => el.component === 'group_component' && el.id !== element.id)
-                .map(el => ({ label: el.title || el.key, value: el.key })),
+                .map(el => ({ label: el.title || `Element ${el.id}`, value: el.id.toString() })),
             ...(value.customElements ?? []).filter(el => el.component === 'group_component' && el.id !== element.id)
-                .map(el => ({ label: el.title || el.key, value: el.key }))
+                .map(el => ({ label: el.title || `Custom Element ${el.id}`, value: el.id.toString() }))
         ];
 
         return (
@@ -289,7 +307,7 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                     <HorizontalGroup>
                         <Badge color={element.component === 'group_component' ? 'purple' : 'blue'}
                             text={element.component === 'group_component' ? 'Group' : 'Element'} />
-                        <span style={{ fontWeight: 'bold' }}>{element.title || element.key}</span>
+                        <span style={{ fontWeight: 'bold' }}>{element.title || `Element ${element.id}`}</span>
                         {element.queryRef && <Badge color="green" text={`Query: ${element.queryRef}`} />}
                         {element.parentId && <Badge color="orange" text={`Parent: ${element.parentId}`} />}
                     </HorizontalGroup>
@@ -307,7 +325,7 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                     </HorizontalGroup>
                 </HorizontalGroup>
 
-                <Collapse isOpen={isExpanded}>
+                <Collapse label="Element Configuration" isOpen={isExpanded}>
                     <VerticalGroup spacing="md">
                         <HorizontalGroup>
                             <Field label="Component Type">
@@ -327,23 +345,6 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                                     placeholder="Element title"
                                 />
                             </Field>
-                            <Field label="Key">
-                                <Input
-                                    value={element.key}
-                                    onChange={(e) => updateElement(element.id, { key: e.currentTarget.value }, isCustom)}
-                                    placeholder="Unique key"
-                                />
-                            </Field>
-                        </HorizontalGroup>
-
-                        <HorizontalGroup>
-                            <Field label="Type">
-                                <Input
-                                    value={element.type}
-                                    onChange={(e) => updateElement(element.id, { type: e.currentTarget.value }, isCustom)}
-                                    placeholder="Element type"
-                                />
-                            </Field>
                             <Field label="Icon">
                                 <Input
                                     value={element.icon || ''}
@@ -359,14 +360,18 @@ export const ServiceMapEditor: React.FC<Props> = ({ value = { elements: [], cust
                                     value={element.parentId || ''}
                                     options={parentOptions}
                                     onChange={(option) => updateElement(element.id, { parentId: option.value }, isCustom)}
+                                    placeholder="Select parent group"
+                                    isClearable
                                 />
                             </Field>
                             {!isCustom && (
                                 <Field label="Query Reference">
-                                    <Input
+                                    <Select
                                         value={element.queryRef || ''}
-                                        onChange={(e) => updateElement(element.id, { queryRef: e.currentTarget.value }, isCustom)}
-                                        placeholder="e.g., A, B, C"
+                                        options={queryOptions}
+                                        onChange={(option) => updateElement(element.id, { queryRef: option.value || undefined }, isCustom)}
+                                        placeholder="Select a query"
+                                        isClearable
                                     />
                                 </Field>
                             )}
