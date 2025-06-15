@@ -11,10 +11,10 @@ const getIcon = (element: Element): string | null => {
     return null
 }
 
-const generateLayoutItems = (element: Element, dataFrames: DataFrame[], joinKey: string | null): LayoutItem[] => {
+const generateLayoutItems = (layout: LayoutItem[], dataFrames: DataFrame[], joinKey: string | null): LayoutItem[] => {
     const layoutItems: LayoutItem[] = []
 
-    for (const layoutItem of element.layout ?? []) {
+    for (const layoutItem of layout) {
         switch (layoutItem.sourceType) {
             case 'value':
                 layoutItems.push({
@@ -71,7 +71,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
             let queryResults = dataFrames.filter((frame: DataFrame) => frame.refId === element.source)
             if (queryResults.length > 0) {
                 const queryRecords = queryResults.map((series: DataFrame) => {
-                    const layoutItems = generateLayoutItems(element, dataFrames, series?.fields?.[1]?.labels?.['service_name'] as string)
+                    const layoutItems = generateLayoutItems(element.layout ?? [], dataFrames, series?.fields?.[1]?.labels?.['service_name'] as string)
                     return {
                         component: element.type,
                         icon: getIcon(element) || "",
@@ -84,7 +84,6 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
                 records.push(...queryRecords)
             } else {
                 const queryRecords = extractRecordsFromNodeGraph(dataFrames, element)
-                console.log('queryRecords', queryRecords, element)
                 records.push(...queryRecords)
             }
         } else {
@@ -93,11 +92,13 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
                 icon: getIcon(element) || "",
                 id: element.name,
                 key: element.name,
-                layout: generateLayoutItems(element, dataFrames, null),
+                layout: generateLayoutItems(element.layout ?? [], dataFrames, null),
                 layoutSpec: element,
             })
         }
     }
+
+    console.log('records', records)
 
     return records
 }
@@ -108,7 +109,7 @@ const extractRecordsFromNodeGraph = (dataFrames: DataFrame[], element: Element):
             const queryResults = dataFrames.filter((frame: DataFrame) => frame.meta?.preferredVisualisationType === element.source)
             const dataFrame = queryResults.find((frame: DataFrame) => frame.fields?.find((field: Field) => field.name === 'title'))
             const values = dataFrame?.fields.find((field: Field) => field.name === 'title')?.values
-            const queryRecords = values?.map((title: string, index: number) => {
+            const queryRecords = values?.map((title: string, index: number): Record => {
                 return {
                     component: element.type,
                     icon: getIcon(element) || "",
@@ -121,10 +122,19 @@ const extractRecordsFromNodeGraph = (dataFrames: DataFrame[], element: Element):
                                 data: title
                             }
                         },
-                        ...generateLayoutItems(element, dataFrames, title),
+                        ...generateLayoutItems(element.layout ?? [], dataFrames, title),
+                    ],
+                    details: [
+                        {
+                            type: 'title' as LayoutItemType,
+                            value: {
+                                data: title
+                            }
+                        },
+                        ...generateLayoutItems(element.details ?? [], dataFrames, title),
                     ],
                     layoutSpec: element,
-                }
+                } as Record
             })
             return queryRecords || []
         case 'connection':
