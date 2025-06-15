@@ -150,12 +150,12 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                             placeholder="Type"
                         />
                         <Select
-                            value={item.source || ''}
+                            value={typeof item.source === 'string' ? item.source : ''}
                             options={queryOptions}
                             onChange={(option) => handleSourceChange(elementIndex, option.value || '')}
                             width={20}
                             placeholder="Select query (optional)"
-                            isInvalid={item.source ? !isValidQueryRef(item.source, queries) : false}
+                            isInvalid={typeof item.source === 'string' && item.source ? !isValidQueryRef(item.source, queries) : false}
                             isClearable
                         />
                         <Button

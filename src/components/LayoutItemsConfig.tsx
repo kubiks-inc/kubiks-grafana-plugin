@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { Input, Button, Select, useStyles2 } from '@grafana/ui';
 import { DataQuery, GrafanaTheme2 } from '@grafana/data';
 import { getQueryOptions } from '../utils/queryUtils';
 import { getIconOptions, getIconUrlWithFallback } from '../utils/iconMapper';
+import { getDashboardOptions, getPanelOptions, DashboardOption, PanelOption } from '../utils/dashboardUtils';
 import { Element, LayoutItem } from '../lib/model/view';
 
 interface LayoutItemsConfigProps {
@@ -26,6 +27,10 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
     onRemoveLayoutItem
 }) => {
     const styles = useStyles2(getStyles);
+    const [dashboardOptions, setDashboardOptions] = useState<DashboardOption[]>([]);
+    const [panelOptionsMap, setPanelOptionsMap] = useState<Record<string, PanelOption[]>>({});
+    const [loadingDashboards, setLoadingDashboards] = useState(false);
+    const [loadingPanels, setLoadingPanels] = useState<Record<string, boolean>>({});
 
     const layoutTypeOptions = [
         { label: 'Title', value: 'title' },
@@ -39,11 +44,13 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
         { label: 'Links', value: 'links' },
         { label: 'Icon', value: 'icon' },
         { label: 'Status', value: 'status' },
+        { label: 'Panel', value: 'panel' },
     ];
 
     const sourceModeOptions = [
         { label: 'Query', value: 'query' },
         { label: 'Value', value: 'manual' },
+        { label: 'Dashboard', value: 'dashboard' },
     ];
 
     const queryOptions = getQueryOptions(queries);
@@ -54,6 +61,42 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
         label: el.name,
         value: el.name
     }));
+
+    // Load dashboard options on component mount
+    useEffect(() => {
+        const loadDashboards = async () => {
+            setLoadingDashboards(true);
+            try {
+                const options = await getDashboardOptions();
+                setDashboardOptions(options);
+            } catch (error) {
+                console.error('Failed to load dashboards:', error);
+                setDashboardOptions([{ label: 'Failed to load dashboards', value: '' }]);
+            } finally {
+                setLoadingDashboards(false);
+            }
+        };
+
+        loadDashboards();
+    }, []);
+
+    // Function to load panel options for a specific dashboard
+    const loadPanelOptions = async (dashboardUid: string) => {
+        if (!dashboardUid || panelOptionsMap[dashboardUid]) {
+            return; // Already loaded or no dashboard selected
+        }
+
+        setLoadingPanels(prev => ({ ...prev, [dashboardUid]: true }));
+        try {
+            const panels = await getPanelOptions(dashboardUid);
+            setPanelOptionsMap(prev => ({ ...prev, [dashboardUid]: panels }));
+        } catch (error) {
+            console.error('Failed to load panels:', error);
+            setPanelOptionsMap(prev => ({ ...prev, [dashboardUid]: [{ label: 'Failed to load panels', value: '' }] }));
+        } finally {
+            setLoadingPanels(prev => ({ ...prev, [dashboardUid]: false }));
+        }
+    };
 
     return (
         <div className={styles.layoutSection}>
@@ -132,8 +175,10 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                     value={layoutItem.sourceMode || 'query'}
                                     options={sourceModeOptions}
                                     onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                                        sourceMode: option.value as 'query' | 'manual',
-                                        ...(option.value === 'query' ? { value: undefined } : { source: '' })
+                                        sourceMode: option.value as 'query' | 'manual' | 'dashboard',
+                                        ...(option.value === 'query' ? { value: undefined, source: '' } :
+                                            option.value === 'manual' ? { source: '' } :
+                                                option.value === 'dashboard' ? { source: { panelId: '', dashboardUid: '' }, value: undefined } : {})
                                     })}
                                     width={12}
                                     placeholder="Source Mode"
@@ -147,9 +192,47 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                         placeholder="Enter value"
                                         width={20}
                                     />
+                                ) : layoutItem.sourceMode === 'dashboard' ? (
+                                    <div className={styles.panelSelectorContainer}>
+                                        <Select
+                                            value={typeof layoutItem.source === 'object' ? layoutItem.source.dashboardUid : ''}
+                                            options={dashboardOptions}
+                                            onChange={(option) => {
+                                                const dashboardUid = option.value || '';
+                                                onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                    source: { dashboardUid, panelId: '' } // Reset panel selection when dashboard changes
+                                                });
+                                                if (dashboardUid) {
+                                                    loadPanelOptions(dashboardUid);
+                                                }
+                                            }}
+                                            width={25}
+                                            placeholder="Select dashboard"
+                                            isClearable
+                                            isLoading={loadingDashboards}
+                                        />
+                                        <Select
+                                            value={typeof layoutItem.source === 'object' ? layoutItem.source.panelId : ''}
+                                            options={typeof layoutItem.source === 'object' && layoutItem.source.dashboardUid ?
+                                                (panelOptionsMap[layoutItem.source.dashboardUid] || []) :
+                                                [{ label: 'Select dashboard first', value: '' }]}
+                                            onChange={(option) => {
+                                                const currentSource = typeof layoutItem.source === 'object' ? layoutItem.source : { dashboardUid: '', panelId: '' };
+                                                onUpdateLayoutItem(elementIndex, layoutIndex, {
+                                                    source: { ...currentSource, panelId: option.value || '' }
+                                                });
+                                            }}
+                                            width={25}
+                                            placeholder="Select panel"
+                                            isClearable
+                                            isLoading={typeof layoutItem.source === 'object' && layoutItem.source.dashboardUid ?
+                                                loadingPanels[layoutItem.source.dashboardUid] : false}
+                                            disabled={!layoutItem.source || typeof layoutItem.source !== 'object' || !layoutItem.source.dashboardUid}
+                                        />
+                                    </div>
                                 ) : (
                                     <Select
-                                        value={layoutItem.source || ''}
+                                        value={typeof layoutItem.source === 'string' ? layoutItem.source : ''}
                                         options={queryOptions}
                                         onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
                                             source: option.value || ''
@@ -219,6 +302,11 @@ const getStyles = (theme: GrafanaTheme2) => ({
         gap: ${theme.spacing(1)};
     `,
     parentIdSelectorContainer: css`
+        display: flex;
+        align-items: center;
+        gap: ${theme.spacing(1)};
+    `,
+    panelSelectorContainer: css`
         display: flex;
         align-items: center;
         gap: ${theme.spacing(1)};
