@@ -2,7 +2,8 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { StandardEditorProps, DataQuery, GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
-import { ElementsList, Element } from './ElementsList';
+import { ElementsList } from './ElementsList';
+import { Element } from '../lib/model/view';
 
 interface Props extends StandardEditorProps<Element[]> { }
 
