@@ -15,8 +15,10 @@ export interface DashboardElementSource {
   dashboardUid: string
 }
 
+export type LayoutItemType = 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'link' | 'icon' | 'status' | 'panel' | 'from' | 'to'
+
 export interface LayoutItem {
-  type: 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'link' | 'icon' | 'status' | 'panel'
+  type: LayoutItemType
   source?: QueryElementSource | DashboardElementSource
   sourceType?: 'query' | 'value' | 'dashboard'
   field?: string
@@ -32,6 +34,4 @@ export interface Record {
   key: string
   layout: LayoutItem[]
   layoutSpec: Element
-  parentId: string
-  type: string
 }
