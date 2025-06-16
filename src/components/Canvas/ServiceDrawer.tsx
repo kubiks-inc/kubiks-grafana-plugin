@@ -1315,21 +1315,21 @@ const getStyles = (theme: GrafanaTheme2) => ({
     `,
     linksGrid: css`
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: ${theme.spacing(1)};
-        max-width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+        gap: ${theme.spacing(2)};
+        width: 100%;
     `,
     linkItem: css`
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: ${theme.spacing(1.5)};
+        padding: ${theme.spacing(1)};
         background: ${theme.colors.background.secondary};
         border: 1px solid ${theme.colors.border.weak};
         border-radius: ${theme.shape.radius.default};
         cursor: pointer;
         transition: all 0.2s ease;
-        min-height: 60px;
+        min-height: 45px;
         text-decoration: none;
         
         &:hover {
@@ -1347,29 +1347,29 @@ const getStyles = (theme: GrafanaTheme2) => ({
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 24px;
-        height: 24px;
-        margin-bottom: ${theme.spacing(0.5)};
+        width: 18px;
+        height: 18px;
+        margin-bottom: ${theme.spacing(0.25)};
         background: ${theme.colors.background.canvas};
         border-radius: 50%;
         flex-shrink: 0;
     `,
     linkItemIcon: css`
-        width: 16px;
-        height: 16px;
+        width: 12px;
+        height: 12px;
         object-fit: contain;
     `,
     linkItemIconDefault: css`
-        width: 14px;
-        height: 14px;
+        width: 10px;
+        height: 10px;
         color: ${theme.colors.text.secondary};
     `,
     linkItemLabel: css`
-        font-size: ${theme.typography.bodySmall.fontSize};
+        font-size: 10px;
         font-weight: ${theme.typography.fontWeightMedium};
         color: ${theme.colors.text.primary};
         text-align: center;
-        line-height: 1.2;
+        line-height: 1.1;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
