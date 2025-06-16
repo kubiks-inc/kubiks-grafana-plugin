@@ -18,7 +18,7 @@ export interface Selector {
 
 export interface Element {
   name: string;
-  type: 'group' | 'element';
+  type: 'group' | 'element' | 'connection';
   source?: string; // Query reference ID
   layout?: LayoutItem[]; // Array of configurable layout items
 }
