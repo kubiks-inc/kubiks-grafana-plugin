@@ -33,5 +33,6 @@ export interface Record {
   id: string
   key: string
   layout: LayoutItem[]
+  details: LayoutItem[]
   layoutSpec: Element
 }

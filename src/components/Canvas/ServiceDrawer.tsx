@@ -29,35 +29,6 @@ interface ServiceDrawerProps {
     record: Record
 }
 
-const Tag = ({
-    children,
-    variant = 'default',
-}: {
-    children: React.ReactNode
-    variant?: 'default' | 'success' | 'warning' | 'error'
-}) => {
-    const styles = useStyles2(getStyles)
-
-    const getVariantStyles = () => {
-        switch (variant) {
-            case 'success':
-                return styles.tagSuccess
-            case 'warning':
-                return styles.tagWarning
-            case 'error':
-                return styles.tagError
-            default:
-                return styles.tagDefault
-        }
-    }
-
-    return (
-        <span className={`${styles.tag} ${getVariantStyles()}`}>
-            {children}
-        </span>
-    )
-}
-
 const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
     const styles = useStyles2(getStyles)
     return <div className={`${styles.card} ${className}`}>{children}</div>
@@ -76,44 +47,6 @@ const CardTitle = ({ children }: { children: React.ReactNode }) => {
 const CardContent = ({ children }: { children: React.ReactNode }) => {
     const styles = useStyles2(getStyles)
     return <div className={styles.cardContent}>{children}</div>
-}
-
-const Table = ({ children }: { children: React.ReactNode }) => {
-    const styles = useStyles2(getStyles)
-    return <table className={styles.table}>{children}</table>
-}
-
-const TableHeader = ({ children }: { children: React.ReactNode }) => {
-    return <thead>{children}</thead>
-}
-
-const TableBody = ({ children }: { children: React.ReactNode }) => {
-    return <tbody>{children}</tbody>
-}
-
-const TableRow = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-    const styles = useStyles2(getStyles)
-    return <tr className={`${styles.tableRow} ${className}`}>{children}</tr>
-}
-
-const TableHead = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-    const styles = useStyles2(getStyles)
-    return <th className={`${styles.tableHead} ${className}`}>{children}</th>
-}
-
-const TableCell = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-    const styles = useStyles2(getStyles)
-    return <td className={`${styles.tableCell} ${className}`}>{children}</td>
-}
-
-const Avatar = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-    const styles = useStyles2(getStyles)
-    return <div className={`${styles.avatar} ${className}`}>{children}</div>
-}
-
-const AvatarFallback = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-    const styles = useStyles2(getStyles)
-    return <span className={`${styles.avatarFallback} ${className}`}>{children}</span>
 }
 
 const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
@@ -246,7 +179,9 @@ export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps
     const { selectedServiceDetails } = useViewStore((state) => state)
     const styles = useStyles2(getStyles)
 
-    const items = record?.layoutSpec?.details?.map((item, index) => {
+    console.log('record for drawer', record)
+
+    const items = record?.details?.map((item, index) => {
         switch (item.type) {
             case 'panel':
                 const config = item.source as DashboardElementSource
