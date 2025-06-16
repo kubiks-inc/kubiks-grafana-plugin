@@ -24,10 +24,10 @@ const AppConfig = (props: AppConfigProps) => (
 
 export const plugin = new PanelPlugin(ServiceMapPanel).setPanelOptions((builder) => {
   return builder.addCustomEditor({
-    id: 'services',
-    path: 'services',
-    name: 'Service list',
-    description: 'Define which services to include',
+    id: 'service-map-editor',
+    path: 'elements',
+    name: 'Service Map Configuration',
+    description: 'Configure the service map',
     editor: ServiceMapEditor,
     defaultValue: [],
   });

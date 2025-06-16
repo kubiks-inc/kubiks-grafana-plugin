@@ -186,7 +186,7 @@ const ServiceMapSchemaEditor: React.FC<ServiceMapSchemaEditorProps> = ({
           />
         </div>
       </Field>
-      
+
       {!isValid && validationErrors.length > 0 && (
         <Alert
           title="Schema Validation Error"
@@ -217,7 +217,7 @@ const ServiceMapSchemaEditor: React.FC<ServiceMapSchemaEditorProps> = ({
 const getDefaultSchema = () => {
   return JSON.stringify({
     version: "1.0",
-    services: [
+    elements: [
       {
         name: "frontend",
         type: "web",
