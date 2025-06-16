@@ -15,13 +15,15 @@ import {
     Disc,
     TrendingDown,
 } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
-import { Button, useStyles2, Alert, Field, Input, Tooltip } from '@grafana/ui'
+import { Button, useStyles2, Alert, Field, Input, Tooltip, Badge } from '@grafana/ui'
 import { useViewStore } from '@/store/ViewStoreProvider'
-import { DashboardElementSource, Record } from '@/lib/model/view'
+import { DashboardElementSource, Record, LayoutItem } from '@/lib/model/view'
 import { getBackendSrv } from '@grafana/runtime'
+import { getIconUrlWithFallback } from '@/utils/iconMapper'
+import { getTitle } from './helpers'
 
 interface ServiceDrawerProps {
     open: boolean
@@ -47,6 +49,99 @@ const CardTitle = ({ children }: { children: React.ReactNode }) => {
 const CardContent = ({ children }: { children: React.ReactNode }) => {
     const styles = useStyles2(getStyles)
     return <div className={styles.cardContent}>{children}</div>
+}
+
+type Status = 'Success' | 'Warning' | 'Failed' | 'Running' | 'Online'
+
+const getStatusBadgeColor = (status: Status) => {
+    switch (status) {
+        case 'Success':
+        case 'Running':
+        case 'Online':
+            return 'green'
+        case 'Warning':
+            return 'orange'
+        case 'Failed':
+            return 'red'
+        default:
+            return 'blue'
+    }
+}
+
+const CopyableText = ({
+    text,
+    className,
+    disabled = false,
+}: {
+    text: string
+    className?: string
+    disabled?: boolean
+}) => {
+    const [copied, setCopied] = useState(false)
+    const styles = useStyles2(getStyles)
+
+    const handleCopy = () => {
+        if (disabled) return
+        navigator.clipboard.writeText(text)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 600)
+    }
+
+    return (
+        <span
+            onClick={disabled ? undefined : handleCopy}
+            className={`${styles.copyableText} ${disabled ? styles.copyableDisabled : styles.copyableEnabled} ${className || ''}`}
+            title={text}
+        >
+            <span className={styles.textContent}>{text}</span>
+            {copied && !disabled && (
+                <span className={styles.copiedOverlay}>
+                    Copied
+                </span>
+            )}
+        </span>
+    )
+}
+
+// Component to visualize pods as blocks
+const BlocksComponent = ({
+    blocks,
+    disabled = false,
+}: {
+    blocks: { name: string; status: Status; url: string }[]
+    disabled?: boolean
+}) => {
+    const styles = useStyles2(getStyles)
+
+    return (
+        <div className={styles.blocksContainer}>
+            <div className={styles.blocksGrid}>
+                {blocks?.map((block, index) => (
+                    <div
+                        key={index}
+                        className={`${styles.block} ${disabled
+                            ? styles.blockDisabled
+                            : block.url
+                                ? styles.blockClickable
+                                : styles.blockDefault
+                            }`}
+                        onClick={!disabled && block.url ? () => window.open(block.url, '_blank') : undefined}
+                    >
+                        <div className={styles.blockHeader}>
+                            <div className={`${styles.statusDot} ${styles[`statusDot${block.status}` as keyof typeof styles]}`} />
+                            <span className={styles.blockName}>{block.name}</span>
+                        </div>
+                        <div className={styles.blockStatus}>
+                            <Badge
+                                text={block.status}
+                                color={getStatusBadgeColor(block.status)}
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
 }
 
 const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
@@ -175,21 +270,209 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
     )
 }
 
+// Component for rendering links grid
+const LinksGrid = ({ links, styles }: { links: LayoutItem[], styles: any }) => {
+    if (!links || links.length === 0) return null
+
+    return (
+        <div className={styles.linksGridContainer}>
+            <div className={styles.linksGrid}>
+                {links.map((link, index) => (
+                    <div
+                        key={index}
+                        className={styles.linkItem}
+                        onClick={() => window.open(link.value?.data as string, '_blank', 'noopener,noreferrer')}
+                        title={link.label}
+                    >
+                        <div className={styles.linkIconWrapper}>
+                            {link.icon ? (
+                                <img
+                                    src={getIconUrlWithFallback(link.icon)}
+                                    alt={link.label}
+                                    className={styles.linkItemIcon}
+                                />
+                            ) : (
+                                <ExternalLink className={styles.linkItemIconDefault} />
+                            )}
+                        </div>
+                        <span className={styles.linkItemLabel}>{link.label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+const renderLayoutItem = (item: LayoutItem, index: number, key: string, styles: any) => {
+    switch (item.type) {
+        case 'panel':
+            const config = item.source as DashboardElementSource
+            return <PanelPreview key={`${key}-panel-${index}`} config={config} />
+        case 'status':
+            const statusValue = item.value?.data as Status | undefined
+            return (
+                <Card key={`${key}-status-${index}`}>
+                    <CardHeader>
+                        <CardTitle>Status</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={styles.drawerStatusContainer}>
+                            {statusValue && (
+                                <div className={`${styles.statusDot} ${styles[`statusDot${statusValue}` as keyof typeof styles]}`} />
+                            )}
+                            <Badge
+                                text={statusValue || 'Unknown'}
+                                color={getStatusBadgeColor(statusValue as Status)}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            )
+        case 'text':
+            return (
+                <Card key={`${key}-text-${index}`}>
+                    <CardHeader>
+                        <CardTitle>{item.label || 'Information'}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={styles.drawerTextField}>
+                            <CopyableText text={item.value?.data as string} />
+                        </div>
+                    </CardContent>
+                </Card>
+            )
+        case 'tags':
+            return (
+                <Card key={`${key}-tags-${index}`}>
+                    <CardHeader>
+                        <CardTitle>{item.label || 'Tags'}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={styles.drawerTagsGrid}>
+                            {Object.entries(item.value?.data || {}).map(([_, val]) => (
+                                <Badge
+                                    key={val}
+                                    text={val}
+                                    color="blue"
+                                />
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )
+        case 'keyValue':
+            return (
+                <Card key={`${key}-keyValue-${index}`}>
+                    <CardHeader>
+                        <CardTitle>{item.label || 'Configuration'}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={styles.drawerKeyValueGrid}>
+                            {Object.entries(item.value?.data || {}).map(([key, val], idx) => (
+                                <div key={idx} className={styles.drawerKeyValuePair}>
+                                    <span className={styles.drawerKeyValueKey}>{key}:</span>{' '}
+                                    <CopyableText text={val as string} />
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )
+        case 'progress':
+            const percentage = Math.max(Number(item.value?.data), 0)
+            const isWarning = percentage >= 70 && percentage < 80
+            const isDanger = percentage >= 80
+            return (
+                <Card key={`${key}-progress-${index}`}>
+                    <CardHeader>
+                        <CardTitle>{item.label || 'Progress'}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={styles.drawerProgressContainer}>
+                            <div className={styles.drawerProgressHeader}>
+                                <span className={`${styles.drawerProgressValue} ${isDanger ? styles.progressDanger : isWarning ? styles.progressWarning : styles.progressSuccess
+                                    }`}>
+                                    {percentage.toFixed(2)}%
+                                </span>
+                            </div>
+                            <div className={styles.drawerProgressBar}>
+                                <div
+                                    className={`${styles.drawerProgressFill} ${isDanger ? styles.progressFillDanger : isWarning ? styles.progressFillWarning : styles.progressFillSuccess
+                                        }`}
+                                    style={{ width: `${Math.min(percentage, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )
+        case 'inversed_progress':
+            const inversePercentage = Math.max(Number(item.value?.data), 0)
+            const isInverseDanger = inversePercentage <= 20
+            const isInverseWarning = inversePercentage > 20 && inversePercentage <= 30
+            return (
+                <Card key={`${key}-inversed_progress-${index}`}>
+                    <CardHeader>
+                        <CardTitle>{item.label || 'Available Resources'}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={styles.drawerProgressContainer}>
+                            <div className={styles.drawerProgressHeader}>
+                                <span className={`${styles.drawerProgressValue} ${isInverseDanger ? styles.progressDanger : isInverseWarning ? styles.progressWarning : styles.progressSuccess
+                                    }`}>
+                                    {inversePercentage.toFixed(2)}%
+                                </span>
+                            </div>
+                            <div className={styles.drawerProgressBar}>
+                                <div
+                                    className={`${styles.drawerProgressFill} ${isInverseDanger ? styles.progressFillDanger : isInverseWarning ? styles.progressFillWarning : styles.progressFillSuccess
+                                        }`}
+                                    style={{ width: `${Math.min(inversePercentage, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )
+        case 'blocks':
+            return (
+                <Card key={`${key}-blocks-${index}`}>
+                    <CardHeader>
+                        <CardTitle>{item.label || 'Resources'}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <BlocksComponent blocks={item.value?.data as any} />
+                    </CardContent>
+                </Card>
+            )
+        case 'link':
+            // Links are now handled separately in the LinksGrid component
+            return null
+        default:
+            return (
+                <Card key={`${key}-unknown-${index}`}>
+                    <CardContent>
+                        <div>Unknown item type: {item.type}</div>
+                    </CardContent>
+                </Card>
+            )
+    }
+}
+
 export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps) {
     const { selectedServiceDetails } = useViewStore((state) => state)
     const styles = useStyles2(getStyles)
 
     console.log('record for drawer', record)
 
-    const items = record?.details?.map((item, index) => {
-        switch (item.type) {
-            case 'panel':
-                const config = item.source as DashboardElementSource
-                return <PanelPreview key={index} config={config} />
-            default:
-                return <div key={index}>Unknown</div>
-        }
-    })
+    // Extract title and links from details and filter them out from main content rendering
+    const title = getTitle(record?.details)
+    const linkItems = record?.details?.filter(item => item.type === 'link') || []
+    const filteredDetails = record?.details?.filter(item => item.type !== 'title' && item.type !== 'link') || []
+
+    const items = filteredDetails.map((item, index) =>
+        renderLayoutItem(item, index, record.key || 'drawer', styles)
+    )
 
     if (!open) return null
 
@@ -215,17 +498,27 @@ export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps
                     <>
                         {/* Content */}
                         <div className={styles.contentWrapper}>
-                            {/* Header with close button */}
-                            <div className={styles.headerActions}>
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => onOpenChange(false)}
-                                    icon="times"
-                                    size="sm"
-                                />
+                            {/* Header with title and close button */}
+                            <div className={styles.drawerHeader}>
+                                <div className={styles.drawerTitleContainer}>
+                                    {title && (
+                                        <h2 className={styles.drawerTitle}>{title}</h2>
+                                    )}
+                                </div>
+                                <div className={styles.headerActions}>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() => onOpenChange(false)}
+                                        icon="times"
+                                        size="sm"
+                                    />
+                                </div>
                             </div>
 
-                            <div className={styles.contentWrapper}>
+                            {/* Links Grid */}
+                            <LinksGrid links={linkItems} styles={styles} />
+
+                            <div className={styles.drawerItemsContainer}>
                                 {items}
                             </div>
                         </div>
@@ -753,5 +1046,336 @@ const getStyles = (theme: GrafanaTheme2) => ({
         height: 16px;
         width: 16px;
         color: ${theme.colors.error.text};
+    `,
+    // CopyableText styles
+    copyableText: css`
+        position: relative;
+        display: inline-block;
+        padding: ${theme.spacing(0.5, 1)};
+        border-radius: ${theme.shape.radius.default};
+        transition: all 0.2s ease;
+        word-break: break-all;
+        max-width: 100%;
+    `,
+    copyableEnabled: css`
+        cursor: pointer;
+        background: ${theme.colors.background.canvas};
+        &:hover {
+            background: ${theme.colors.emphasize(theme.colors.background.canvas, 0.03)};
+        }
+    `,
+    copyableDisabled: css`
+        cursor: default;
+        background: transparent;
+    `,
+    textContent: css`
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: ${theme.colors.text.primary};
+    `,
+    copiedOverlay: css`
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: ${theme.colors.background.secondary};
+        color: ${theme.colors.text.primary};
+        border-radius: ${theme.shape.radius.default};
+        font-weight: ${theme.typography.fontWeightMedium};
+        font-size: ${theme.typography.bodySmall.fontSize};
+    `,
+    // Blocks styles
+    blocksContainer: css`
+        margin-top: ${theme.spacing(1)};
+    `,
+    blocksGrid: css`
+        display: flex;
+        flex-direction: column;
+        gap: ${theme.spacing(1)};
+    `,
+    block: css`
+        padding: ${theme.spacing(1, 1.5)};
+        background: ${theme.colors.background.canvas};
+        border: 1px solid ${theme.colors.border.medium};
+        border-radius: ${theme.shape.radius.default};
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+    `,
+    blockDefault: css`
+        cursor: default;
+    `,
+    blockClickable: css`
+        cursor: pointer;
+        &:hover {
+            border-color: ${theme.colors.border.strong};
+            background: ${theme.colors.emphasize(theme.colors.background.canvas, 0.03)};
+        }
+    `,
+    blockDisabled: css`
+        cursor: default;
+        opacity: 0.6;
+    `,
+    blockHeader: css`
+        display: flex;
+        align-items: center;
+        gap: ${theme.spacing(1)};
+        flex: 1;
+        min-width: 0;
+    `,
+    blockName: css`
+        font-size: ${theme.typography.body.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.text.primary};
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    `,
+    blockStatus: css`
+        flex-shrink: 0;
+    `,
+    statusDot: css`
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    `,
+    statusDotSuccess: css`
+        background: ${theme.colors.success.main};
+    `,
+    statusDotWarning: css`
+        background: ${theme.colors.warning.main};
+    `,
+    statusDotFailed: css`
+        background: ${theme.colors.error.main};
+    `,
+    statusDotRunning: css`
+        background: ${theme.colors.success.main};
+    `,
+    statusDotOnline: css`
+        background: ${theme.colors.success.main};
+    `,
+    // Drawer-specific component styles
+    drawerStatusContainer: css`
+        display: flex;
+        align-items: center;
+        gap: ${theme.spacing(1)};
+    `,
+    drawerTextField: css`
+        font-size: ${theme.typography.body.fontSize};
+        color: ${theme.colors.text.primary};
+    `,
+    drawerTagsGrid: css`
+        display: flex;
+        gap: ${theme.spacing(0.5)};
+        flex-wrap: wrap;
+    `,
+    drawerKeyValueGrid: css`
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: ${theme.spacing(1)};
+    `,
+    drawerKeyValuePair: css`
+        font-size: ${theme.typography.body.fontSize};
+        display: flex;
+        align-items: center;
+        gap: ${theme.spacing(1)};
+    `,
+    drawerKeyValueKey: css`
+        color: ${theme.colors.text.secondary};
+        font-weight: ${theme.typography.fontWeightMedium};
+        flex-shrink: 0;
+    `,
+    drawerProgressContainer: css`
+        display: flex;
+        flex-direction: column;
+        gap: ${theme.spacing(1.5)};
+    `,
+    drawerProgressHeader: css`
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    `,
+    drawerProgressValue: css`
+        font-size: ${theme.typography.h6.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+    `,
+    drawerProgressBar: css`
+        width: 100%;
+        background: ${theme.colors.background.canvas};
+        border-radius: ${theme.shape.radius.default};
+        height: 8px;
+        overflow: hidden;
+    `,
+    drawerProgressFill: css`
+        height: 100%;
+        border-radius: ${theme.shape.radius.default};
+        transition: all 0.3s ease;
+    `,
+    progressSuccess: css`
+        color: ${theme.colors.success.text};
+    `,
+    progressWarning: css`
+        color: ${theme.colors.warning.text};
+    `,
+    progressDanger: css`
+        color: ${theme.colors.error.text};
+    `,
+    progressFillSuccess: css`
+        background: ${theme.colors.success.main};
+    `,
+    progressFillWarning: css`
+        background: ${theme.colors.warning.main};
+    `,
+    progressFillDanger: css`
+        background: ${theme.colors.error.main};
+    `,
+    drawerLinkCard: css`
+        cursor: pointer;
+        transition: all 0.2s ease;
+        &:hover {
+            border-color: ${theme.colors.border.strong};
+            box-shadow: ${theme.shadows.z2};
+        }
+    `,
+    drawerLinkButton: css`
+        cursor: pointer;
+        width: 100%;
+    `,
+    drawerLinkContent: css`
+        display: flex;
+        align-items: center;
+        gap: ${theme.spacing(2)};
+        padding: ${theme.spacing(1)};
+    `,
+    drawerLinkIconContainer: css`
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: ${theme.colors.background.canvas};
+        border-radius: 50%;
+        flex-shrink: 0;
+    `,
+    drawerLinkIcon: css`
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+    `,
+    drawerLinkLabel: css`
+        font-size: ${theme.typography.body.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.text.primary};
+        flex: 1;
+    `,
+    drawerLinkExternalIcon: css`
+        width: 16px;
+        height: 16px;
+        color: ${theme.colors.text.secondary};
+        flex-shrink: 0;
+    `,
+    drawerHeader: css`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: ${theme.spacing(2)} 0;
+        border-bottom: 1px solid ${theme.colors.border.medium};
+        margin-bottom: ${theme.spacing(2)};
+    `,
+    drawerTitleContainer: css`
+        flex: 1;
+        min-width: 0;
+    `,
+    drawerTitle: css`
+        font-size: ${theme.typography.h4.fontSize};
+        font-weight: ${theme.typography.fontWeightBold};
+        color: ${theme.colors.text.primary};
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    `,
+    drawerItemsContainer: css`
+        display: flex;
+        flex-direction: column;
+        gap: ${theme.spacing(2)};
+        flex: 1;
+        overflow: auto;
+    `,
+    // Links Grid Styles
+    linksGridContainer: css`
+        margin-bottom: ${theme.spacing(3)};
+        padding-bottom: ${theme.spacing(2)};
+        border-bottom: 1px solid ${theme.colors.border.weak};
+    `,
+    linksGrid: css`
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: ${theme.spacing(1)};
+        max-width: 100%;
+    `,
+    linkItem: css`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: ${theme.spacing(1.5)};
+        background: ${theme.colors.background.secondary};
+        border: 1px solid ${theme.colors.border.weak};
+        border-radius: ${theme.shape.radius.default};
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 60px;
+        text-decoration: none;
+        
+        &:hover {
+            border-color: ${theme.colors.border.medium};
+            background: ${theme.colors.emphasize(theme.colors.background.secondary, 0.03)};
+            transform: translateY(-1px);
+            box-shadow: ${theme.shadows.z1};
+        }
+        
+        &:active {
+            transform: translateY(0);
+        }
+    `,
+    linkIconWrapper: css`
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-bottom: ${theme.spacing(0.5)};
+        background: ${theme.colors.background.canvas};
+        border-radius: 50%;
+        flex-shrink: 0;
+    `,
+    linkItemIcon: css`
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+    `,
+    linkItemIconDefault: css`
+        width: 14px;
+        height: 14px;
+        color: ${theme.colors.text.secondary};
+    `,
+    linkItemLabel: css`
+        font-size: ${theme.typography.bodySmall.fontSize};
+        font-weight: ${theme.typography.fontWeightMedium};
+        color: ${theme.colors.text.primary};
+        text-align: center;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        word-break: break-word;
+        hyphens: auto;
     `,
 })
