@@ -138,6 +138,7 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
     const [imageUrl, setImageUrl] = React.useState<string | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
+    const [isHovered, setIsHovered] = React.useState(false)
 
     React.useEffect(() => {
         const fetchPanelImage = async () => {
@@ -186,76 +187,58 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
         }
     }, [config.dashboardUid, config.panelId])
 
+    const handleClick = () => {
+        const dashboardUrl = `/d/${config.dashboardUid}?viewPanel=${config.panelId}`
+        window.open(dashboardUrl, '_blank')
+    }
+
     if (loading) {
         return (
-            <Card className={styles.panelPreviewCard}>
-                <CardContent>
-                    <div className={styles.panelPreviewLoading}>
-                        <RefreshCw className={styles.loadingIcon} />
-                        <span>Loading panel preview...</span>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className={styles.panelPreviewPlaceholder}>
+                <RefreshCw className={styles.loadingIcon} />
+                <span>Loading panel preview...</span>
+            </div>
         )
     }
 
-    if (error) {
+    if (error || !imageUrl) {
         return (
-            <Card className={styles.panelPreviewCard}>
-                <CardContent>
-                    <div className={styles.panelPreviewError}>
-                        <AlertTriangle className={styles.errorIcon} />
-                        <span>{error}</span>
-                    </div>
-                </CardContent>
-            </Card>
-        )
-    }
-
-    if (!imageUrl) {
-        return (
-            <Card className={styles.panelPreviewCard}>
-                <CardContent>
-                    <div className={styles.panelPreviewError}>
-                        <Server className={styles.errorIcon} />
-                        <span>No preview available</span>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className={styles.panelPreviewPlaceholder}>
+                <AlertTriangle className={styles.errorIcon} />
+                <span>{error || 'No preview available'}</span>
+            </div>
         )
     }
 
     return (
-        <Card className={styles.panelPreviewCard}>
-            <CardHeader>
-                <CardTitle>
-                    <div className={styles.panelHeader}>
-                        <span>Panel Preview</span>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            icon="external-link-alt"
-                            onClick={() => {
-                                // Open the dashboard in a new tab
-                                const dashboardUrl = `/d/${config.dashboardUid}?viewPanel=${config.panelId}`
-                                window.open(dashboardUrl, '_blank')
-                            }}
-                            tooltip="Open panel in dashboard"
-                        />
-                    </div>
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className={styles.panelImageContainer}>
-                    <img
-                        src={imageUrl}
-                        alt="Panel Preview"
-                        className={styles.panelImage}
-                        onError={() => setError('Failed to load image')}
-                    />
+        <div
+            className={styles.panelPreviewContainer}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={handleClick}
+        >
+            <img
+                src={imageUrl}
+                alt="Panel Preview"
+                className={styles.panelPreviewImage}
+                onError={() => setError('Failed to load image')}
+            />
+            {isHovered && (
+                <div className={styles.panelPreviewOverlay}>
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        icon="external-link-alt"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleClick()
+                        }}
+                    >
+                        Open Panel
+                    </Button>
                 </div>
-            </CardContent>
-        </Card>
+            )}
+        </div>
     )
 }
 
@@ -971,51 +954,51 @@ const getStyles = (theme: GrafanaTheme2) => ({
         color: ${theme.colors.text.secondary};
         margin-top: ${theme.spacing(0.5)};
     `,
-    panelPreviewCard: css`
-        margin-bottom: ${theme.spacing(2)};
-    `,
-    panelHeader: css`
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    `,
-    panelImageContainer: css`
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: ${theme.colors.background.canvas};
+    panelPreviewContainer: css`
+        position: relative;
+        cursor: pointer;
         border-radius: ${theme.shape.radius.default};
         overflow: hidden;
+        transition: all 0.2s ease;
+        margin-bottom: ${theme.spacing(2)};
     `,
-    panelImage: css`
-        max-width: 100%;
+    panelPreviewImage: css`
+        width: 100%;
         height: auto;
         display: block;
+        border-radius: ${theme.shape.radius.default};
     `,
-    panelPreviewLoading: css`
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+    panelPreviewPlaceholder: css`
         display: flex;
         align-items: center;
         justify-content: center;
         gap: ${theme.spacing(1)};
+        padding: ${theme.spacing(4)};
+        background: ${theme.colors.background.secondary};
+        border: 1px solid ${theme.colors.border.medium};
+        border-radius: ${theme.shape.radius.default};
         color: ${theme.colors.text.secondary};
-        z-index: 1;
+        margin-bottom: ${theme.spacing(2)};
     `,
-    panelPreviewError: css`
+    panelPreviewOverlay: css`
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: ${theme.spacing(1)};
-        color: ${theme.colors.error.text};
-        z-index: 1;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: ${theme.shape.radius.default};
+        opacity: 0;
+        animation: fadeIn 0.2s ease forwards;
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
     `,
     loadingIcon: css`
         height: 16px;
