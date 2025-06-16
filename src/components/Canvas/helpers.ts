@@ -1,27 +1,28 @@
 import { LayoutItem } from '@/lib/model/view'
-import { ViewRecord } from '@/lib/model/record'
+import { Record } from '@/lib/model/view'
+
 export function getTitle(layout: LayoutItem[] | undefined): string {
   const titleItem = layout?.find((item) => item.type === 'title')
   return titleItem?.value?.data as string
 }
 
-export function isHiddenBeDefault(layout: LayoutItem[] | undefined): boolean {
-  const hiddenItem = layout?.find((item) => item.type === 'hiddenByDefault')
+export function isHiddenBeDefault(record: Record): boolean {
+  const hiddenItem = record.layout?.find((item) => item.type === 'hiddenByDefault' as any)
   return (hiddenItem?.value?.data as unknown as boolean) || false
 }
 
-export const getParentId = (record: ViewRecord) => {
-  const parentIdItem = record.layout?.find((item) => item.type === 'parentId')
-  return parentIdItem?.value?.data || (record.parentId as string)
+export function getParentId(record: Record): string | undefined {
+  const parentIdItem = record.layout?.find((item: LayoutItem) => item.type === 'parentId')
+  return parentIdItem?.value?.data as string | undefined
 }
 
 export const getParentIdFromLayout = (layout: LayoutItem[] | undefined) => {
-  const parentIdItem = layout?.find((item) => item.type === 'parentId')
-  return parentIdItem?.value?.data as string
+  const parentIdItem = layout?.find((item: LayoutItem) => item.type === 'parentId')
+  return parentIdItem?.value?.data
 }
 
-export const getExploreLink = (data: LayoutItem[] | undefined) => {
-  const linkItems = data?.filter((item) => item.type === 'explore') || []
+export const getExploreLink = (data: LayoutItem[]) => {
+  const linkItems = data?.filter((item) => item.type === 'explore' as any) || []
   return linkItems[0]?.value?.data as string
 }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { Modal, Input, useStyles2, Icon } from '@grafana/ui'
-import { ViewRecord } from '@/lib/api/model/record'
+import { Record as ViewRecord, LayoutItem } from '@/lib/model/view'
 import { useViewStore } from '@/store/ViewStoreProvider'
 import { getIconUrlWithFallback } from '@/utils/iconMapper'
 import { Server } from 'lucide-react'
@@ -10,13 +10,6 @@ import { Server } from 'lucide-react'
 interface RecordSearchProps {
     open: boolean
     setOpen: (open: boolean) => void
-}
-
-interface LayoutItem {
-    type: string
-    value?: {
-        data?: any
-    }
 }
 
 // Function to extract title from layout items

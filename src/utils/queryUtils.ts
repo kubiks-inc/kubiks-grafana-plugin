@@ -1,4 +1,4 @@
-import { DataFrame, DataQuery } from '@grafana/data';
+import { DataFrame } from '@grafana/data';
 
 export interface QueryReference {
     refId: string;

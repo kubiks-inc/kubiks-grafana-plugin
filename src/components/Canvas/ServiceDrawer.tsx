@@ -1,24 +1,13 @@
 import {
-    Search,
     AlertTriangle,
     ExternalLink,
     Server,
-    Code,
-    X,
     RefreshCw,
-    Filter,
-    Cpu,
-    CheckCircle,
-    ArrowUpRight,
-    Wifi,
-    MemoryStickIcon as Memory,
-    Disc,
-    TrendingDown,
 } from 'lucide-react'
 import React, { useState } from 'react'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
-import { Button, useStyles2, Alert, Field, Input, Tooltip, Badge } from '@grafana/ui'
+import { Button, useStyles2, Badge } from '@grafana/ui'
 import { useViewStore } from '@/store/ViewStoreProvider'
 import { DashboardElementSource, Record, LayoutItem } from '@/lib/model/view'
 import { getBackendSrv } from '@grafana/runtime'
