@@ -31,7 +31,16 @@ export const ServiceMapPanel: React.FC<Props> = (props) => {
 const ServiceMapPanelContent: React.FC<Props> = (props) => {
     const s = useStyles2(getStyles);
 
-    const { setFilteredRecords, isServiceDrawerOpen, setIsServiceDrawerOpen, setViewState, setOriginalViewState } = useViewStore(state => state)
+    const {
+        setFilteredRecords,
+        filteredRecords,
+        isServiceDrawerOpen,
+        setIsServiceDrawerOpen,
+        selectedServiceDetails,
+        setViewState,
+        setOriginalViewState,
+        viewState
+    } = useViewStore(state => state)
     const { elements } = props.options;
 
     useEffect(() => {
@@ -56,7 +65,10 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
                     <div className={s.canvasContainer}>
                         <InfiniteCanvas />
                     </div>
-                    <ServiceDrawer open={isServiceDrawerOpen} onOpenChange={setIsServiceDrawerOpen} />
+                    <ServiceDrawer
+                        open={isServiceDrawerOpen}
+                        onOpenChange={setIsServiceDrawerOpen}
+                        record={filteredRecords?.find(record => record.key === selectedServiceDetails) || null} />
                     <ConnectionDetailsDrawer />
                 </div>
             </ReactFlowProvider>
