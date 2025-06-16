@@ -11,7 +11,6 @@ import { DashboardLayoutItem } from './DashboardLayoutItem';
 const sourceModeOptions = [
     { label: 'Query', value: 'query' },
     { label: 'Value', value: 'value' },
-    { label: 'Dashboard', value: 'dashboard' },
 ];
 
 export const SourceModeLayoutItem: React.FC<BaseLayoutItemProps> = (props) => {
@@ -47,10 +46,9 @@ export const SourceModeLayoutItem: React.FC<BaseLayoutItemProps> = (props) => {
                     value={layoutItem.sourceType || 'query'}
                     options={sourceModeOptions}
                     onChange={(option) => onUpdateLayoutItem(elementIndex, layoutIndex, {
-                        sourceType: option.value as 'query' | 'value' | 'dashboard',
+                        sourceType: option.value as 'query' | 'value',
                         ...(option.value === 'query' ? { value: undefined, source: undefined } :
-                            option.value === 'value' ? { source: undefined } :
-                                option.value === 'dashboard' ? { source: { panelId: '', dashboardUid: '' }, value: undefined } : {})
+                            option.value === 'value' ? { source: undefined } : {})
                     })}
                     width={12}
                     placeholder="Source Mode"
