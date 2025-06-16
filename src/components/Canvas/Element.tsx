@@ -1,15 +1,18 @@
 import React from 'react'
-import { LayoutItem } from '@/lib/model/view'
+import { LayoutItem, DashboardElementSource } from '@/lib/model/view'
 import { Handle, Position } from '@xyflow/react'
 import {
   CpuIcon,
   ServerIcon,
   LayersIcon,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { useStyles2, Badge } from '@grafana/ui'
+import { getBackendSrv } from '@grafana/runtime'
 import { getTitle, getExploreLink } from './helpers'
 import { useViewStore } from '@/store/ViewStoreProvider'
 import { getIconUrlWithFallback } from '@/utils/iconMapper'
@@ -151,6 +154,97 @@ const BlocksComponent = ({
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
+  const styles = useStyles2(getElementStyles)
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    const fetchPanelImage = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // Get the current time range (you might want to make this configurable)
+        const from = Date.now() - 6 * 60 * 60 * 1000 // 6 hours ago
+        const to = Date.now()
+
+        // Construct the render URL for the panel
+        const renderUrl = `/render/d-solo/${config.dashboardUid}?panelId=${config.panelId}&from=${from}&to=${to}&width=400&height=300`
+
+        // Use Grafana's backend service to fetch the rendered image
+        const response = await getBackendSrv().fetch({
+          url: renderUrl,
+          method: 'GET',
+          responseType: 'blob'
+        })
+
+        const result = await response.toPromise()
+        if (result && result.data && result.data instanceof Blob) {
+          const imageObjectUrl = URL.createObjectURL(result.data)
+          setImageUrl(imageObjectUrl)
+        } else {
+          throw new Error('Invalid response format')
+        }
+      } catch (err) {
+        console.error('Error fetching panel image:', err)
+        setError('Failed to load panel preview')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (config.dashboardUid && config.panelId) {
+      fetchPanelImage()
+    }
+
+    // Cleanup function to revoke object URL
+    return () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl)
+      }
+    }
+  }, [config.dashboardUid, config.panelId])
+
+  const handleClick = () => {
+    const dashboardUrl = `/d/${config.dashboardUid}?viewPanel=${config.panelId}`
+    window.open(dashboardUrl, '_blank')
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.panelPreviewPlaceholder}>
+        <RefreshCw className={styles.loadingIcon} />
+        <span>Loading panel preview...</span>
+      </div>
+    )
+  }
+
+  if (error || !imageUrl) {
+    return (
+      <div className={styles.panelPreviewPlaceholder}>
+        <AlertTriangle className={styles.errorIcon} />
+        <span>{error || 'No preview available'}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={styles.panelPreviewContainer}
+      onClick={handleClick}
+    >
+      <img
+        src={imageUrl}
+        alt="Panel Preview"
+        className={styles.panelPreviewImage}
+        onError={() => setError('Failed to load image')}
+      />
     </div>
   )
 }
@@ -335,6 +429,9 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
             <BlocksComponent blocks={item.value?.data as any} disabled={true} />
           </div>
         )
+      case 'panel':
+        const config = item.value?.data as DashboardElementSource
+        return <PanelPreview key={`${data.key}-panel-${i}`} config={config} />
       default:
         return null
     }
@@ -1003,5 +1100,49 @@ const getElementStyles = (theme: GrafanaTheme2) => ({
     height: 16px;
     color: ${theme.colors.text.secondary};
     margin-left: ${theme.spacing(1)};
+  `,
+  panelPreviewContainer: css`
+    cursor: pointer;
+    border-radius: ${theme.shape.radius.default};
+    overflow: hidden;
+    transition: all 0.2s ease;
+    margin-bottom: ${theme.spacing(2)};
+  `,
+  panelPreviewImage: css`
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: ${theme.shape.radius.default};
+  `,
+  panelPreviewPlaceholder: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: ${theme.spacing(1)};
+    padding: ${theme.spacing(4)};
+    background: ${theme.colors.background.secondary};
+    border: 1px solid ${theme.colors.border.medium};
+    border-radius: ${theme.shape.radius.default};
+    color: ${theme.colors.text.secondary};
+    margin-bottom: ${theme.spacing(2)};
+  `,
+  loadingIcon: css`
+    height: 16px;
+    width: 16px;
+    animation: spin 1s linear infinite;
+    
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  `,
+  errorIcon: css`
+    height: 16px;
+    width: 16px;
+    color: ${theme.colors.error.text};
   `,
 })
