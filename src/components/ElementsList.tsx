@@ -1,25 +1,20 @@
 import React from 'react';
 import { css } from '@emotion/css';
-import { Input, Button, Select, useStyles2 } from '@grafana/ui';
-import { DataQuery, GrafanaTheme2 } from '@grafana/data';
+import { Button, Select, useStyles2 } from '@grafana/ui';
+import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import { getQueryOptions, isValidQueryRef } from '../utils/queryUtils';
 import { Element, LayoutItem } from '../lib/model/view';
 import { LayoutItemsConfig } from './LayoutItemsConfig';
 
 interface ElementsListProps {
     elements: Element[];
-    queries?: DataQuery[];
+    queries?: string[];
+    data: DataFrame[];
     onChange: (elements: Element[]) => void;
 }
 
-export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = [], onChange }) => {
+export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = [], data, onChange }) => {
     const styles = useStyles2(getStyles);
-
-    const handleNameChange = (index: number, event: React.FormEvent<HTMLInputElement>) => {
-        const updated = [...elements];
-        updated[index] = { ...updated[index], name: event.currentTarget.value };
-        onChange(updated);
-    };
 
     const handleTypeChange = (index: number, type: 'group' | 'element' | 'connection') => {
         const updated = [...elements];
@@ -174,6 +169,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                         elementIndex={elementIndex}
                         elements={elements}
                         queries={queries}
+                        data={data}
                         onUpdateLayoutItem={updateLayoutItem}
                         onAddLayoutItem={addLayoutItem}
                         onRemoveLayoutItem={removeLayoutItem}
@@ -190,6 +186,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                             elementIndex={elementIndex}
                             elements={elements}
                             queries={queries}
+                            data={data}
                             onUpdateLayoutItem={updateDetailsItem}
                             onAddLayoutItem={addDetailsItem}
                             onRemoveLayoutItem={removeDetailsItem}
