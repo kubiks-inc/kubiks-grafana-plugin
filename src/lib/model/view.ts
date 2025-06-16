@@ -16,11 +16,12 @@ export interface DashboardElementSource {
 }
 
 export interface LayoutItem {
-  type: 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'links' | 'icon' | 'status' | 'panel'
+  type: 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'link' | 'icon' | 'status' | 'panel'
   source?: QueryElementSource | DashboardElementSource
   sourceType?: 'query' | 'value' | 'dashboard'
   field?: string
   label?: string
+  icon?: string
   value?: { data: number | string | object }
 }
 

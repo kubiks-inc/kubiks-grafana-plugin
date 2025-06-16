@@ -43,7 +43,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
         { label: 'Progress', value: 'progress' },
         { label: 'Inversed Progress', value: 'inversed_progress' },
         { label: 'Blocks', value: 'blocks' },
-        { label: 'Links', value: 'links' },
+        { label: 'Link', value: 'link' },
         { label: 'Icon', value: 'icon' },
         { label: 'Status', value: 'status' },
         { label: 'Panel', value: 'panel' },
@@ -121,7 +121,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
                                 placeholder="Field Type"
                             />
                         </div>
-                        {!['title', 'status', 'parentId', 'icon', 'links'].includes(layoutItem.type) && (
+                        {!['title', 'status', 'parentId', 'icon'].includes(layoutItem.type) && (
                             <div className={styles.inputGroup}>
                                 <label className={styles.inputLabel}>Label</label>
                                 <Input
