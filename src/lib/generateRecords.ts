@@ -1,5 +1,5 @@
 import { DataFrame, Field } from "@grafana/data";
-import { DashboardElementSource, DashboardElementValue, Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
+import { DashboardElementSource, Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
 import { Record } from "./model/view";
 
 const getIcon = (element: Element): string | null => {
@@ -97,12 +97,14 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
             if (queryResults.length > 0) {
                 const queryRecords = queryResults.map((series: DataFrame) => {
                     const layoutItems = generateLayoutItems(element.layout ?? [], dataFrames, series?.fields?.[1]?.labels?.[JOIN_KEY] as string)
+                    const recordId = series.fields?.[1]?.labels?.[JOIN_KEY] || crypto.randomUUID()
                     return {
                         component: element.type,
                         icon: getIcon(element) || "",
-                        id: series.fields?.[1]?.labels?.[JOIN_KEY],
-                        key: series.fields?.[1]?.labels?.[JOIN_KEY],
+                        id: recordId,
+                        key: recordId,
                         layout: layoutItems,
+                        details: layoutItems,
                         layoutSpec: element,
                     }
                 })
@@ -118,6 +120,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
                 id: element.name,
                 key: element.name,
                 layout: generateLayoutItems(element.layout ?? [], dataFrames, null),
+                details: generateLayoutItems(element.details ?? [], dataFrames, null),
                 layoutSpec: element,
             })
         }
@@ -184,6 +187,7 @@ const extractRecordsFromNodeGraph = (dataFrames: DataFrame[], element: Element):
                             },
                         }
                     ],
+                    details: [],
                     layoutSpec: element,
                 }
             })

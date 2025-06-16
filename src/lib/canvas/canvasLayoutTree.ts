@@ -1,7 +1,7 @@
 import * as dagre from 'dagre'
 import { Edge, Node, Position } from '@xyflow/react'
-import { isHiddenBeDefault, getParentIdFromLayout } from './helpers'
-import { LayoutItem } from '@/lib/api/model/view'
+// import { isHiddenBeDefault, getParentIdFromLayout } from './helpers'
+// import { LayoutItem } from '@/lib/api/model/view'
 
 // Define layout configuration interface
 export interface LayoutConfig {
@@ -33,7 +33,6 @@ function layoutChildrenInGrid(
   if (children.length === 0) return []
 
   const padding = 40
-  const nodeSpacing = 20
   const availableWidth = groupSize.width - padding * 2
   const availableHeight = groupSize.height - padding * 2
 
