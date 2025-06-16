@@ -13,7 +13,7 @@ import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { useStyles2, Badge } from '@grafana/ui'
 import { getBackendSrv } from '@grafana/runtime'
-import { getTitle, getExploreLink } from './helpers'
+import { getTitle } from './helpers'
 import { useViewStore } from '@/store/ViewStoreProvider'
 import { getIconUrlWithFallback } from '@/utils/iconMapper'
 
@@ -44,6 +44,7 @@ const icons = {
 
 type Status = 'Success' | 'Warning' | 'Failed' | 'Running' | 'Online'
 
+/*
 const statusColors: Record<Status, string> = {
   Success: 'border-green-500',
   Warning: 'border-yellow-500',
@@ -82,6 +83,7 @@ const getStatusTextColor = (status?: Status | string) => {
       return 'text-white/60'
   }
 }
+*/
 
 const CopyableText = ({
   text,
@@ -271,7 +273,6 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
   const [showDeploymentSticker, setShowDeploymentSticker] = useState(false)
   const { setIsServiceDrawerOpen, setSelectedServiceDetails } = useViewStore((state) => state)
   const containerRef = useRef<HTMLDivElement>(null)
-  const exploreLink = getExploreLink(data.layout)
   const styles = useStyles2(getElementStyles)
 
   const isSimplifiedView = false
@@ -302,11 +303,6 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
     },
     [data.key, data.onClick, setSelectedServiceDetails]
   )
-
-  const handleExplore = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    // Disabled - no longer functional
-  }
 
   const renderField = (i: number, item: LayoutItem) => {
     // In simplified view, only render progress elements
