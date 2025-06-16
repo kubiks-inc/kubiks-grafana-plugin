@@ -25,11 +25,21 @@ export interface PanelInfo {
     };
 }
 
+export interface DashboardVariable {
+    name: string;
+    type: string;
+    label: string;
+    description?: string;
+}
+
 export interface DashboardDetails {
     dashboard: {
         uid: string;
         title: string;
         panels: PanelInfo[];
+        templating?: {
+            list: any[];
+        };
     };
 }
 
@@ -44,6 +54,12 @@ export interface PanelOption {
     value: string;
     description?: string;
     dashboardTitle?: string;
+}
+
+export interface VariableOption {
+    label: string;
+    value: string;
+    description?: string;
 }
 
 /**
@@ -154,4 +170,33 @@ export const getDashboardPanelInfo = async (
         console.error('Error fetching dashboard panel info:', error);
         return null;
     }
+};
+
+/**
+ * Gets variable options for a specific dashboard
+ */
+export const getDashboardVariableOptions = async (dashboardUid: string): Promise<VariableOption[]> => {
+    if (!dashboardUid) {
+        return [{ label: 'Select a dashboard first', value: '' }];
+    }
+
+    const dashboardDetails = await fetchDashboardDetails(dashboardUid);
+
+    if (!dashboardDetails || !dashboardDetails.dashboard.templating?.list) {
+        return [{ label: 'No variables available', value: '', description: 'This dashboard has no variables' }];
+    }
+
+    const variables = dashboardDetails.dashboard.templating.list.filter(
+        (variable: any) => variable.name && variable.type !== 'adhoc'
+    );
+
+    if (variables.length === 0) {
+        return [{ label: 'No variables available', value: '', description: 'This dashboard has no variables' }];
+    }
+
+    return variables.map((variable: any) => ({
+        label: variable.label || variable.name,
+        value: variable.name,
+        description: `Type: ${variable.type}`,
+    }));
 }; 

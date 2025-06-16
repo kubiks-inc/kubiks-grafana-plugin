@@ -15,6 +15,12 @@ export interface DashboardElementSource {
   dashboardUid: string
 }
 
+export interface PanelVariableMapping {
+  panelVariable: string
+  queryRef: string
+  field: string
+}
+
 export type LayoutItemType = 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'link' | 'icon' | 'status' | 'panel' | 'from' | 'to'
 
 export interface LayoutItem {
@@ -25,6 +31,7 @@ export interface LayoutItem {
   label?: string
   icon?: string
   value?: { data: number | string | object }
+  panelVariableMappings?: PanelVariableMapping[]
 }
 
 export interface Record {
