@@ -150,8 +150,8 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
                 const from = Date.now() - 6 * 60 * 60 * 1000 // 6 hours ago
                 const to = Date.now()
 
-                // Construct the render URL for the panel
-                const renderUrl = `/render/d-solo/${config.dashboardUid}?panelId=${config.panelId}&from=${from}&to=${to}&width=400&height=300`
+                // Construct the render URL for the panel - let Grafana use default dimensions
+                const renderUrl = `/render/d-solo/${config.dashboardUid}?panelId=${config.panelId}&from=${from}&to=${to}`
 
                 // Use Grafana's backend service to fetch the rendered image
                 const response = await getBackendSrv().fetch({
@@ -963,7 +963,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
         margin-bottom: ${theme.spacing(2)};
     `,
     panelPreviewImage: css`
-        width: 100%;
+        max-width: 100%;
         height: auto;
         display: block;
         border-radius: ${theme.shape.radius.default};
