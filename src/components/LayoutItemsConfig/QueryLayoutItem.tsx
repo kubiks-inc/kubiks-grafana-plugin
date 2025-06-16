@@ -1,9 +1,8 @@
 import React from 'react';
 import { css } from '@emotion/css';
-import { Input, Select, useStyles2 } from '@grafana/ui';
+import { Select, useStyles2 } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
 import { BaseLayoutItemProps } from './types';
-import { BaseLayoutItem } from './BaseLayoutItem';
 import { getQueryOptions, getQueryByRef, getFieldOptionsFromQuery } from '../../utils/queryUtils';
 
 export const QueryLayoutItem: React.FC<BaseLayoutItemProps> = (props) => {

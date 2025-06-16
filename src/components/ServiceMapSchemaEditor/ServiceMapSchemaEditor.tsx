@@ -109,9 +109,11 @@ const ServiceMapSchemaEditor: React.FC<ServiceMapSchemaEditorProps> = ({
     let valid = true;
 
     try {
-      // Basic JSON validation
-      const parsed = JSON.parse(schemaValue);
-      //TODO: validate schema
+      JSON.parse(schemaValue);
+      setIsValid(true);
+      if (onValidate) {
+        onValidate(true, []);
+      }
     } catch (e) {
       errors.push('Invalid JSON format');
       valid = false;
@@ -119,7 +121,9 @@ const ServiceMapSchemaEditor: React.FC<ServiceMapSchemaEditorProps> = ({
 
     setValidationErrors(errors);
     setIsValid(valid);
-    onValidate?.(valid, errors);
+    if (onValidate) {
+      onValidate(valid, errors);
+    }
   };
 
   const formatSchema = () => {

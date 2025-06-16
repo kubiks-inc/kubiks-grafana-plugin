@@ -1,15 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import {
-  Home,
-  ChevronRight,
-  ArrowLeft,
   Search,
   Command,
-  ScrollText,
-  Settings,
-  Save,
-  X,
-  FileEdit,
 } from 'lucide-react'
 import { Button, useStyles2, Tooltip } from '@grafana/ui'
 import { css } from '@emotion/css'
@@ -28,39 +20,22 @@ export const CanvasNavbar: React.FC<CanvasNavbarProps> = ({ }) => {
     selectedNode,
     setSelectedNode,
     viewState,
-    liveMode,
     setLiveMode,
     editLayout,
     setEditLayout,
   } = useViewStore((state) => state)
-  const record = viewState?.records?.find((record) => record.key === selectedNode)
+  const record = viewState?.records?.find((record: any) => record.key === selectedNode)
   const { getNodes } = useReactFlow()
   const styles = useStyles2(getStyles)
 
-  const handleEnableLayoutEdit = () => {
-    setLiveMode(false)
-    setEditLayout(true)
-  }
-
   const handleSaveLayout = useCallback(async () => {
     console.log('Saving layout changes')
-
-    const nodes = getNodes()
-    const positions = nodes
-      .filter((node) => node.type == 'group')
-      .reduce(
-        (acc, node) => {
-          acc[node.id] = { x: node.position.x, y: node.position.y }
-          return acc
-        },
-        {} as Record<string, { x: number; y: number }>
-      )
 
     // await saveLayoutPositions(positions)
 
     setEditLayout(false)
     setLiveMode(true)
-  }, [getNodes])
+  }, [setEditLayout, setLiveMode])
 
   const handleDiscardLayout = () => {
     console.log('Discarding layout changes')

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { EdgeProps, getSimpleBezierPath, Position, BaseEdge } from '@xyflow/react'
 import { LayoutItem } from '@/lib/model/view'
 import { useViewStore } from '@/store/ViewStoreProvider'
@@ -65,7 +65,6 @@ const HighlightedEdge = ({
   ...props
 }: EdgeProps) => {
   const setConnectionPopup = useViewStore((state) => state.setConnectionPopup)
-  const popupTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isHovered, setIsHovered] = useState(false)
 
   // Use simple bezier path for a clean curved line
@@ -141,7 +140,6 @@ const HighlightedEdge = ({
 
   const connectionType = getConnectionType()
 
-  const status = getLayoutValue(data.layout as LayoutItem[], 'status')?.data as unknown as string
   const edgePayload = data as EdgeData
   const sourceName = edgePayload.sourceName
   const targetName = edgePayload.targetName

@@ -26,6 +26,8 @@
     "@swc/jest": "^0.2.26",
     "@testing-library/jest-dom": "6.1.4",
     "@testing-library/react": "14.0.0",
+    "@types/d3-force": "^3.0.10",
+    "@types/dagre": "^0.7.52",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.8.7",
     "@types/testing-library__jest-dom": "5.14.8",
