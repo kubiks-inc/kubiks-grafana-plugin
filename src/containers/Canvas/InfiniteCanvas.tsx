@@ -219,7 +219,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
 
       window.requestAnimationFrame(() => {
         const { x, y, zoom } = reactFlowInstance.getViewport()
-        reactFlowInstance.setViewport({ x: x - 150, y: y - 150, zoom })
+        reactFlowInstance.setViewport({ x: x, y: y, zoom })
       })
       setShouldFitView(false)
     }
