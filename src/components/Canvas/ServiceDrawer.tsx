@@ -295,7 +295,7 @@ const LinksGrid = ({ links, styles }: { links: LayoutItem[], styles: any }) => {
 const renderLayoutItem = (item: LayoutItem, index: number, key: string, styles: any) => {
     switch (item.type) {
         case 'panel':
-            const config = item.source as DashboardElementSource
+            const config = item.value?.data as DashboardElementSource
             return <PanelPreview key={`${key}-panel-${index}`} config={config} />
         case 'status':
             const statusValue = item.value?.data as Status | undefined

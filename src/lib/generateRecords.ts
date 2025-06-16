@@ -1,5 +1,5 @@
 import { DataFrame, Field } from "@grafana/data";
-import { Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
+import { DashboardElementSource, Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
 import { Record } from "./model/view";
 
 const getIcon = (element: Element): string | null => {
@@ -25,7 +25,14 @@ const generateLayoutItems = (layout: LayoutItem[], dataFrames: DataFrame[], join
                 })
                 break;
             case 'dashboard':
-                //TODO: Implement dashboard source
+                layoutItems.push({
+                    type: 'panel' as LayoutItemType,
+                    value: {
+                        data: layoutItem.source as DashboardElementSource
+                    },
+                    label: layoutItem.label,
+                    icon: layoutItem.icon,
+                })
                 break;
             case 'query':
                 const ref = layoutItem.source as QueryElementSource
