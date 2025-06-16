@@ -16,6 +16,13 @@ export interface Selector {
   data: string
 }
 
+export interface Element {
+  name: string;
+  type: 'group' | 'element';
+  source?: string; // Query reference ID
+  layout?: LayoutItem[]; // Array of configurable layout items
+}
+
 export interface LayoutItem {
   type: 'title' | 'parentId' | 'text' | 'tags' | 'keyValue' | 'progress' | 'inversed_progress' | 'blocks' | 'links' | 'icon' | 'status'
   source?: string // Query reference

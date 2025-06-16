@@ -53,7 +53,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
         const grouped: Record<string, ViewRecord[]> = {}
         originalViewState.records
             .filter(isUniqueRecord) // Filter out duplicates
-            .filter((record: ViewRecord) => record.component == 'element_component')
+            .filter((record: ViewRecord) => record.component == 'element')
             .forEach((record: ViewRecord) => {
                 const recordType = record.type
                 if (!grouped[recordType]) {

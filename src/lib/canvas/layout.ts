@@ -30,7 +30,7 @@ export function createNodesAndEdges(
   unique.forEach((record) => {
     if (
       record.component === 'group_component' ||
-      (record.component === 'element_component' && elementsToExplore.includes(record.key))
+      (record.component === 'element' && elementsToExplore.includes(record.key))
     ) {
       const groupId = record.key
       const groupStyle = getGroupStyle()
@@ -60,7 +60,7 @@ export function createNodesAndEdges(
       nodes.push(...groupLabels)
 
       nodes.push(groupNode)
-    } else if (record.component === 'element_component') {
+    } else if (record.component === 'element') {
       const element: Node = {
         id: record.key,
         type: record.component,
@@ -124,7 +124,7 @@ function createEdgesFromLayout(records: ViewRecord[]): EdgeData[] {
   // Create a map of node IDs to their names for quick lookup
   const nodeNameMap: Record<string, string> = {}
   records
-    .filter((r) => r.component === 'element_component' || r.component === 'group_component')
+    .filter((r) => r.component === 'element' || r.component === 'group_component')
     .forEach((record) => {
       // Get display name from the record (type, component name, or ID)
       nodeNameMap[record.key] = getTitle(record.layout as LayoutItem[])

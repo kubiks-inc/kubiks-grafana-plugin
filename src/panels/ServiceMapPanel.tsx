@@ -8,7 +8,7 @@ import { prefixRoute } from '../utils/utils.routing';
 import { testIds } from '../components/testIds';
 import { PluginPage } from '@grafana/runtime';
 import { InfiniteCanvas } from '@/containers/Canvas/InfiniteCanvas';
-import { generateRecords } from '../lib/generateView';
+import { generateRecords } from '../lib/generateRecords';
 import { useViewStore, ViewStoreProvider } from '@/store/ViewStoreProvider';
 import { useEffect, useState } from 'react';
 import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';

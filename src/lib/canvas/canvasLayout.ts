@@ -66,8 +66,8 @@ export const layoutElements = async (
 
   const allNodesMeasured = nodes.every(
     (node) =>
-      (node.type === 'element_component' && node.measured?.width && node.measured?.height) ||
-      node.type !== 'element_component'
+      (node.type === 'element' && node.measured?.width && node.measured?.height) ||
+      node.type !== 'element'
   )
 
   // If not all nodes are measured, return null
@@ -248,8 +248,8 @@ function layoutNodesInGroup(
       originalNode: node,
       x: initialX,
       y: initialY,
-      width: node.type === 'element_component' ? node.measured?.width || 200 : 800,
-      height: node.type === 'element_component' ? node.measured?.height || 100 : 500,
+      width: node.type === 'element' ? node.measured?.width || 200 : 800,
+      height: node.type === 'element' ? node.measured?.height || 100 : 500,
       parentId: node.parentId,
     })
   })
@@ -355,8 +355,8 @@ function calculateGroupDimensions(nodes: Node[]): { width: number; height: numbe
   let maxY = -Infinity
 
   nodes.forEach((node) => {
-    const nodeWidth = node.type === 'element_component' ? node.measured?.width || 200 : 100
-    const nodeHeight = node.type === 'element_component' ? node.measured?.height || 100 : 50
+    const nodeWidth = node.type === 'element' ? node.measured?.width || 200 : 100
+    const nodeHeight = node.type === 'element' ? node.measured?.height || 100 : 50
 
     const left = node.position.x
     const top = node.position.y

@@ -48,9 +48,9 @@ export const layoutElements = async (
     children: nodes.map((node) => {
       // Get actual node dimensions or use defaults
       const width =
-        node.type === 'element_component' ? node.measured?.width || nodeWidth : nodeWidth / 2
+        node.type === 'element' ? node.measured?.width || nodeWidth : nodeWidth / 2
       const height =
-        node.type === 'element_component' ? node.measured?.height || nodeHeight : nodeHeight / 2
+        node.type === 'element' ? node.measured?.height || nodeHeight : nodeHeight / 2
 
       return {
         id: node.id,
