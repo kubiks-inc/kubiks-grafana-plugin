@@ -1,6 +1,5 @@
 import React from 'react'
 // import { Panel } from './view-store'
-import { BarChart2, FileText, MousePointer } from 'lucide-react'
 // import { Button } from '@/components/ui/button'
 // import { useViewStore } from './view-store-provider'
 

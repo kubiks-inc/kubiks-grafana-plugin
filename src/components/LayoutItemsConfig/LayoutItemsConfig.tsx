@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/css';
 import { Button, useStyles2 } from '@grafana/ui';
 import { DataFrame, GrafanaTheme2 } from '@grafana/data';
