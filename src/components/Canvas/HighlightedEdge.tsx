@@ -124,7 +124,7 @@ const HighlightedEdge = ({
 
   // Determine the primary connection type
   const getConnectionType = () => {
-    if (endpoints.length === 0) return 'TCP'
+    if (endpoints.length === 0) return 'Details'
 
     // Get the most common endpoint type
     const typeCounts = Object.entries(groupedEndpoints).map(([type, endpointList]) => ({
@@ -132,7 +132,7 @@ const HighlightedEdge = ({
       count: endpointList.length
     }))
 
-    if (typeCounts.length === 0) return 'TCP'
+    if (typeCounts.length === 0) return 'Details'
 
     // Sort by count and return the most common type
     typeCounts.sort((a, b) => b.count - a.count)
@@ -152,7 +152,6 @@ const HighlightedEdge = ({
   const handleButtonClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      console.log('handleButtonClick')
       setConnectionPopup({
         x: e.clientX,
         y: e.clientY,
