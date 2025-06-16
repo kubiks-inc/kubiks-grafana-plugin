@@ -142,9 +142,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
         node.type !== 'element'
     )
 
-    // If not all nodes are measured, return null
     if (!allNodesMeasured || nodes.length === 0) {
-      console.log('not all nodes measured')
       return
     }
 

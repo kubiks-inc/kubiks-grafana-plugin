@@ -25,7 +25,7 @@ type State = {
   isSchemaValid: boolean;
 };
 
-export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> {}
+export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> { }
 
 const AppConfig = ({ plugin }: AppConfigProps) => {
   const s = useStyles2(getStyles);
@@ -78,18 +78,14 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           serviceMapSchema: schema,
         },
       });
-      
-      // Update local state to reflect saved schema
+
       setState({
         ...state,
         serviceMapSchema: schema,
       });
-      
-      // You might want to show a success notification here
-      console.log('Schema saved successfully');
+
     } catch (e) {
       console.error('Error while saving schema', e);
-      // You might want to show an error notification here
     }
   };
 
@@ -110,8 +106,8 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
       secureJsonData: state.isApiKeySet
         ? undefined
         : {
-            apiKey: state.apiKey,
-          },
+          apiKey: state.apiKey,
+        },
     });
   };
 

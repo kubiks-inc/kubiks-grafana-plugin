@@ -50,10 +50,6 @@ const generateLayoutItems = (layout: LayoutItem[], dataFrames: DataFrame[], join
                     }
                 }
 
-                if (dashboard.value.data.variables.size > 0) {
-                    console.log('dashboard', dashboard)
-                }
-
                 layoutItems.push(dashboard)
                 break;
             case 'query':
@@ -126,8 +122,6 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
             })
         }
     }
-
-    console.log('records', records)
 
     return records
 }
