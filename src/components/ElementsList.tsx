@@ -77,6 +77,15 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         onChange(updated);
     };
 
+    const reorderLayoutItems = (elementIndex: number, sourceIndex: number, destinationIndex: number) => {
+        const updated = [...elements];
+        const currentLayout = [...(updated[elementIndex].layout || [])];
+        const [removed] = currentLayout.splice(sourceIndex, 1);
+        currentLayout.splice(destinationIndex, 0, removed);
+        updated[elementIndex] = { ...updated[elementIndex], layout: currentLayout };
+        onChange(updated);
+    };
+
     const addDetailsItem = (elementIndex: number) => {
         const updated = [...elements];
         const currentDetails = updated[elementIndex].details || [];
@@ -107,6 +116,15 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         const updated = [...elements];
         const currentDetails = [...(updated[elementIndex].details || [])];
         currentDetails[detailsIndex] = { ...currentDetails[detailsIndex], ...updates };
+        updated[elementIndex] = { ...updated[elementIndex], details: currentDetails };
+        onChange(updated);
+    };
+
+    const reorderDetailsItems = (elementIndex: number, sourceIndex: number, destinationIndex: number) => {
+        const updated = [...elements];
+        const currentDetails = [...(updated[elementIndex].details || [])];
+        const [removed] = currentDetails.splice(sourceIndex, 1);
+        currentDetails.splice(destinationIndex, 0, removed);
         updated[elementIndex] = { ...updated[elementIndex], details: currentDetails };
         onChange(updated);
     };
@@ -173,6 +191,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                         onUpdateLayoutItem={updateLayoutItem}
                         onAddLayoutItem={addLayoutItem}
                         onRemoveLayoutItem={removeLayoutItem}
+                        onReorderLayoutItems={reorderLayoutItems}
                     />
 
                     {/* Details View Configuration */}
@@ -190,6 +209,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                             onUpdateLayoutItem={updateDetailsItem}
                             onAddLayoutItem={addDetailsItem}
                             onRemoveLayoutItem={removeDetailsItem}
+                            onReorderLayoutItems={reorderDetailsItems}
                         />
                     </div>
                 </div>
