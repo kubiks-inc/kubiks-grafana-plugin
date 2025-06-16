@@ -52,7 +52,8 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         const newLayoutItem: LayoutItem = {
             type: 'text',
             label: `Field ${currentLayout.length + 1}`,
-            source: ''
+            source: '',
+            sourceMode: 'query'
         };
         updated[elementIndex] = {
             ...updated[elementIndex],
@@ -96,6 +97,11 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
         { label: 'Links', value: 'links' },
         { label: 'Icon', value: 'icon' },
         { label: 'Status', value: 'status' },
+    ];
+
+    const sourceModeOptions = [
+        { label: 'Query', value: 'query' },
+        { label: 'Value', value: 'manual' },
     ];
 
     const queryOptions = getQueryOptions(queries);
@@ -170,15 +176,36 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                                         width={20}
                                     />
                                     <Select
-                                        value={layoutItem.source || ''}
-                                        options={queryOptions}
+                                        value={layoutItem.sourceMode || 'query'}
+                                        options={sourceModeOptions}
                                         onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
-                                            source: option.value || ''
+                                            sourceMode: option.value as 'query' | 'manual',
+                                            ...(option.value === 'query' ? { value: undefined } : { source: '' })
                                         })}
-                                        width={20}
-                                        placeholder="Data source query"
-                                        isClearable
+                                        width={12}
+                                        placeholder="Source Mode"
                                     />
+                                    {layoutItem.sourceMode === 'manual' ? (
+                                        <Input
+                                            value={layoutItem.value?.data?.toString() || ''}
+                                            onChange={(e) => updateLayoutItem(elementIndex, layoutIndex, {
+                                                value: { data: e.currentTarget.value }
+                                            })}
+                                            placeholder="Enter value"
+                                            width={20}
+                                        />
+                                    ) : (
+                                        <Select
+                                            value={layoutItem.source || ''}
+                                            options={queryOptions}
+                                            onChange={(option) => updateLayoutItem(elementIndex, layoutIndex, {
+                                                source: option.value || ''
+                                            })}
+                                            width={20}
+                                            placeholder="Data source query"
+                                            isClearable
+                                        />
+                                    )}
                                     <Button
                                         variant="destructive"
                                         size="sm"

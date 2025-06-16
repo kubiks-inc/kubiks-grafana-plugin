@@ -30,18 +30,25 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
                             }
                         })
                     } else {
-                        const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === layoutItem.source)
-                        //correlate layoutQueryResult with queryResults
-                        const result = layoutQueryResult.filter((series: DataFrame) => {
-                            return series.fields[1].labels['service_name'] === queryResults[index].fields[1].labels['service_name']
-                        })
-                        console.log(layoutQueryResult, result)
-                        if (result.length > 0) {
+                        if (layoutItem.sourceMode === 'query') {
+                            const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === layoutItem.source)
+                            //correlate layoutQueryResult with queryResults
+                            const result = layoutQueryResult.filter((series: DataFrame) => {
+                                return series.fields[1].labels['service_name'] === queryResults[index].fields[1].labels['service_name']
+                            })
+                            console.log(layoutQueryResult, result)
+                            if (result.length > 0) {
+                                layoutItems.push({
+                                    "type": layoutItem.type,
+                                    "value": {
+                                        "data": result[0].fields[1].values[0]
+                                    }
+                                })
+                            }
+                        } else {
                             layoutItems.push({
                                 "type": layoutItem.type,
-                                "value": {
-                                    "data": result[0].fields[1].values[0]
-                                }
+                                "value": layoutItem.value
                             })
                         }
                     }
