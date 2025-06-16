@@ -1,5 +1,6 @@
 import { DataFrame } from "@grafana/data";
 import { Element } from "./model/view";
+import { Record } from "./model/view";
 
 const getIcon = (element: Element) => {
     for (const layoutItem of element.layout ?? []) {
@@ -41,7 +42,7 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
     return layoutItems
 }
 
-export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) => {
+export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): Record[] => {
     const records = []
 
     for (const element of elements) {
@@ -58,7 +59,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
                     "layoutSpec": element,
                     "parentId": "",
                     "type": ""
-                }
+                } as Record
             })
             records.push(...queryRecords)
         } else {
@@ -71,7 +72,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]) =>
                 "layoutSpec": element,
                 "parentId": "",
                 "type": ""
-            })
+            } as Record)
         }
     }
 
