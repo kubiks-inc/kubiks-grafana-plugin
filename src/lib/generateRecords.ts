@@ -1,5 +1,5 @@
 import { DataFrame, Field } from "@grafana/data";
-import { DashboardElementSource, Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
+import { DashboardElementSource, DashboardElementValue, Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
 import { Record } from "./model/view";
 
 const getIcon = (element: Element): string | null => {
@@ -10,6 +10,8 @@ const getIcon = (element: Element): string | null => {
     }
     return null
 }
+
+const JOIN_KEY = 'service_name'
 
 const generateLayoutItems = (layout: LayoutItem[], dataFrames: DataFrame[], joinKey: string | null): LayoutItem[] => {
     const layoutItems: LayoutItem[] = []
@@ -25,21 +27,41 @@ const generateLayoutItems = (layout: LayoutItem[], dataFrames: DataFrame[], join
                 })
                 break;
             case 'dashboard':
-                layoutItems.push({
+                const dashboard = {
                     type: 'panel' as LayoutItemType,
                     value: {
-                        data: layoutItem.source as DashboardElementSource
+                        data: {
+                            source: layoutItem.source as DashboardElementSource,
+                            variables: new Map<string, string>()
+                        }
                     },
                     label: layoutItem.label,
                     icon: layoutItem.icon,
-                })
+                }
+
+                for (const variable of layoutItem.panelVariableMappings ?? []) {
+                    const variableResult = dataFrames.filter((frame: DataFrame) => frame.refId === variable.queryRef)
+                    const variableResultValue = variableResult.find((series: DataFrame) => {
+                        return series.fields?.[1]?.labels?.[JOIN_KEY] === joinKey
+                    })
+
+                    if (variableResultValue) {
+                        dashboard.value.data.variables.set(variable.panelVariable, variableResultValue.fields[1].labels?.[variable.field] as string)
+                    }
+                }
+
+                if (dashboard.value.data.variables.size > 0) {
+                    console.log('dashboard', dashboard)
+                }
+
+                layoutItems.push(dashboard)
                 break;
             case 'query':
                 const ref = layoutItem.source as QueryElementSource
                 const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === ref?.queryRef)
                 //correlate layoutQueryResult with queryResults
                 const result = layoutQueryResult.filter((series: DataFrame) => {
-                    return series.fields?.[1]?.labels?.['service_name'] === joinKey
+                    return series.fields?.[1]?.labels?.[JOIN_KEY] === joinKey
                 })
 
                 if (result.length > 0 && layoutItem.field) {
@@ -78,12 +100,12 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
             let queryResults = dataFrames.filter((frame: DataFrame) => frame.refId === element.source)
             if (queryResults.length > 0) {
                 const queryRecords = queryResults.map((series: DataFrame) => {
-                    const layoutItems = generateLayoutItems(element.layout ?? [], dataFrames, series?.fields?.[1]?.labels?.['service_name'] as string)
+                    const layoutItems = generateLayoutItems(element.layout ?? [], dataFrames, series?.fields?.[1]?.labels?.[JOIN_KEY] as string)
                     return {
                         component: element.type,
                         icon: getIcon(element) || "",
-                        id: series.fields?.[1]?.labels?.['service_name'],
-                        key: series.fields?.[1]?.labels?.['service_name'],
+                        id: series.fields?.[1]?.labels?.[JOIN_KEY],
+                        key: series.fields?.[1]?.labels?.[JOIN_KEY],
                         layout: layoutItems,
                         layoutSpec: element,
                     }

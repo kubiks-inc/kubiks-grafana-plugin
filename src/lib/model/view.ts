@@ -10,6 +10,11 @@ export interface QueryElementSource {
   queryRef: string
 }
 
+export interface DashboardElementValue {
+  source: DashboardElementSource
+  variables: Map<string, string>
+}
+
 export interface DashboardElementSource {
   panelId: string
   dashboardUid: string
