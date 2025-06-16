@@ -1,24 +1,24 @@
-import { DataFrame } from "@grafana/data";
-import { Element, LayoutItem, QueryElementSource } from "./model/view";
+import { DataFrame, Field } from "@grafana/data";
+import { Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
 import { Record } from "./model/view";
 
-const getIcon = (element: Element) => {
+const getIcon = (element: Element): string | null => {
     for (const layoutItem of element.layout ?? []) {
         if (layoutItem.type === 'icon') {
-            return layoutItem.value?.data
+            return layoutItem.value?.data as string
         }
     }
     return null
 }
 
-const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: DataFrame | null): LayoutItem[] => {
+const generateLayoutItems = (element: Element, dataFrames: DataFrame[], joinKey: string | null): LayoutItem[] => {
     const layoutItems: LayoutItem[] = []
 
     for (const layoutItem of element.layout ?? []) {
         switch (layoutItem.sourceType) {
             case 'value':
                 layoutItems.push({
-                    type: layoutItem.type,
+                    type: layoutItem.type as LayoutItemType,
                     value: layoutItem.value,
                     icon: layoutItem.icon,
                     label: layoutItem.label
@@ -32,13 +32,13 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
                 const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === ref?.queryRef)
                 //correlate layoutQueryResult with queryResults
                 const result = layoutQueryResult.filter((series: DataFrame) => {
-                    return series.fields?.[1]?.labels?.['service_name'] === record?.fields?.[1]?.labels?.['service_name']
+                    return series.fields?.[1]?.labels?.['service_name'] === joinKey
                 })
 
                 if (result.length > 0 && layoutItem.field) {
                     if (layoutItem.field === 'value') {
                         layoutItems.push({
-                            type: layoutItem.type,
+                            type: layoutItem.type as LayoutItemType,
                             label: layoutItem.label,
                             icon: layoutItem.icon,
                             value: {
@@ -47,7 +47,7 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
                         })
                     } else {
                         layoutItems.push({
-                            type: layoutItem.type,
+                            type: layoutItem.type as LayoutItemType,
                             label: layoutItem.label,
                             icon: layoutItem.icon,
                             value: {
@@ -71,7 +71,7 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
             let queryResults = dataFrames.filter((frame: DataFrame) => frame.refId === element.source)
             if (queryResults.length > 0) {
                 const queryRecords = queryResults.map((series: DataFrame) => {
-                    const layoutItems = generateLayoutItems(element, dataFrames, series)
+                    const layoutItems = generateLayoutItems(element, dataFrames, series?.fields?.[1]?.labels?.['service_name'] as string)
                     return {
                         component: element.type,
                         icon: getIcon(element) || "",
@@ -79,39 +79,12 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
                         key: series.fields?.[1]?.labels?.['service_name'],
                         layout: layoutItems,
                         layoutSpec: element,
-                        parentId: "",
-                        type: ""
                     }
                 })
                 records.push(...queryRecords)
             } else {
-                queryResults = dataFrames.filter((frame: DataFrame) => frame.meta?.preferredVisualisationType === element.source)
-                const queryRecords = queryResults[1].fields[1].values.map((target: string, index: number) => {
-                    // const layoutItems = generateLayoutItems(element, dataFrames, series)
-                    return {
-                        component: element.type,
-                        icon: getIcon(element) || "",
-                        id: crypto.randomUUID(),
-                        key: crypto.randomUUID(),
-                        layout: [
-                            {
-                                "type": "to",
-                                "value": {
-                                    "data": target
-                                },
-                            },
-                            {
-                                "type": "from",
-                                "value": {
-                                    "data": queryResults[1].fields[2].values[index]
-                                },
-                            }
-                        ],
-                        layoutSpec: element,
-                        parentId: "",
-                        type: ""
-                    }
-                })
+                const queryRecords = extractRecordsFromNodeGraph(dataFrames, element)
+                console.log('queryRecords', queryRecords, element)
                 records.push(...queryRecords)
             }
         } else {
@@ -122,11 +95,67 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
                 key: element.name,
                 layout: generateLayoutItems(element, dataFrames, null),
                 layoutSpec: element,
-                parentId: "",
-                type: ""
             })
         }
     }
 
     return records
+}
+
+const extractRecordsFromNodeGraph = (dataFrames: DataFrame[], element: Element): Record[] => {
+    switch (element.type) {
+        case 'element':
+            const queryResults = dataFrames.filter((frame: DataFrame) => frame.meta?.preferredVisualisationType === element.source)
+            const dataFrame = queryResults.find((frame: DataFrame) => frame.fields?.find((field: Field) => field.name === 'title'))
+            const values = dataFrame?.fields.find((field: Field) => field.name === 'title')?.values
+            const queryRecords = values?.map((title: string, index: number) => {
+                return {
+                    component: element.type,
+                    icon: getIcon(element) || "",
+                    id: title,
+                    key: title,
+                    layout: [
+                        {
+                            type: 'title' as LayoutItemType,
+                            value: {
+                                data: title
+                            }
+                        },
+                        ...generateLayoutItems(element, dataFrames, title),
+                    ],
+                    layoutSpec: element,
+                }
+            })
+            return queryRecords || []
+        case 'connection':
+            const connectionDataFrame = dataFrames.find((frame: DataFrame) => frame.fields?.find((field: Field) => field.name === 'source'))
+            const sourceValues = connectionDataFrame?.fields.find((field: Field) => field.name === 'source')?.values
+            const targetValues = connectionDataFrame?.fields.find((field: Field) => field.name === 'target')?.values
+            const connectionRecords = sourceValues?.map((source: string, index: number) => {
+                return {
+                    component: element.type,
+                    icon: getIcon(element) || "",
+                    id: crypto.randomUUID(),
+                    key: crypto.randomUUID(),
+                    layout: [
+                        {
+                            type: "to" as LayoutItemType,
+                            value: {
+                                data: targetValues?.[index]
+                            },
+                        },
+                        {
+                            type: "from" as LayoutItemType,
+                            value: {
+                                data: source
+                            },
+                        }
+                    ],
+                    layoutSpec: element,
+                }
+            })
+            return connectionRecords || []
+    }
+
+    return []
 }
