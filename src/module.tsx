@@ -29,6 +29,6 @@ export const plugin = new PanelPlugin(ServiceMapPanel).setPanelOptions((builder)
     name: 'Service list',
     description: 'Define which services to include',
     editor: ServiceMapEditor,
-    defaultValue: [],
+    defaultValue: { elements: [], customElements: [] },
   });
 });
