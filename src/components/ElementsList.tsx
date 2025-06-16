@@ -137,15 +137,6 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                 <div key={elementIndex} className={styles.elementCard}>
                     <div className={styles.elementHeader}>
                         <div className={styles.inputGroup}>
-                            <label className={styles.inputLabel}>Element Name</label>
-                            <Input
-                                value={item.name}
-                                onChange={(e) => handleNameChange(elementIndex, e)}
-                                placeholder={`${item.type === 'group' ? 'Group' : item.type === 'connection' ? 'Connection' : 'Element'} name`}
-                                width={25}
-                            />
-                        </div>
-                        <div className={styles.inputGroup}>
                             <label className={styles.inputLabel}>Type</label>
                             <Select
                                 value={item.type}
@@ -171,6 +162,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                             variant="secondary"
                             size="sm"
                             onClick={() => removeElement(elementIndex)}
+                            className={styles.removeButton}
                         >
                             Remove Element
                         </Button>
@@ -246,8 +238,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     elementHeader: css`
         display: flex;
         gap: ${theme.spacing(1)};
-        margin-bottom: ${theme.spacing(1.5)};
-        align-items: center;
+        align-items: flex-end;
         flex-wrap: wrap;
     `,
     detailsSection: css`
@@ -276,5 +267,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
         margin-bottom: ${theme.spacing(0.5)};
         font-size: ${theme.typography.bodySmall.fontSize};
         color: ${theme.colors.text.secondary};
+    `,
+    removeButton: css`
+        height: 32px;
+        align-self: flex-end;
     `,
 }); 
