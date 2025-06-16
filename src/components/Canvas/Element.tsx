@@ -1,20 +1,15 @@
 import React from 'react'
 import { LayoutItem } from '@/lib/model/view'
-import { Handle, Position, useStore, useReactFlow, NodeToolbar } from '@xyflow/react'
+import { Handle, Position } from '@xyflow/react'
 import {
   CpuIcon,
   ServerIcon,
   LayersIcon,
-  FocusIcon,
-  MaximizeIcon,
-  RefreshCwIcon,
-  ExternalLinkIcon,
-  ZoomIn,
 } from 'lucide-react'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
-import { Button, useStyles2, Icon, Badge, Tooltip } from '@grafana/ui'
+import { useStyles2, Badge } from '@grafana/ui'
 import { getTitle, getExploreLink } from './helpers'
 import { useViewStore } from '@/store/ViewStoreProvider'
 import { getIconUrlWithFallback } from '@/utils/iconMapper'
@@ -36,13 +31,6 @@ interface GenericNodeProps {
     onClick?: (nodeId: string) => void
     [key: string]: unknown
   }
-}
-
-interface LayoutLink {
-  url: string
-  hoverColor: string
-  label: string
-  icon: string
 }
 
 const icons = {
