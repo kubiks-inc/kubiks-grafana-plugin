@@ -29,13 +29,19 @@ const generateLayoutItems = (element: Element, dataFrames: DataFrame[], record: 
                 })
                 break;
             case 'query':
-                const layoutItemValue = record?.fields?.[1]?.labels?.['service_name']
-                layoutItems.push({
-                    "type": layoutItem.type,
-                    "value": {
-                        "data": layoutItemValue
-                    }
+                const layoutQueryResult = dataFrames.filter((frame: DataFrame) => frame.refId === layoutItem.source)
+                //correlate layoutQueryResult with queryResults
+                const result = layoutQueryResult.filter((series: DataFrame) => {
+                    return series.fields?.[1]?.labels?.['service_name'] === record?.fields?.[1]?.labels?.['service_name']
                 })
+                if (result.length > 0) {
+                    layoutItems.push({
+                        "type": layoutItem.type,
+                        "value": {
+                            "data": result[0].fields[1].values[0]
+                        }
+                    })
+                }
                 break;
         }
     }
@@ -47,21 +53,54 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
 
     for (const element of elements) {
         if (element?.source) {
-            const queryResults = dataFrames.filter((frame: DataFrame) => frame.refId === element.source)
-            const queryRecords = queryResults.map((series: DataFrame) => {
-                const layoutItems = generateLayoutItems(element, dataFrames, series)
-                return {
-                    component: element.type,
-                    icon: getIcon(element) || "",
-                    id: crypto.randomUUID(),
-                    key: crypto.randomUUID(),
-                    layout: layoutItems,
-                    layoutSpec: element,
-                    parentId: "",
-                    type: ""
-                }
-            })
-            records.push(...queryRecords)
+            let queryResults = dataFrames.filter((frame: DataFrame) => frame.refId === element.source)
+            if (queryResults.length > 0) {
+                const queryRecords = queryResults.map((series: DataFrame) => {
+                    const layoutItems = generateLayoutItems(element, dataFrames, series)
+                    return {
+                        component: element.type,
+                        icon: getIcon(element) || "",
+                        id: series.fields?.[1]?.labels?.['service_name'],
+                        key: series.fields?.[1]?.labels?.['service_name'],
+                        layout: layoutItems,
+                        layoutSpec: element,
+                        parentId: "",
+                        type: ""
+                    }
+                })
+                records.push(...queryRecords)
+            } else {
+                queryResults = dataFrames.filter((frame: DataFrame) => frame.meta?.preferredVisualisationType === element.source)
+                console.log('nodegraph queryResults', queryResults)
+                const queryRecords = queryResults[1].fields[1].values.map((target: string, index: number) => {
+                    // const layoutItems = generateLayoutItems(element, dataFrames, series)
+                    return {
+                        component: element.type,
+                        icon: getIcon(element) || "",
+                        id: crypto.randomUUID(),
+                        key: crypto.randomUUID(),
+                        layout: [
+                            {
+                                "type": "to",
+                                "value": {
+                                    "data": target
+                                },
+                            },
+                            {
+                                "type": "from",
+                                "value": {
+                                    "data": queryResults[1].fields[2].values[index]
+                                },
+                            }
+                        ],
+                        layoutSpec: element,
+                        parentId: "",
+                        type: ""
+                    }
+                })
+                console.log('connection', queryRecords)
+                records.push(...queryRecords)
+            }
         } else {
             records.push({
                 component: element.type,
