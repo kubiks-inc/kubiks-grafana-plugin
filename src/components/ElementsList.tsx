@@ -142,7 +142,7 @@ export const ElementsList: React.FC<ElementsListProps> = ({ elements, queries = 
                                 value={item.type}
                                 options={typeOptions}
                                 onChange={(option) => handleTypeChange(elementIndex, option.value as 'group' | 'element' | 'connection')}
-                                width={12}
+                                width={16}
                                 placeholder="Type"
                             />
                         </div>
