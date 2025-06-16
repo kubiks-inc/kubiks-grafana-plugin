@@ -20,7 +20,8 @@ import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { Button, useStyles2, Alert, Field, Input, Tooltip } from '@grafana/ui'
 import { useViewStore } from '@/store/ViewStoreProvider'
-import { Record } from '@/lib/model/view'
+import { DashboardElementSource, Record } from '@/lib/model/view'
+import { getBackendSrv } from '@grafana/runtime'
 
 interface ServiceDrawerProps {
     open: boolean
@@ -115,19 +116,145 @@ const AvatarFallback = ({ children, className = '' }: { children: React.ReactNod
     return <span className={`${styles.avatarFallback} ${className}`}>{children}</span>
 }
 
+const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
+    const styles = useStyles2(getStyles)
+    const [imageUrl, setImageUrl] = React.useState<string | null>(null)
+    const [loading, setLoading] = React.useState(true)
+    const [error, setError] = React.useState<string | null>(null)
+
+    React.useEffect(() => {
+        const fetchPanelImage = async () => {
+            try {
+                setLoading(true)
+                setError(null)
+
+                // Get the current time range (you might want to make this configurable)
+                const from = Date.now() - 6 * 60 * 60 * 1000 // 6 hours ago
+                const to = Date.now()
+
+                // Construct the render URL for the panel
+                const renderUrl = `/render/d-solo/${config.dashboardUid}?panelId=${config.panelId}&from=${from}&to=${to}&width=400&height=300`
+
+                // Use Grafana's backend service to fetch the rendered image
+                const response = await getBackendSrv().fetch({
+                    url: renderUrl,
+                    method: 'GET',
+                    responseType: 'blob'
+                })
+
+                const result = await response.toPromise()
+                if (result && result.data && result.data instanceof Blob) {
+                    const imageObjectUrl = URL.createObjectURL(result.data)
+                    setImageUrl(imageObjectUrl)
+                } else {
+                    throw new Error('Invalid response format')
+                }
+            } catch (err) {
+                console.error('Error fetching panel image:', err)
+                setError('Failed to load panel preview')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        if (config.dashboardUid && config.panelId) {
+            fetchPanelImage()
+        }
+
+        // Cleanup function to revoke object URL
+        return () => {
+            if (imageUrl) {
+                URL.revokeObjectURL(imageUrl)
+            }
+        }
+    }, [config.dashboardUid, config.panelId])
+
+    if (loading) {
+        return (
+            <Card className={styles.panelPreviewCard}>
+                <CardContent>
+                    <div className={styles.panelPreviewLoading}>
+                        <RefreshCw className={styles.loadingIcon} />
+                        <span>Loading panel preview...</span>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (error) {
+        return (
+            <Card className={styles.panelPreviewCard}>
+                <CardContent>
+                    <div className={styles.panelPreviewError}>
+                        <AlertTriangle className={styles.errorIcon} />
+                        <span>{error}</span>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (!imageUrl) {
+        return (
+            <Card className={styles.panelPreviewCard}>
+                <CardContent>
+                    <div className={styles.panelPreviewError}>
+                        <Server className={styles.errorIcon} />
+                        <span>No preview available</span>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    return (
+        <Card className={styles.panelPreviewCard}>
+            <CardHeader>
+                <CardTitle>
+                    <div className={styles.panelHeader}>
+                        <span>Panel Preview</span>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon="external-link-alt"
+                            onClick={() => {
+                                // Open the dashboard in a new tab
+                                const dashboardUrl = `/d/${config.dashboardUid}?viewPanel=${config.panelId}`
+                                window.open(dashboardUrl, '_blank')
+                            }}
+                            tooltip="Open panel in dashboard"
+                        />
+                    </div>
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className={styles.panelImageContainer}>
+                    <img
+                        src={imageUrl}
+                        alt="Panel Preview"
+                        className={styles.panelImage}
+                        onError={() => setError('Failed to load image')}
+                    />
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
 export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps) {
     const { selectedServiceDetails } = useViewStore((state) => state)
     const styles = useStyles2(getStyles)
 
     console.log('record', record?.layoutSpec?.details)
 
-
-    const items = record?.layoutSpec?.details?.map((item) => {
+    const items = record?.layoutSpec?.details?.map((item, index) => {
         switch (item.type) {
             case 'panel':
-                return <div>Panel</div>
+                const config = item.source as DashboardElementSource
+                return <PanelPreview key={index} config={config} />
             default:
-                return <div>Unknown</div>
+                return <div key={index}>Unknown</div>
         }
     })
 
@@ -628,5 +755,70 @@ const getStyles = (theme: GrafanaTheme2) => ({
         font-size: ${theme.typography.bodySmall.fontSize};
         color: ${theme.colors.text.secondary};
         margin-top: ${theme.spacing(0.5)};
+    `,
+    panelPreviewCard: css`
+        margin-bottom: ${theme.spacing(2)};
+    `,
+    panelHeader: css`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    `,
+    panelImageContainer: css`
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: ${theme.colors.background.canvas};
+        border-radius: ${theme.shape.radius.default};
+        overflow: hidden;
+    `,
+    panelImage: css`
+        max-width: 100%;
+        height: auto;
+        display: block;
+    `,
+    panelPreviewLoading: css`
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: ${theme.spacing(1)};
+        color: ${theme.colors.text.secondary};
+        z-index: 1;
+    `,
+    panelPreviewError: css`
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: ${theme.spacing(1)};
+        color: ${theme.colors.error.text};
+        z-index: 1;
+    `,
+    loadingIcon: css`
+        height: 16px;
+        width: 16px;
+        animation: spin 1s linear infinite;
+        
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    `,
+    errorIcon: css`
+        height: 16px;
+        width: 16px;
+        color: ${theme.colors.error.text};
     `,
 })
