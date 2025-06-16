@@ -21,4 +21,10 @@ export interface DashboardOption {
 export interface PanelOption {
     label: string;
     value: string;
+}
+
+export interface VariableOption {
+    label: string;
+    value: string;
+    description?: string;
 } 

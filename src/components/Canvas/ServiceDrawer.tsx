@@ -958,15 +958,17 @@ const getStyles = (theme: GrafanaTheme2) => ({
         position: relative;
         cursor: pointer;
         border-radius: ${theme.shape.radius.default};
-        overflow: hidden;
+        overflow: visible;
         transition: all 0.2s ease;
         margin-bottom: ${theme.spacing(2)};
+        width: 100%;
     `,
     panelPreviewImage: css`
-        max-width: 100%;
+        width: 100%;
         height: auto;
         display: block;
         border-radius: ${theme.shape.radius.default};
+        max-height: none;
     `,
     panelPreviewPlaceholder: css`
         display: flex;
