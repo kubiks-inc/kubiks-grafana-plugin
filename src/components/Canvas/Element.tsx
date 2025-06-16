@@ -392,30 +392,6 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
             <BlocksComponent blocks={item.value?.data as any} disabled={true} />
           </div>
         )
-      case 'link':
-        return (
-          <div className="flex flex-wrap gap-3" key={`${data.key}`}>
-            <div
-              className="text-white/90 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg cursor-pointer hover:bg-white/5 transition-colors"
-              aria-label={item.label}
-              style={{
-                background: 'rgba(45, 45, 50, 0.4)',
-                border: '0.5px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-              }}
-              onClick={(e) => {
-                e.stopPropagation()
-                window.open(item.value?.data as string, '_blank', 'noopener,noreferrer')
-              }}
-            >
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#252528]">
-                <img src={getIconUrlWithFallback(item.icon || '')} alt={item.label} className="w-12 h-12" />
-              </div>
-              <span className="text-2xl font-medium">{item.label}</span>
-              <ExternalLinkIcon className="w-4 h-4 text-white/40 ml-2" />
-            </div>
-          </div>
-        )
       default:
         return null
     }
@@ -578,7 +554,32 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
         <>
           <div className="flex-grow min-h-[20px]"></div>
           <div className="w-full h-px bg-[#3a3a3c] my-4"></div>
-          <div className="animate-fadeIn">{linkItems.map((item, i) => renderField(i, item))}</div>
+          <div className="animate-fadeIn">
+            <div className="flex flex-wrap gap-3">
+              {linkItems.map((item, i) => (
+                <div
+                  key={`${data.key}-link-${i}`}
+                  className="text-white/90 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg cursor-pointer hover:bg-white/5 transition-colors"
+                  aria-label={item.label}
+                  style={{
+                    background: 'rgba(45, 45, 50, 0.4)',
+                    border: '0.5px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    window.open(item.value?.data as string, '_blank', 'noopener,noreferrer')
+                  }}
+                >
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#252528]">
+                    <img src={getIconUrlWithFallback(item.icon || '')} alt={item.label} className="w-12 h-12" />
+                  </div>
+                  <span className="text-2xl font-medium">{item.label}</span>
+                  <ExternalLinkIcon className="w-4 h-4 text-white/40 ml-2" />
+                </div>
+              ))}
+            </div>
+          </div>
         </>
       )}
     </div>
