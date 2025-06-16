@@ -72,7 +72,9 @@ export const getFieldOptionsFromQuery = (query: string, data: DataFrame[]): Quer
         return [{ label: 'No query selected', value: '' }];
     }
 
-    const fieldOptions: QueryOption[] = [];
+    const fieldOptions: QueryOption[] = [
+        { label: 'value', value: 'value', description: 'Metric value' },
+    ];
     const record = data.find(d => d.refId === query);
 
     const valueField = record?.fields?.find(f => f.name === 'Value');
@@ -80,6 +82,7 @@ export const getFieldOptionsFromQuery = (query: string, data: DataFrame[]): Quer
         fieldOptions.push(...Object.keys(valueField.labels || {}).map((l: string) => ({
             label: l,
             value: l,
+            description: 'Metric label'
         })));
     }
 
