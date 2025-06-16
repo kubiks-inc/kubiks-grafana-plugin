@@ -71,7 +71,6 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
                 records.push(...queryRecords)
             } else {
                 queryResults = dataFrames.filter((frame: DataFrame) => frame.meta?.preferredVisualisationType === element.source)
-                console.log('nodegraph queryResults', queryResults)
                 const queryRecords = queryResults[1].fields[1].values.map((target: string, index: number) => {
                     // const layoutItems = generateLayoutItems(element, dataFrames, series)
                     return {
@@ -98,7 +97,6 @@ export const generateRecords = (elements: Element[], dataFrames: DataFrame[]): R
                         type: ""
                     }
                 })
-                console.log('connection', queryRecords)
                 records.push(...queryRecords)
             }
         } else {

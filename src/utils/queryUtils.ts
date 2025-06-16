@@ -79,4 +79,79 @@ export const isValidQueryRef = (refId: string, queries: DataQuery[] = []): boole
  */
 export const getQueryByRef = (refId: string, queries: DataQuery[] = []): DataQuery | undefined => {
     return queries.find(query => query.refId === refId);
+};
+
+/**
+ * Gets field options from a query
+ * @param query - The query object
+ * @returns Array of field options for dropdown selection
+ */
+export const getFieldOptionsFromQuery = (query: DataQuery): QueryOption[] => {
+    if (!query) {
+        return [{ label: 'No query selected', value: '' }];
+    }
+
+    const fieldOptions: QueryOption[] = [];
+
+    // For Prometheus queries, extract common field names
+    if ('expr' in query && query.expr) {
+        // Common Prometheus fields
+        fieldOptions.push(
+            { label: 'Value', value: 'value', description: 'Query result value' },
+            { label: 'Timestamp', value: 'timestamp', description: 'Query result timestamp' },
+            { label: 'Metric Name', value: '__name__', description: 'Metric name' }
+        );
+
+        // Try to extract label names from the query expression
+        const labelMatches = String(query.expr).match(/\{([^}]+)\}/g);
+        if (labelMatches) {
+            labelMatches.forEach(match => {
+                const labels = match.slice(1, -1).split(',');
+                labels.forEach(label => {
+                    const [key] = label.trim().split(/[=!~]/);
+                    if (key && !fieldOptions.some(opt => opt.value === key)) {
+                        fieldOptions.push({ label: key, value: key, description: `Label: ${key}` });
+                    }
+                });
+            });
+        }
+    }
+
+    // For SQL queries, common fields
+    if ('rawSql' in query && query.rawSql) {
+        // Try to extract SELECT fields from SQL query
+        const sqlQuery = String(query.rawSql).toLowerCase();
+        const selectMatch = sqlQuery.match(/select\s+(.+?)\s+from/);
+        if (selectMatch) {
+            const selectClause = selectMatch[1];
+            if (selectClause !== '*') {
+                const fields = selectClause.split(',').map(field => field.trim());
+                fields.forEach(field => {
+                    // Remove aliases and functions to get basic field name
+                    const cleanField = field.replace(/\s+as\s+\w+/i, '').replace(/\w+\(([^)]+)\)/, '$1').trim();
+                    if (cleanField && !fieldOptions.some(opt => opt.value === cleanField)) {
+                        fieldOptions.push({ label: cleanField, value: cleanField, description: `Field: ${cleanField}` });
+                    }
+                });
+            }
+        }
+
+        // Add common SQL result fields
+        fieldOptions.push(
+            { label: 'Value', value: 'value', description: 'Query result value' },
+            { label: 'Time', value: 'time', description: 'Query result time' }
+        );
+    }
+
+    // For other query types, add generic options
+    if (fieldOptions.length === 0) {
+        fieldOptions.push(
+            { label: 'Value', value: 'value', description: 'Query result value' },
+            { label: 'Time', value: 'time', description: 'Query result time' },
+            { label: 'Text', value: 'text', description: 'Text field' },
+            { label: 'Label', value: 'label', description: 'Label field' }
+        );
+    }
+
+    return fieldOptions;
 }; 
