@@ -37,8 +37,8 @@
         "path": "img/screenshot.png"
       }
     ],
-    "version": "v0.3.0",
-    "updated": "2025-06-17"
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
   },
   "includes": [
     {
