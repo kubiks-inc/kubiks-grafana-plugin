@@ -9,7 +9,7 @@ import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { Button, useStyles2, Badge } from '@grafana/ui'
 import { useViewStore } from '@/store/ViewStoreProvider'
-import { DashboardElementSource, Record, LayoutItem } from '@/lib/model/view'
+import { DashboardElementValue, Record, LayoutItem } from '@/lib/model/view'
 import { getBackendSrv } from '@grafana/runtime'
 import { getIconUrlWithFallback } from '@/utils/iconMapper'
 import { getTitle } from './helpers'
@@ -133,7 +133,7 @@ const BlocksComponent = ({
     )
 }
 
-const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
+const PanelPreview = ({ config }: { config: DashboardElementValue }) => {
     const styles = useStyles2(getStyles)
     const [imageUrl, setImageUrl] = React.useState<string | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -146,12 +146,23 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
                 setLoading(true)
                 setError(null)
 
+                console.log('variables', config.variables)
+
                 // Get the current time range (you might want to make this configurable)
                 const from = Date.now() - 6 * 60 * 60 * 1000 // 6 hours ago
                 const to = Date.now()
 
                 // Construct the render URL for the panel - let Grafana use default dimensions
-                const renderUrl = `/render/d-solo/${config.dashboardUid}?panelId=${config.panelId}&from=${from}&to=${to}`
+                let renderUrl = `/render/d-solo/${config.source.dashboardUid}?panelId=${config.source.panelId}&from=${from}&to=${to}`
+
+                // Add variables as var-{name} query parameters
+                if (config.variables) {
+                    config.variables.forEach((value, name) => {
+                        renderUrl += `&var-${name}=${encodeURIComponent(value as string)}`
+                    })
+                }
+
+                console.log('renderUrl', renderUrl)
 
                 // Use Grafana's backend service to fetch the rendered image
                 const response = await getBackendSrv().fetch({
@@ -175,7 +186,7 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
             }
         }
 
-        if (config.dashboardUid && config.panelId) {
+        if (config.source.dashboardUid && config.source.panelId) {
             fetchPanelImage()
         }
 
@@ -185,10 +196,10 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
                 URL.revokeObjectURL(imageUrl)
             }
         }
-    }, [config.dashboardUid, config.panelId])
+    }, [config.source.dashboardUid, config.source.panelId])
 
     const handleClick = () => {
-        const dashboardUrl = `/d/${config.dashboardUid}?viewPanel=${config.panelId}`
+        const dashboardUrl = `/d/${config.source.dashboardUid}?viewPanel=${config.source.panelId}`
         window.open(dashboardUrl, '_blank')
     }
 
@@ -278,7 +289,7 @@ const LinksGrid = ({ links, styles }: { links: LayoutItem[], styles: any }) => {
 const renderLayoutItem = (item: LayoutItem, index: number, key: string, styles: any) => {
     switch (item.type) {
         case 'panel':
-            const config = item.value?.data as DashboardElementSource
+            const config = item.value?.data as DashboardElementValue
             return <PanelPreview key={`${key}-panel-${index}`} config={config} />
         case 'status':
             const statusValue = item.value?.data as Status | undefined
