@@ -18,7 +18,6 @@ import '@xyflow/react/dist/style.css'
 import NodeLabel from '@/components/Canvas/Label'
 import HighlightedEdge from '@/components/Canvas/HighlightedEdge'
 import { ElementComponent } from '@/components/Canvas/Element'
-import { View } from '@/lib/api/model/view'
 import { createNodesAndEdges } from '@/lib/canvas/layout'
 import { NodeContextMenu } from '@/components/Canvas/NodeContextMenu'
 import { layoutElements } from '@/lib/canvas/canvasLayout'
@@ -66,7 +65,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
   const [shouldFitView, setShouldFitView] = useState(false)
 
   useEffect(() => {
-    const { nodes: newNodes, edges: newEdges } = createNodesAndEdges(
+    const { nodes: newNodes } = createNodesAndEdges(
       viewState?.organizationId ?? '',
       filteredRecords ?? [],
       editLayout,
