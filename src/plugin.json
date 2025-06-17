@@ -35,6 +35,18 @@
       {
         "name": "Service Map Overview",
         "path": "img/screenshot.png"
+      },
+      {
+        "name": "Service Map Builder",
+        "path": "img/configuration-page.png"
+      },
+      {
+        "name": "Embedded Panels Configuration",
+        "path": "img/configuration-panel.png"
+      },
+      {
+        "name": "Elements Configuration",
+        "path": "img/configuration-details.png"
       }
     ],
     "version": "%VERSION%",
