@@ -2,14 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
   "name": "Kubiks",
-  "id": "kubiks-kubiks-app",
+  "id": "kubiks-kubiks-panel",
   "backend": true,
   "executable": "gpx_kubiks",
   "info": {
     "keywords": [
       "app"
     ],
-    "description": "",
+    "description": "A powerful service map visualization panel for monitoring and observing distributed systems and microservices architecture.",
     "author": {
       "name": "Kubiks"
     },
@@ -17,7 +17,26 @@
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
-    "screenshots": [],
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://kubiks.ai"
+      },
+      {
+        "name": "Support",
+        "url": "https://github.com/kubiks-inc/kubiks-grafana-plugin/issues"
+      },
+      {
+        "name": "Sponsor",
+        "url": "https://github.com/sponsors/kubiks-inc"
+      }
+    ],
+    "screenshots": [
+      {
+        "name": "Service Map Overview",
+        "path": "img/screenshot.png"
+      }
+    ],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },
