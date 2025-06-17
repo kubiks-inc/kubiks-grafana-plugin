@@ -74,13 +74,58 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
     )
 
     setNodes(newNodes)
-  }, [editLayout])
+  }, [editLayout, elementsToExplore, filteredRecords, setNodes, viewState?.organizationId, viewState?.positions])
+
+  // Add a new function to update layout excluding group's children
+  const updateLayout = useCallback(async (positions: { [key: string]: { x: number; y: number } }) => {
+    const allNodesMeasured = nodes.every(
+      (node) =>
+        (node.type === 'element' && node.measured?.width && node.measured?.height) ||
+        node.type !== 'element'
+    )
+
+    if (!allNodesMeasured || nodes.length === 0) {
+      return
+    }
+
+    let layoutedNodes: Node[] | null = null
+    switch (view?.layoutType) {
+      case 'd3':
+        layoutedNodes = await layoutElements(nodes, edges, positions)
+        break
+      case 'grid':
+        layoutedNodes = await layoutElementsGrid(nodes, edges, positions)
+        break
+      case 'tree':
+        layoutedNodes = await layoutElementsTree(nodes, edges, positions)
+        break
+      default:
+        layoutedNodes = await layoutElementsTree(nodes, edges, positions)
+        break
+    }
+
+    if (layoutedNodes) {
+      // Create a map of the original node positions for group children
+      const childPositions = new Map()
+      nodes.forEach((node) => {
+        if (node.parentId) {
+          childPositions.set(node.id, { ...node.position, parentId: node.parentId })
+        }
+      })
+
+      setNodes(layoutedNodes)
+      setIsLayouted(true)
+      setShouldFitView(true)
+    } else {
+      setIsLayouted(false)
+    }
+  }, [nodes, edges, view?.layoutType, setNodes])
 
   useEffect(() => {
     if (!isLayouted) {
       updateLayout(viewState?.positions ?? {})
     }
-  }, [nodes, isLayouted])
+  }, [nodes, isLayouted, updateLayout, viewState?.positions])
 
   // Update nodes and edges when props change
   useEffect(() => {
@@ -131,52 +176,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
 
     setNodes(updatedNodes)
     setEdges(newEdges)
-  }, [filteredRecords, editLayout])
-
-  // Add a new function to update layout excluding group's children
-  const updateLayout = async (positions: { [key: string]: { x: number; y: number } }) => {
-    const allNodesMeasured = nodes.every(
-      (node) =>
-        (node.type === 'element' && node.measured?.width && node.measured?.height) ||
-        node.type !== 'element'
-    )
-
-    if (!allNodesMeasured || nodes.length === 0) {
-      return
-    }
-
-    let layoutedNodes: Node[] | null = null
-    switch (view?.layoutType) {
-      case 'd3':
-        layoutedNodes = await layoutElements(nodes, edges, positions)
-        break
-      case 'grid':
-        layoutedNodes = await layoutElementsGrid(nodes, edges, positions)
-        break
-      case 'tree':
-        layoutedNodes = await layoutElementsTree(nodes, edges, positions)
-        break
-      default:
-        layoutedNodes = await layoutElementsTree(nodes, edges, positions)
-        break
-    }
-
-    if (layoutedNodes) {
-      // Create a map of the original node positions for group children
-      const childPositions = new Map()
-      nodes.forEach((node) => {
-        if (node.parentId) {
-          childPositions.set(node.id, { ...node.position, parentId: node.parentId })
-        }
-      })
-
-      setNodes(layoutedNodes)
-      setIsLayouted(true)
-      setShouldFitView(true)
-    } else {
-      setIsLayouted(false)
-    }
-  }
+  }, [elementsToExplore, nodes, setEdges, setNodes, viewState?.organizationId, viewState?.positions, filteredRecords, editLayout])
 
   // Custom handler for nodes change events
   const handleNodesChange = useCallback(
@@ -225,7 +225,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
   const onViewportChange = useCallback((viewport: Viewport) => {
     // Only update if viewport changed significantly to prevent unnecessary updates
     setViewport((prevViewport) => {
-      if (!prevViewport) return viewport
+      if (!prevViewport) { return viewport }
 
       // Check if the viewport changed enough to warrant an update
       const zoomDiff = Math.abs(prevViewport.zoom - viewport.zoom)

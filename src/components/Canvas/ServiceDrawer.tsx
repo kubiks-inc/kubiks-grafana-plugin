@@ -196,7 +196,7 @@ const PanelPreview = ({ config }: { config: DashboardElementValue }) => {
                 URL.revokeObjectURL(imageUrl)
             }
         }
-    }, [config.source.dashboardUid, config.source.panelId])
+    }, [config.source.dashboardUid, config.source.panelId, config.variables, imageUrl])
 
     const handleClick = () => {
         const dashboardUrl = `/d/${config.source.dashboardUid}?viewPanel=${config.source.panelId}`

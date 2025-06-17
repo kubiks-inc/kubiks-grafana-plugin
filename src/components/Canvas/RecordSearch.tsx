@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { Modal, Input, useStyles2, Icon } from '@grafana/ui'
@@ -84,10 +84,10 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
     }, [open, setOpen])
 
     // Handle record selection
-    const handleSelectRecord = (record: ViewRecord) => {
+    const handleSelectRecord = useCallback((record: ViewRecord) => {
         setOpen(false)
         setSelectedNode(record.key)
-    }
+    }, [setOpen, setSelectedNode])
 
     // Get icon for record
     const getRecordIcon = (record: ViewRecord) => {
@@ -212,7 +212,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [open, selectedIndex, allMatchingRecords])
+    }, [open, selectedIndex, allMatchingRecords, handleSelectRecord])
 
     // Reset selected index when search changes
     useEffect(() => {

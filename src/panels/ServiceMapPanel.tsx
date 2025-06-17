@@ -48,7 +48,7 @@ const ServiceMapPanelContent: React.FC<Props> = (props) => {
         setOriginalViewState({
             records: records
         })
-    }, [props]);
+    }, [elements, setFilteredRecords, setOriginalViewState, setViewState, props.data.series]);
 
 
     return (

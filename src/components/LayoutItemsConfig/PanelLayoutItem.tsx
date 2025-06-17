@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { Button, Select, useStyles2 } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
@@ -46,17 +46,8 @@ export const PanelLayoutItem: React.FC<BaseLayoutItemProps> = (props) => {
         loadDashboards();
     }, []);
 
-    // Load panel and variable options for already selected dashboard on component mount
-    useEffect(() => {
-        if (typeof layoutItem.source === 'object' && 'dashboardUid' in layoutItem.source && layoutItem.source.dashboardUid) {
-            const dashboardUid = layoutItem.source.dashboardUid;
-            loadPanelOptions(dashboardUid);
-            loadVariableOptions(dashboardUid);
-        }
-    }, [layoutItem.source]);
-
     // Function to load panel options for a specific dashboard
-    const loadPanelOptions = async (dashboardUid: string) => {
+    const loadPanelOptions = useCallback(async (dashboardUid: string) => {
         if (!dashboardUid || panelOptionsMap[dashboardUid]) {
             return; // Already loaded or no dashboard selected
         }
@@ -71,10 +62,10 @@ export const PanelLayoutItem: React.FC<BaseLayoutItemProps> = (props) => {
         } finally {
             setLoadingPanels(prev => ({ ...prev, [dashboardUid]: false }));
         }
-    };
+    }, [panelOptionsMap]);
 
     // Function to load variable options for a specific dashboard
-    const loadVariableOptions = async (dashboardUid: string) => {
+    const loadVariableOptions = useCallback(async (dashboardUid: string) => {
         if (!dashboardUid || variableOptionsMap[dashboardUid]) {
             return; // Already loaded or no dashboard selected
         }
@@ -89,7 +80,16 @@ export const PanelLayoutItem: React.FC<BaseLayoutItemProps> = (props) => {
         } finally {
             setLoadingVariables(prev => ({ ...prev, [dashboardUid]: false }));
         }
-    };
+    }, [variableOptionsMap]);
+
+    // Load panel and variable options for already selected dashboard on component mount
+    useEffect(() => {
+        if (typeof layoutItem.source === 'object' && 'dashboardUid' in layoutItem.source && layoutItem.source.dashboardUid) {
+            const dashboardUid = layoutItem.source.dashboardUid;
+            loadPanelOptions(dashboardUid);
+            loadVariableOptions(dashboardUid);
+        }
+    }, [layoutItem.source, loadPanelOptions, loadVariableOptions]);
 
     const handleAddVariableMapping = () => {
         const currentMappings = layoutItem.panelVariableMappings || [];
