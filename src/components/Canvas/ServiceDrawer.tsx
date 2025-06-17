@@ -523,7 +523,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
         border-left: 1px solid ${theme.colors.border.medium};
         box-shadow: ${theme.shadows.z3};
         transition: all 0.3s ease;
-        width: 50%;
+        width: 30%;
     `,
     drawerContent: css`
         height: 100%;

@@ -31,7 +31,6 @@ export const CanvasNavbar: React.FC<CanvasNavbarProps> = ({ }) => {
   const handleSaveLayout = useCallback(async () => {
     console.log('Saving layout changes')
 
-    // await saveLayoutPositions(positions)
 
     setEditLayout(false)
     setLiveMode(true)
