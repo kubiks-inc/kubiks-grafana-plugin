@@ -70,7 +70,9 @@ const CopyableText = ({
     const styles = useStyles2(getStyles)
 
     const handleCopy = () => {
-        if (disabled) { return }
+        if (disabled) {
+            return
+        }
         navigator.clipboard.writeText(text)
         setCopied(true)
         setTimeout(() => setCopied(false), 600)
@@ -89,47 +91,6 @@ const CopyableText = ({
                 </span>
             )}
         </span>
-    )
-}
-
-// Component to visualize pods as blocks
-const BlocksComponent = ({
-    blocks,
-    disabled = false,
-}: {
-    blocks: Array<{ name: string; status: Status; url: string }>
-    disabled?: boolean
-}) => {
-    const styles = useStyles2(getStyles)
-
-    return (
-        <div className={styles.blocksContainer}>
-            <div className={styles.blocksGrid}>
-                {blocks?.map((block, index) => (
-                    <div
-                        key={index}
-                        className={`${styles.block} ${disabled
-                            ? styles.blockDisabled
-                            : block.url
-                                ? styles.blockClickable
-                                : styles.blockDefault
-                            }`}
-                        onClick={!disabled && block.url ? () => window.open(block.url, '_blank') : undefined}
-                    >
-                        <div className={styles.blockHeader}>
-                            <div className={`${styles.statusDot} ${styles[`statusDot${block.status}` as keyof typeof styles]}`} />
-                            <span className={styles.blockName}>{block.name}</span>
-                        </div>
-                        <div className={styles.blockStatus}>
-                            <Badge
-                                text={block.status}
-                                color={getStatusBadgeColor(block.status)}
-                            />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
     )
 }
 
@@ -196,7 +157,7 @@ const PanelPreview = ({ config }: { config: DashboardElementValue }) => {
                 URL.revokeObjectURL(imageUrl)
             }
         }
-    }, [config.source.dashboardUid, config.source.panelId, config.variables, imageUrl])
+    }, [config.source.dashboardUid, config.source.panelId]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleClick = () => {
         const dashboardUrl = `/d/${config.source.dashboardUid}?viewPanel=${config.source.panelId}`
@@ -255,7 +216,9 @@ const PanelPreview = ({ config }: { config: DashboardElementValue }) => {
 
 // Component for rendering links grid
 const LinksGrid = ({ links, styles }: { links: LayoutItem[], styles: any }) => {
-    if (!links || links.length === 0) { return null }
+    if (!links || links.length === 0) {
+        return null
+    }
 
     return (
         <div className={styles.linksGridContainer}>
@@ -417,17 +380,6 @@ const renderLayoutItem = (item: LayoutItem, index: number, key: string, styles: 
                     </CardContent>
                 </Card>
             )
-        case 'blocks':
-            return (
-                <Card key={`${key}-blocks-${index}`}>
-                    <CardHeader>
-                        <CardTitle>{item.label || 'Resources'}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <BlocksComponent blocks={item.value?.data as any} />
-                    </CardContent>
-                </Card>
-            )
         case 'link':
             // Links are now handled separately in the LinksGrid component
             return null
@@ -457,7 +409,9 @@ export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps
         renderLayoutItem(item, index, record.key || 'drawer', styles)
     )
 
-    if (!open) { return null }
+    if (!open) {
+        return null
+    }
 
     return (
         <div className={styles.drawer}>

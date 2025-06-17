@@ -17,8 +17,6 @@ const layoutTypeOptions = [
     { label: 'Tags', value: 'tags' },
     { label: 'Key-Value', value: 'keyValue' },
     { label: 'Progress', value: 'progress' },
-    { label: 'Inversed Progress', value: 'inversed_progress' },
-    { label: 'Blocks', value: 'blocks' },
     { label: 'Link', value: 'link' },
     { label: 'Icon', value: 'icon' },
     { label: 'Status', value: 'status' },

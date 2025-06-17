@@ -80,7 +80,6 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
             case 'keyValue':
             case 'progress':
             case 'inversed_progress':
-            case 'blocks':
             default:
                 return <SourceModeLayoutItem key={layoutIndex} {...baseProps} />;
         }

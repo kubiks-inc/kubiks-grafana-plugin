@@ -25,8 +25,6 @@ export const ServiceMapPanel: React.FC<Props> = (props) => {
 const ServiceMapPanelContent: React.FC<Props> = (props) => {
     const s = useStyles2(getStyles);
 
-    console.log('props', props.data.series)
-
     const {
         setFilteredRecords,
         filteredRecords,
