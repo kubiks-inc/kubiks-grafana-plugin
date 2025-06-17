@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppRootProps } from '@grafana/data';
 
-interface Props extends AppRootProps {}
+interface Props extends AppRootProps { }
 
 const App: React.FC<Props> = (props) => {
   return (

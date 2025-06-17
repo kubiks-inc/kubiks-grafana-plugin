@@ -10,20 +10,20 @@ export const ConnectionDetailsDrawer: React.FC = () => {
     const styles = useStyles2(getStyles)
 
     const getStatusColor = (errorRate: number) => {
-        if (errorRate > 5) return '#f43f5e'
-        if (errorRate > 1) return '#f59e0b'
+        if (errorRate > 5) { return '#f43f5e' }
+        if (errorRate > 1) { return '#f59e0b' }
         return '#10b981'
     }
 
     const getStatusBadgeColor = (errorRate: number) => {
-        if (errorRate > 5) return 'red'
-        if (errorRate > 1) return 'orange'
+        if (errorRate > 5) { return 'red' }
+        if (errorRate > 1) { return 'orange' }
         return 'green'
     }
 
     const getStatusText = (errorRate: number) => {
-        if (errorRate > 5) return 'Critical'
-        if (errorRate > 1) return 'Warning'
+        if (errorRate > 5) { return 'Critical' }
+        if (errorRate > 1) { return 'Warning' }
         return 'Healthy'
     }
 

@@ -1,13 +1,11 @@
-import React from 'react';
-import { PanelProps } from '@grafana/data';
+import React, { useEffect } from 'react';
+import { PanelProps, GrafanaTheme2, PageLayoutType } from '@grafana/data';
 import { css } from '@emotion/css';
-import { GrafanaTheme2, PageLayoutType } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
 import { PluginPage } from '@grafana/runtime';
 import { InfiniteCanvas } from '@/containers/Canvas/InfiniteCanvas';
 import { generateRecords } from '../lib/generateRecords';
 import { useViewStore, ViewStoreProvider } from '@/store/ViewStoreProvider';
-import { useEffect } from 'react';
 import { ServiceDrawer } from '@/components/Canvas/ServiceDrawer';
 import { ReactFlowProvider } from '@xyflow/react'
 import { ConnectionDetailsDrawer } from '@/components/Canvas/EdgeDetailsDrawer';

@@ -90,7 +90,7 @@ export const LayoutItemsConfig: React.FC<LayoutItemsConfigProps> = ({
         <div className={styles.layoutSection}>
             <h4 className={styles.sectionTitle}>Layout Fields</h4>
             <p className={styles.sectionDescription}>
-                Configure what fields are displayed in this element's service map node
+                Configure what fields are displayed in this element&apos;s service map node
             </p>
             <DragDropContext onDragEnd={handleDragEnd}>
                 <Droppable droppableId={`layout-items-${elementIndex}`}>
