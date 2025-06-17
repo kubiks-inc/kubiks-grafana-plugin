@@ -26,7 +26,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
 
     // Group records by type
     const groupedRecords = useMemo(() => {
-        if (!originalViewState?.records?.length) return {}
+        if (!originalViewState?.records?.length) {return {}}
 
         // Create a set to track unique record identifiers
         // This ensures each record appears only once in the search results,
@@ -46,7 +46,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
         const grouped: Record<string, ViewRecord[]> = {}
         originalViewState.records
             .filter(isUniqueRecord) // Filter out duplicates
-            .filter((record: ViewRecord) => record.component == 'element')
+            .filter((record: ViewRecord) => record.component === 'element')
             .forEach((record: ViewRecord) => {
                 const recordType = record.layoutSpec.type
                 if (!grouped[recordType]) {
@@ -114,7 +114,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
     // Helper function to check if a record matches the search query
     const recordMatchesSearch = useCallback(
         (record: ViewRecord): boolean => {
-            if (!searchQuery) return true
+            if (!searchQuery) {return true}
 
             const displayName = getRecordDisplayName(record)
             const recordId = String(record.id || '')
@@ -136,7 +136,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
     // Filter group names based on search query
     const filteredGroups = useMemo(() => {
         const groups = Object.keys(groupedRecords)
-        if (!searchQuery) return groups
+        if (!searchQuery) {return groups}
 
         return groups.filter(
             (group) =>
@@ -161,8 +161,8 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                     // First, prioritize records with real names (not just IDs)
                     const isIdA = nameA === String(a.id)
                     const isIdB = nameB === String(b.id)
-                    if (isIdA && !isIdB) return 1
-                    if (!isIdA && isIdB) return -1
+                    if (isIdA && !isIdB) {return 1}
+                    if (!isIdA && isIdB) {return -1}
 
                     // If records are in the same namespace, keep them together
                     // Note: Commented out due to Record type not having 'value' property
@@ -193,7 +193,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
 
     // Handle keyboard navigation
     useEffect(() => {
-        if (!open) return
+        if (!open) {return}
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowDown') {
@@ -269,7 +269,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                         const matchingRecords = groupedRecords[group].filter(recordMatchesSearch)
 
                         // Skip this group if no records match
-                        if (matchingRecords.length === 0) return null
+                        if (matchingRecords.length === 0) {return null}
 
                         return (
                             <div key={`group-${group}`} className={s.group}>
@@ -289,8 +289,8 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                                             // First, prioritize records with real names (not just IDs)
                                             const isIdA = nameA === String(a.id)
                                             const isIdB = nameB === String(b.id)
-                                            if (isIdA && !isIdB) return 1
-                                            if (!isIdA && isIdB) return -1
+                                            if (isIdA && !isIdB) {return 1}
+                                            if (!isIdA && isIdB) {return -1}
 
                                             // If records are in the same namespace, keep them together
                                             // Note: Commented out due to Record type not having 'value' property

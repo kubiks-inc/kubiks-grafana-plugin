@@ -80,26 +80,26 @@ const HighlightedEdge = ({
   // Calculate the midpoint for the button
   const midpoint = getBezierMidpoint(sourceX, sourceY, targetX, targetY)
 
-  const getEdgeColor = (errorRate: number = 0, hovered: boolean = false) => {
-    if (hovered) return 'var(--color-primary, #3b82f6)' // blue-500 when hovered
-    if (errorRate > 5) return 'var(--color-error-high, #ef4444)' // red-500 fallback
-    if (errorRate > 1) return 'var(--color-error-medium, #f97316)' // orange-500 fallback
+  const getEdgeColor = (errorRate = 0, hovered = false) => {
+    if (hovered) {return 'var(--color-primary, #3b82f6)'} // blue-500 when hovered
+    if (errorRate > 5) {return 'var(--color-error-high, #ef4444)'} // red-500 fallback
+    if (errorRate > 1) {return 'var(--color-error-medium, #f97316)'} // orange-500 fallback
     return 'var(--color-error-low, #22c55e)' // green-500 fallback
   }
 
-  const getEdgeWidth = (rps: number = 0) => {
-    if (rps > 1000) return 10
-    if (rps > 200) return 8
+  const getEdgeWidth = (rps = 0) => {
+    if (rps > 1000) {return 10}
+    if (rps > 200) {return 8}
     return 8
   }
 
-  const getDashArray = (rps: number = 0) => {
+  const getDashArray = (rps = 0) => {
     const baseLength = 12
     const gap = 6
     return `${Math.max(baseLength * (rps / 500), baseLength)} ${gap}`
   }
 
-  const getAnimationDuration = (rps: number = 0) => {
+  const getAnimationDuration = (rps = 0) => {
     const speed = rps === 0 ? 3 : Math.max(0.5, Math.min(3, 30 / (rps / 500)))
     return `${speed}s`
   }
@@ -123,7 +123,7 @@ const HighlightedEdge = ({
 
   // Determine the primary connection type
   const getConnectionType = () => {
-    if (endpoints.length === 0) return 'Details'
+    if (endpoints.length === 0) {return 'Details'}
 
     // Get the most common endpoint type
     const typeCounts = Object.entries(groupedEndpoints).map(([type, endpointList]) => ({
@@ -131,7 +131,7 @@ const HighlightedEdge = ({
       count: endpointList.length
     }))
 
-    if (typeCounts.length === 0) return 'Details'
+    if (typeCounts.length === 0) {return 'Details'}
 
     // Sort by count and return the most common type
     typeCounts.sort((a, b) => b.count - a.count)
@@ -164,7 +164,6 @@ const HighlightedEdge = ({
       })
     },
     [
-      midpoint,
       rps,
       errorRate,
       latency,

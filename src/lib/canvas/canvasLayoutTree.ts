@@ -30,7 +30,7 @@ function layoutChildrenInGrid(
   groupPosition: { x: number; y: number },
   groupSize: { width: number; height: number }
 ): Node[] {
-  if (children.length === 0) return []
+  if (children.length === 0) {return []}
 
   const padding = 40
   const availableWidth = groupSize.width - padding * 2

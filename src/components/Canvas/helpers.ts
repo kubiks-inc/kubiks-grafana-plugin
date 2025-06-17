@@ -1,5 +1,4 @@
-import { LayoutItem } from '@/lib/model/view'
-import { Record } from '@/lib/model/view'
+import { LayoutItem, Record } from '@/lib/model/view'
 
 export function getTitle(layout: LayoutItem[] | undefined): string {
   const titleItem = layout?.find((item) => item.type === 'title')

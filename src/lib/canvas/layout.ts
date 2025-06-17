@@ -133,7 +133,7 @@ function createEdgesFromLayout(records: ViewRecord[]): EdgeData[] {
     })
 
   return records
-    .filter((r) => r.component == 'connection')
+    .filter((r) => r.component === 'connection')
     .map((item) => {
       // Find the 'to' and 'from' values in the layout array
       const toItem = item.layout?.find((layoutItem: LayoutItem) => layoutItem.type === 'to')

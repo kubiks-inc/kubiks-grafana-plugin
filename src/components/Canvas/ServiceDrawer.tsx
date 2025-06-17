@@ -70,7 +70,7 @@ const CopyableText = ({
     const styles = useStyles2(getStyles)
 
     const handleCopy = () => {
-        if (disabled) return
+        if (disabled) {return}
         navigator.clipboard.writeText(text)
         setCopied(true)
         setTimeout(() => setCopied(false), 600)
@@ -97,7 +97,7 @@ const BlocksComponent = ({
     blocks,
     disabled = false,
 }: {
-    blocks: { name: string; status: Status; url: string }[]
+    blocks: Array<{ name: string; status: Status; url: string }>
     disabled?: boolean
 }) => {
     const styles = useStyles2(getStyles)
@@ -255,7 +255,7 @@ const PanelPreview = ({ config }: { config: DashboardElementValue }) => {
 
 // Component for rendering links grid
 const LinksGrid = ({ links, styles }: { links: LayoutItem[], styles: any }) => {
-    if (!links || links.length === 0) return null
+    if (!links || links.length === 0) {return null}
 
     return (
         <div className={styles.linksGridContainer}>
@@ -457,7 +457,7 @@ export function ServiceDrawer({ open, onOpenChange, record }: ServiceDrawerProps
         renderLayoutItem(item, index, record.key || 'drawer', styles)
     )
 
-    if (!open) return null
+    if (!open) {return null}
 
     return (
         <div className={styles.drawer}>

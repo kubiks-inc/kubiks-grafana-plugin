@@ -225,7 +225,7 @@ export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = () => {
   const onViewportChange = useCallback((viewport: Viewport) => {
     // Only update if viewport changed significantly to prevent unnecessary updates
     setViewport((prevViewport) => {
-      if (!prevViewport) return viewport
+      if (!prevViewport) {return viewport}
 
       // Check if the viewport changed enough to warrant an update
       const zoomDiff = Math.abs(prevViewport.zoom - viewport.zoom)

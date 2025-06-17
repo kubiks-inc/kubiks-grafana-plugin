@@ -301,8 +301,8 @@ function layoutNodesInGroup(
   let minX = Infinity,
     minY = Infinity
   simulationNodes.forEach((node) => {
-    if (node.x !== undefined) minX = Math.min(minX, node.x - node.width / 2)
-    if (node.y !== undefined) minY = Math.min(minY, node.y - node.height / 2)
+    if (node.x !== undefined) {minX = Math.min(minX, node.x - node.width / 2)}
+    if (node.y !== undefined) {minY = Math.min(minY, node.y - node.height / 2)}
   })
 
   // Apply simulation results to nodes with proper positioning

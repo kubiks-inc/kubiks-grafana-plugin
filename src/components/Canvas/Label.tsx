@@ -1,9 +1,7 @@
-import React from 'react'
-import { Record } from '@/lib/model/view'
+import React, { memo } from 'react'
+import { Record, LayoutItem } from '@/lib/model/view'
 import { NodeProps, useStore } from '@xyflow/react'
-import { memo } from 'react'
 import { getTitle } from '@/components/Canvas/helpers'
-import { LayoutItem } from '@/lib/model/view'
 
 interface NodeLabelProps extends NodeProps {
   data: {

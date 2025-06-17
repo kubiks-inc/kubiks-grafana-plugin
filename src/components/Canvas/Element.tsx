@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { LayoutItem, DashboardElementSource } from '@/lib/model/view'
 import { Handle, Position } from '@xyflow/react'
 import {
@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   RefreshCw,
 } from 'lucide-react'
-import { useEffect, useState, useRef, useCallback } from 'react'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
 import { useStyles2, Badge } from '@grafana/ui'
@@ -98,7 +97,7 @@ const CopyableText = ({
   const styles = useStyles2(getCopyableTextStyles)
 
   const handleCopy = () => {
-    if (disabled) return
+    if (disabled) {return}
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 600)
@@ -125,7 +124,7 @@ const BlocksComponent = ({
   blocks,
   disabled = false,
 }: {
-  blocks: { name: string; status: Status; url: string }[]
+  blocks: Array<{ name: string; status: Status; url: string }>
   disabled?: boolean
 }) => {
   const styles = useStyles2(getBlocksStyles)
