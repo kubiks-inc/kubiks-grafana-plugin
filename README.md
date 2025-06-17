@@ -1,136 +1,254 @@
-# Grafana app plugin template
+# Kubiks - Service Map Visualization Panel for Grafana
 
-This template is a starting point for building an app plugin for Grafana.
+![Kubiks Logo](src/img/logo.svg)
 
-## What are Grafana app plugins?
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Grafana](https://img.shields.io/badge/Grafana-v10.4+-orange.svg)](https://grafana.com)
+[![Node.js](https://img.shields.io/badge/Node.js-v22+-green.svg)](https://nodejs.org)
 
-App plugins can let you create a custom out-of-the-box monitoring experience by custom pages, nested data sources and panel plugins.
+> A powerful service map visualization panel for monitoring and observing distributed systems and microservices architecture in Grafana.
 
-## Get started
+## ✨ Features
 
-### Backend
+### 🗺️ Interactive Service Maps
+- **Dynamic Visualization**: Transform your metrics into interactive service topology maps
+- **Multiple Layout Algorithms**: Tree, grid, and force-directed layouts
+- **Infinite Canvas**: Pan, zoom, and explore large service topologies with ease
+- **Real-time Updates**: Live monitoring with automatic data refresh
 
-1. Update [Grafana plugin SDK for Go](https://grafana.com/developers/plugin-tools/key-concepts/backend-plugins/grafana-plugin-sdk-for-go) dependency to the latest minor version:
+### 🎨 Rich Configuration
+- **Flexible Elements**: Services, connections, and groups with custom styling
+- **Layout Items**: Progress bars, status indicators, metrics, tags, and more
+- **Data Integration**: Connect to any Grafana data source
+- **Dashboard Embedding**: Include panels and link to detailed dashboards
 
+### 🔍 Advanced Interactions
+- **Service Details**: Click to view comprehensive service information
+- **Connection Analysis**: Hover for traffic metrics and error rates
+- **Context Actions**: Right-click menus for quick navigation
+- **Search & Filter**: Find and highlight specific services
+
+![Service Map Screenshot](src/img/screenshot.png)
+
+## 🚀 Quick Start
+
+### Installation
+
+1. **From Grafana Catalog** (Recommended)
+   - Go to your Grafana instance
+   - Navigate to Administration → Plugins
+   - Search for "Kubiks"
+   - Click Install
+
+2. **Manual Installation**
    ```bash
-   go get -u github.com/grafana/grafana-plugin-sdk-go
-   go mod tidy
+   # Download the latest release
+   wget https://github.com/kubiks-inc/kubiks-grafana-plugin/releases/latest/download/kubiks-panel.zip
+   
+   # Extract to Grafana plugins directory
+   unzip kubiks-panel.zip -d /var/lib/grafana/plugins/
+   
+   # Restart Grafana
+   sudo systemctl restart grafana-server
    ```
 
-2. Build backend plugin binaries for Linux, Windows and Darwin:
+### Basic Usage
 
-   ```bash
-   mage -v
-   ```
+1. **Create a Panel**
+   - Add a new panel to your dashboard
+   - Select "Kubiks" as the visualization type
 
-3. List all available Mage targets for additional commands:
+2. **Configure Data Source**
+   - Connect to your monitoring data source
+   - Create queries returning service metrics
 
-   ```bash
-   mage -l
-   ```
+3. **Add Elements**
+   - Click "Add Element" in the panel editor
+   - Configure element type and data source mapping
+   - Add layout items to display metrics and status
 
-### Frontend
+4. **Customize Layout**
+   - Choose layout algorithm (tree, grid, force)
+   - Configure visual styling and interactions
+   - Save and enjoy your service map!
 
-1. Install dependencies
+## 📊 Data Requirements
 
-   ```bash
-   npm install
-   ```
+### Basic Structure
+Your queries should return data with at least:
+- **Time field**: Timestamp for time-series data
+- **Service identifier**: Field identifying each service (default: `service_name`)
+- **Metrics**: Values to display (CPU, memory, status, etc.)
 
-2. Build plugin in development mode and run in watch mode
+### Example Query (Prometheus)
+```promql
+# Service metrics
+avg_over_time(cpu_usage{job="services"}[5m])
 
-   ```bash
-   npm run dev
-   ```
+# Service status
+up{job="services"}
 
-3. Build plugin in production mode
+# Connection data (for topology)
+sum(rate(http_requests_total[5m])) by (source_service, target_service)
+```
 
-   ```bash
-   npm run build
-   ```
+### Supported Data Sources
+- Prometheus
+- InfluxDB
+- Elasticsearch
+- PostgreSQL/MySQL
+- Grafana TestData
+- Any data source returning time-series or table data
 
-4. Run the tests (using Jest)
+## 🛠️ Development
 
-   ```bash
-   # Runs the tests and watches for changes, requires git init first
-   npm run test
+### Prerequisites
+- Node.js 22+
+- Go 1.21+ (for backend)
+- Docker (optional, for testing)
 
-   # Exits after running all the tests
-   npm run test:ci
-   ```
+### Setup
+```bash
+# Clone the repository
+git clone https://github.com/kubiks-inc/kubiks-grafana-plugin.git
+cd kubiks-grafana-plugin
 
-5. Spin up a Grafana instance and run the plugin inside it (using Docker)
+# Install dependencies
+npm install
 
-   ```bash
-   npm run server
-   ```
+# Start development server
+npm run dev
+```
 
-6. Run the E2E tests (using Playwright)
+### Building
+```bash
+# Frontend build
+npm run build
 
-   ```bash
-   # Spins up a Grafana instance first that we tests against
-   npm run server
+# Backend build (cross-platform)
+mage -v
 
-   # If you wish to start a certain Grafana version. If not specified will use latest by default
-   GRAFANA_VERSION=11.3.0 npm run server
+# Run tests
+npm run test:ci
 
-   # Starts the tests
-   npm run e2e
-   ```
+# Lint and format
+npm run lint:fix
+```
 
-7. Run the linter
+### Testing
+```bash
+# Start test environment
+npm run server
 
-   ```bash
-   npm run lint
+# Run E2E tests
+npm run e2e
 
-   # or
+# Test with specific Grafana version
+GRAFANA_VERSION=11.3.0 npm run server
+```
 
-   npm run lint:fix
-   ```
+## 📖 Documentation
 
-# Distributing your plugin
+### Configuration Guides
+- **[Complete Documentation](./PLUGIN_DOCUMENTATION.md)** - Comprehensive guide
+- **[Element Configuration](./docs/elements.md)** - Configuring service elements
+- **[Layout Items](./docs/layout-items.md)** - Available display options
+- **[Data Integration](./docs/data-integration.md)** - Connecting data sources
 
-When distributing a Grafana plugin either within the community or privately the plugin must be signed so the Grafana application can verify its authenticity. This can be done with the `@grafana/sign-plugin` package.
+### API Reference
+- **[Plugin API](./docs/api.md)** - Backend API endpoints
+- **[Data Models](./docs/models.md)** - TypeScript interfaces
+- **[Theming](./docs/theming.md)** - Customization options
 
-_Note: It's not necessary to sign a plugin during development. The docker development environment that is scaffolded with `@grafana/create-plugin` caters for running the plugin without a signature._
+## 🏗️ Architecture
 
-## Initial steps
+### Frontend (TypeScript/React)
+- **ReactFlow**: Canvas rendering and interactions
+- **Zustand**: State management
+- **TailwindCSS**: Styling and theming
+- **@grafana/ui**: Grafana UI components
 
-Before signing a plugin please read the Grafana [plugin publishing and signing criteria](https://grafana.com/legal/plugins/#plugin-publishing-and-signing-criteria) documentation carefully.
+### Backend (Go)
+- **Grafana Plugin SDK**: Backend framework
+- **Data Processing**: Query transformation and caching
+- **Health Checks**: Service monitoring endpoints
 
-`@grafana/create-plugin` has added the necessary commands and workflows to make signing and distributing a plugin via the grafana plugins catalog as straightforward as possible.
+### Layout Algorithms
+- **Dagre**: Hierarchical tree layouts
+- **D3-Force**: Physics-based positioning
+- **Custom Grid**: Organized grid arrangements
 
-Before signing a plugin for the first time please consult the Grafana [plugin signature levels](https://grafana.com/legal/plugins/#what-are-the-different-classifications-of-plugins) documentation to understand the differences between the types of signature level.
+## 🤝 Contributing
 
-1. Create a [Grafana Cloud account](https://grafana.com/signup).
-2. Make sure that the first part of the plugin ID matches the slug of your Grafana Cloud account.
-   - _You can find the plugin ID in the `plugin.json` file inside your plugin directory. For example, if your account slug is `acmecorp`, you need to prefix the plugin ID with `acmecorp-`._
-3. Create a Grafana Cloud API key with the `PluginPublisher` role.
-4. Keep a record of this API key as it will be required for signing a plugin
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
 
-## Signing a plugin
+### Development Process
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-### Using Github actions release workflow
+### Reporting Issues
+- [Bug Reports](https://github.com/kubiks-inc/kubiks-grafana-plugin/issues/new?template=bug_report.md)
+- [Feature Requests](https://github.com/kubiks-inc/kubiks-grafana-plugin/issues/new?template=feature_request.md)
 
-If the plugin is using the github actions supplied with `@grafana/create-plugin` signing a plugin is included out of the box. The [release workflow](./.github/workflows/release.yml) can prepare everything to make submitting your plugin to Grafana as easy as possible. Before being able to sign the plugin however a secret needs adding to the Github repository.
+## 📝 Release Notes
 
-1. Please navigate to "settings > secrets > actions" within your repo to create secrets.
-2. Click "New repository secret"
-3. Name the secret "GRAFANA_API_KEY"
-4. Paste your Grafana Cloud API key in the Secret field
-5. Click "Add secret"
+### Version 0.3.1 (Current)
+- Enhanced layout algorithms
+- Improved performance for large topologies
+- Better dashboard integration
+- Bug fixes and stability improvements
 
-#### Push a version tag
+See [CHANGELOG.md](./CHANGELOG.md) for complete release history.
 
-To trigger the workflow we need to push a version tag to github. This can be achieved with the following steps:
+## 📋 Requirements
 
-1. Run `npm version <major|minor|patch>`
-2. Run `git push origin main --follow-tags`
+### Grafana Compatibility
+- **Minimum Version**: Grafana 10.4.0+
+- **Recommended**: Grafana 11.0.0+
+- **Tested Versions**: 10.4.x, 11.0.x, 11.3.x
 
-## Learn more
+### Browser Support
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
 
-Below you can find source code for existing app plugins and other related documentation.
+## 🔒 Security
 
-- [Basic app plugin example](https://github.com/grafana/grafana-plugin-examples/tree/master/examples/app-basic#readme)
-- [`plugin.json` documentation](https://grafana.com/developers/plugin-tools/reference/plugin-jsonplugin-json)
-- [Sign a plugin](https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin)
+### Plugin Signing
+This plugin is signed by Grafana for security and integrity. The signing process ensures:
+- Authenticity of the plugin code
+- Protection against tampering
+- Compliance with Grafana security standards
+
+### Data Privacy
+- No data is sent to external services
+- All processing happens within your Grafana instance
+- Secure handling of dashboard variables and queries
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **Website**: [kubiks.ai](https://kubiks.ai)
+- **Documentation**: [Plugin Documentation](./PLUGIN_DOCUMENTATION.md)
+- **Issues**: [GitHub Issues](https://github.com/kubiks-inc/kubiks-grafana-plugin/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/kubiks-inc/kubiks-grafana-plugin/discussions)
+- **Sponsor**: [GitHub Sponsors](https://github.com/sponsors/kubiks-inc)
+
+## 💖 Support
+
+If you find this plugin useful, please consider:
+- ⭐ Starring the repository
+- 🐛 Reporting bugs and issues
+- 💡 Suggesting new features
+- 💰 [Sponsoring development](https://github.com/sponsors/kubiks-inc)
+
+---
+
+**Built with ❤️ by the Kubiks team for the Grafana community.**
