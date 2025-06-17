@@ -210,7 +210,7 @@ const PanelPreview = ({ config }: { config: DashboardElementSource }) => {
         URL.revokeObjectURL(imageUrl)
       }
     }
-  }, [config.dashboardUid, config.panelId])
+  }, [config.dashboardUid, config.panelId, imageUrl])
 
   const handleClick = () => {
     const dashboardUrl = `/d/${config.dashboardUid}?viewPanel=${config.panelId}`
@@ -300,7 +300,7 @@ export const ElementComponent = ({ data }: GenericNodeProps) => {
         data.onClick(data.key)
       }
     },
-    [data.key, data.onClick, setSelectedServiceDetails]
+    [data, setSelectedServiceDetails, setIsServiceDrawerOpen]
   )
 
   const renderField = (i: number, item: LayoutItem) => {

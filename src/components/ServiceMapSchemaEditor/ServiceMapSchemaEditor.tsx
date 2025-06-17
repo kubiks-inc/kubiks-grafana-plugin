@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Button, Field, useStyles2, Alert } from '@grafana/ui';
@@ -23,6 +23,28 @@ const ServiceMapSchemaEditor: React.FC<ServiceMapSchemaEditorProps> = ({
   const monacoRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isValid, setIsValid] = useState(true);
+
+  const validateSchema = useCallback((schemaValue: string) => {
+    const errors: string[] = [];
+    let valid = true;
+
+    try {
+      JSON.parse(schemaValue);
+      setIsValid(true);
+      if (onValidate) {
+        onValidate(true, []);
+      }
+    } catch (e) {
+      errors.push('Invalid JSON format');
+      valid = false;
+    }
+
+    setValidationErrors(errors);
+    setIsValid(valid);
+    if (onValidate) {
+      onValidate(valid, errors);
+    }
+  }, [onValidate]);
 
   useEffect(() => {
     if (editorRef.current && !monacoRef.current) {
@@ -96,35 +118,13 @@ const ServiceMapSchemaEditor: React.FC<ServiceMapSchemaEditorProps> = ({
         monacoRef.current = null;
       }
     };
-  }, []);
+  }, [onChange, validateSchema, value]);
 
   useEffect(() => {
     if (monacoRef.current && monacoRef.current.getValue() !== value) {
       monacoRef.current.setValue(value || getDefaultSchema());
     }
   }, [value]);
-
-  const validateSchema = (schemaValue: string) => {
-    const errors: string[] = [];
-    let valid = true;
-
-    try {
-      JSON.parse(schemaValue);
-      setIsValid(true);
-      if (onValidate) {
-        onValidate(true, []);
-      }
-    } catch (e) {
-      errors.push('Invalid JSON format');
-      valid = false;
-    }
-
-    setValidationErrors(errors);
-    setIsValid(valid);
-    if (onValidate) {
-      onValidate(valid, errors);
-    }
-  };
 
   const formatSchema = () => {
     if (monacoRef.current) {

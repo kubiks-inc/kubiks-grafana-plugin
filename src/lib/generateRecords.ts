@@ -1,6 +1,5 @@
 import { DataFrame, Field } from "@grafana/data";
-import { DashboardElementSource, Element, LayoutItem, LayoutItemType, QueryElementSource } from "./model/view";
-import { Record } from "./model/view";
+import { DashboardElementSource, Element, LayoutItem, LayoutItemType, QueryElementSource, Record } from "./model/view";
 
 const getIcon = (element: Element): string | null => {
     for (const layoutItem of element.layout ?? []) {
