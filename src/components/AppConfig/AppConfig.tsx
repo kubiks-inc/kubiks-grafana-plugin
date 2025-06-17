@@ -5,9 +5,11 @@ import { AppPluginMeta, GrafanaTheme2, PluginConfigPageProps, PluginMeta } from 
 import { getBackendSrv } from '@grafana/runtime';
 import { Button, Field, FieldSet, Input, SecretInput, useStyles2 } from '@grafana/ui';
 import { testIds } from '../testIds';
+import ServiceMapSchemaEditor from '../ServiceMapSchemaEditor';
 
 type AppPluginSettings = {
   apiUrl?: string;
+  serviceMapSchema?: string;
 };
 
 type State = {
@@ -17,9 +19,13 @@ type State = {
   isApiKeySet: boolean;
   // A secret key for our custom API.
   apiKey: string;
+  // The service map schema configuration.
+  serviceMapSchema: string;
+  // Validation state for service map schema.
+  isSchemaValid: boolean;
 };
 
-export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> {}
+export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> { }
 
 const AppConfig = ({ plugin }: AppConfigProps) => {
   const s = useStyles2(getStyles);
@@ -28,6 +34,8 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
     apiUrl: jsonData?.apiUrl || '',
     apiKey: '',
     isApiKeySet: Boolean(secureJsonFields?.apiKey),
+    serviceMapSchema: jsonData?.serviceMapSchema || '',
+    isSchemaValid: true,
   });
 
   const isSubmitDisabled = Boolean(!state.apiUrl || (!state.isApiKeySet && !state.apiKey));
@@ -46,6 +54,41 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
     });
   };
 
+  const onSchemaChange = (schema: string) => {
+    setState({
+      ...state,
+      serviceMapSchema: schema,
+    });
+  };
+
+  const onSchemaValidate = (isValid: boolean) => {
+    setState({
+      ...state,
+      isSchemaValid: isValid,
+    });
+  };
+
+  const onSchemaSave = async (schema: string) => {
+    try {
+      await updatePlugin(plugin.meta.id, {
+        enabled,
+        pinned,
+        jsonData: {
+          ...jsonData,
+          serviceMapSchema: schema,
+        },
+      });
+
+      setState({
+        ...state,
+        serviceMapSchema: schema,
+      });
+
+    } catch (e) {
+      console.error('Error while saving schema', e);
+    }
+  };
+
   const onSubmit = () => {
     if (isSubmitDisabled) {
       return;
@@ -55,6 +98,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
       enabled,
       pinned,
       jsonData: {
+        ...jsonData,
         apiUrl: state.apiUrl,
       },
       // This cannot be queried later by the frontend.
@@ -62,8 +106,8 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
       secureJsonData: state.isApiKeySet
         ? undefined
         : {
-            apiKey: state.apiKey,
-          },
+          apiKey: state.apiKey,
+        },
     });
   };
 
@@ -101,6 +145,15 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             Save API settings
           </Button>
         </div>
+      </FieldSet>
+
+      <FieldSet label="Service Map Configuration" className={s.marginTop}>
+        <ServiceMapSchemaEditor
+          value={state.serviceMapSchema}
+          onChange={onSchemaChange}
+          onValidate={onSchemaValidate}
+          onSave={onSchemaSave}
+        />
       </FieldSet>
     </form>
   );

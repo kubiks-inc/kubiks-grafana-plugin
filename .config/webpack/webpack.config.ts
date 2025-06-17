@@ -136,7 +136,7 @@ const config = async (env: Env): Promise<Configuration> => {
         },
         {
           test: /\.css$/,
-          use: ['style-loader', 'css-loader'],
+          use: ['style-loader', 'css-loader', 'postcss-loader'],
         },
         {
           test: /\.s[ac]ss$/,
@@ -263,16 +263,17 @@ const config = async (env: Env): Promise<Configuration> => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       // handle resolving "rootDir" paths
       modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
+      alias: {
+        '@': path.resolve(process.cwd(), 'src'),
+      },
       unsafeCache: true,
     },
   };
 
-  if (isWSL()) {
-    baseConfig.watchOptions = {
-      poll: 3000,
-      ignored: /node_modules/,
-    };
-  }
+  baseConfig.watchOptions = {
+    poll: 3000,
+    ignored: /node_modules/,
+  };
 
   return baseConfig;
 };
