@@ -6,7 +6,6 @@ import {
 import { Button, useStyles2, Tooltip } from '@grafana/ui'
 import { css } from '@emotion/css'
 import { GrafanaTheme2 } from '@grafana/data'
-import { useReactFlow } from '@xyflow/react'
 import { RecordSearch } from '@/components/Canvas/RecordSearch'
 import { useViewStore } from '@/store/ViewStoreProvider'
 import { getTitle } from '@/components/Canvas/helpers'
@@ -25,7 +24,6 @@ export const CanvasNavbar: React.FC<CanvasNavbarProps> = ({ }) => {
     setEditLayout,
   } = useViewStore((state) => state)
   const record = viewState?.records?.find((record: any) => record.key === selectedNode)
-  const { getNodes } = useReactFlow()
   const styles = useStyles2(getStyles)
 
   const handleSaveLayout = useCallback(async () => {

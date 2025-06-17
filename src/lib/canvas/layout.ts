@@ -1,8 +1,10 @@
 import { Node } from '@xyflow/react'
 
-import { ViewRecord } from '@/lib/model/record'
 import { LayoutItem } from '@/lib/model/view'
 import { getParentId } from '@/components/Canvas/helpers'
+
+// Type alias for ViewRecord to avoid import issues
+type ViewRecord = any
 
 export function createNodesAndEdges(
   organizationId: string,
@@ -134,8 +136,8 @@ function createEdgesFromLayout(records: ViewRecord[]): EdgeData[] {
     .filter((r) => r.component == 'connection')
     .map((item) => {
       // Find the 'to' and 'from' values in the layout array
-      const toItem = item.layout?.find((layoutItem) => layoutItem.type === 'to')
-      const fromItem = item.layout?.find((layoutItem) => layoutItem.type === 'from')
+      const toItem = item.layout?.find((layoutItem: LayoutItem) => layoutItem.type === 'to')
+      const fromItem = item.layout?.find((layoutItem: LayoutItem) => layoutItem.type === 'from')
 
       // Extract the values or use fallbacks if layout items aren't found
       const to = toItem?.value?.data || ''

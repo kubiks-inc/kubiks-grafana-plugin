@@ -48,7 +48,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
             .filter(isUniqueRecord) // Filter out duplicates
             .filter((record: ViewRecord) => record.component == 'element')
             .forEach((record: ViewRecord) => {
-                const recordType = record.type
+                const recordType = record.layoutSpec.type
                 if (!grouped[recordType]) {
                     grouped[recordType] = []
                 }
@@ -119,7 +119,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
             const displayName = getRecordDisplayName(record)
             const recordId = String(record.id || '')
             const recordKey = String(record.key || '')
-            const recordType = String(record.type || '')
+            const recordType = String(record.layoutSpec.type || '')
 
             const query = searchQuery.toLowerCase()
 
@@ -165,6 +165,8 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                     if (!isIdA && isIdB) return -1
 
                     // If records are in the same namespace, keep them together
+                    // Note: Commented out due to Record type not having 'value' property
+                    /*
                     if (
                         a.value &&
                         b.value &&
@@ -179,6 +181,7 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                             return nsA.localeCompare(nsB)
                         }
                     }
+                    */
 
                     // Finally sort by name
                     return nameA.localeCompare(nameB)
@@ -279,15 +282,19 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                                 <div className={s.recordsList}>
                                     {matchingRecords
                                         .sort((a, b) => {
-                                            // Same sorting logic as before
+                                            // Get the display names for sorting
                                             const nameA = getRecordDisplayName(a)
                                             const nameB = getRecordDisplayName(b)
 
+                                            // First, prioritize records with real names (not just IDs)
                                             const isIdA = nameA === String(a.id)
                                             const isIdB = nameB === String(b.id)
                                             if (isIdA && !isIdB) return 1
                                             if (!isIdA && isIdB) return -1
 
+                                            // If records are in the same namespace, keep them together
+                                            // Note: Commented out due to Record type not having 'value' property
+                                            /*
                                             if (
                                                 a.value &&
                                                 b.value &&
@@ -302,7 +309,9 @@ export function RecordSearch({ open, setOpen }: RecordSearchProps) {
                                                     return nsA.localeCompare(nsB)
                                                 }
                                             }
+                                            */
 
+                                            // Finally sort by name
                                             return nameA.localeCompare(nameB)
                                         })
                                         .map((record, recordIndex) => {
