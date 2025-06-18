@@ -1,9 +1,5 @@
 # Kubiks Service Map Panel
 
-![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?logo=grafana&query=$.version&url=https://grafana.com/api/plugins/kubiks-kubiks-panel&label=Marketplace&prefix=v&color=F47A20)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Node Version](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
-
 A comprehensive service map visualization panel that transforms complex distributed systems into intuitive, interactive diagrams. Kubiks provides a **single pane of glass** for monitoring your entire infrastructure - from microservices and databases to CDNs, load balancers, and cloud components - all visualized in real-time with deep observability integration.
 
 ![Service Map Overview](https://raw.githubusercontent.com/kubiks-inc/kubiks-grafana-plugin/main/src/img/servicemap.png)
@@ -179,7 +175,7 @@ We welcome contributions! Please see our [Contributing Guidelines](https://githu
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/kubiks-inc/kubiks-grafana-plugin/blob/main/LICENSE) file for details.
 
 ---
 
