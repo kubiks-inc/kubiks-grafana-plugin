@@ -4,41 +4,29 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
 
-A powerful service map visualization panel for monitoring and observing distributed systems and microservices architecture in Grafana. Kubiks transforms your observability data into interactive, real-time service dependency graphs that help you understand system relationships, identify bottlenecks, and troubleshoot issues quickly.
+A comprehensive service map visualization panel that transforms complex distributed systems into intuitive, interactive diagrams. Kubiks provides a **single pane of glass** for monitoring your entire infrastructure - from microservices and databases to CDNs, load balancers, and cloud components - all visualized in real-time with deep observability integration.
 
-![Service Map Overview](https://raw.githubusercontent.com/kubiks-inc/kubiks-grafana-plugin/main/src/img/screenshot.png)
+![Service Map Overview](https://raw.githubusercontent.com/kubiks-inc/kubiks-grafana-plugin/main/src/img/servicemap.png)
 
-## 🌟 Features
+## 🌟 Key Features & Capabilities
 
 ### Interactive Service Maps
-- **Real-time visualization** of microservices architecture and dependencies
-- **Interactive nodes** with drill-down capabilities for detailed service information
+- **Real-time visualization** of your complete system architecture and dependencies
+- **Interactive nodes** with one-click access to detailed service information, metrics, and logs
 - **Dynamic layouts** with multiple arrangement options (tree, grid, force-directed)
-- **Infinite canvas** with zoom and pan capabilities for large-scale architectures
 
-### Flexible Data Integration
-- **Multi-query support** - combine data from multiple Grafana queries
-- **Node graph compatibility** - works with Grafana's node graph data format
-- **Custom data mapping** - flexible field mapping for various data sources
-- **Real-time updates** - automatically refreshes as your data changes
+### Comprehensive Data Integration
+- **Multi-query support** - combine data from any Grafana-supported data sources and custom APIs
+- **Standards-compliant** - works with industry-standard observability formats and protocols
+- **Node graph compatibility** - seamlessly works with Grafana's node graph data format
+- **Custom data mapping** - flexible field mapping for proprietary monitoring systems
+- **Real-time updates** - automatically refreshes as your infrastructure evolves
 
-### Rich Visualization Options
-- **Customizable elements** - configure nodes, connections, and groups
-- **Embedded panels** - integrate other Grafana panels directly into service nodes
-- **Status indicators** - visual health and performance indicators
-- **Connection details** - hover and click interactions for relationship insights
-
-### Advanced Configuration
-- **Service Map Builder** - intuitive drag-and-drop configuration interface
-- **Element templates** - reusable configurations for consistent styling
-- **Variable mapping** - dynamic content based on dashboard variables
-- **Layout persistence** - maintains your preferred arrangement across sessions
-
-## 📋 Requirements
-
-- **Grafana** >= 10.4.0
-- **Node.js** >= 22 (for development)
-- Data sources that provide service topology information (e.g., Jaeger, Zipkin, Prometheus with service discovery)
+### Embedded Observability Panels
+- **Integrated dashboards** - embed any Grafana panel directly into service nodes
+- **Contextual metrics** - CPU, memory, error rates, and custom KPIs displayed inline
+- **Dynamic linking** - automatic links to logs, traces, metrics, and any external tools
+- **Variable propagation** - seamlessly pass service context to embedded panels
 
 ## 🚀 Getting Started
 
@@ -70,21 +58,6 @@ A powerful service map visualization panel for monitoring and observing distribu
 4. **Set up the service map configuration** using the Service Map Builder
 
 ## ⚙️ Configuration
-
-### Data Source Setup
-
-Your queries should return data in one of these formats:
-
-#### Node Graph Format
-```
-Fields: id, title, subtitle, arc__success, arc__errors, mainstat, secondarystat
-```
-
-#### Custom Query Format  
-```
-Fields: service_name, [custom_fields...]
-Labels: service_name, status, version, etc.
-```
 
 ### Service Map Builder
 
@@ -155,29 +128,19 @@ Embed other Grafana panels directly into your service nodes:
 
 ## 📊 Data Source Examples
 
-### Prometheus with Service Discovery
-```promql
-# Services query
-up{job=~".*"}
-
-# Connections query  
-rate(http_requests_total[5m]) by (source_service, target_service)
+### Metrics Data Sources
+```
+# Services discovery from any metrics system
+Query services and their metrics from your configured data sources
 ```
 
-### Jaeger Traces
-```sql
-# Services query
-SELECT DISTINCT service_name, operation_name 
-FROM traces 
-WHERE start_time > now() - interval '1 hour'
-
-# Dependencies query
-SELECT source_service, target_service, call_count
-FROM service_dependencies
-WHERE start_time > now() - interval '1 hour'  
+### Distributed Tracing
+```
+# Service topology from tracing data
+Query service relationships and dependencies from your tracing systems
 ```
 
-### Custom JSON API
+### Custom APIs
 ```json
 {
   "nodes": [
@@ -198,144 +161,21 @@ WHERE start_time > now() - interval '1 hour'
 }
 ```
 
-## 🎛️ Panel Options
+## Interaction Features
 
-### Layout Types
-- **Tree**: Hierarchical arrangement (default)
-- **Grid**: Organized grid layout
-- **Force**: Physics-based force-directed layout
-
-### Interaction Features
 - **Node Selection**: Click nodes to view detailed information
 - **Connection Inspection**: Hover over edges to see relationship metrics
 - **Context Menus**: Right-click for additional actions
 - **Zoom Controls**: Mouse wheel and pan gestures
 - **Full-Screen Mode**: Expand for detailed exploration
 
-## 🔧 Advanced Configuration
-
-### Custom Styling
-Use CSS classes and inline styles to customize appearance:
-
-```css
-.kubiks-service-node {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.kubiks-connection-edge {
-  stroke-width: 2px;
-  stroke-dasharray: 5,5;
-}
-```
-
-### Dynamic Variables
-Reference dashboard variables in your configuration:
-
-```javascript
-{
-  "type": "text",
-  "value": "$service_version",
-  "label": "Version"
-}
-```
-
-### Health Status Integration
-Configure status indicators based on metrics:
-
-```javascript
-{
-  "type": "status", 
-  "field": "health_status",
-  "source": {
-    "queryRef": "health_check"
-  }
-}
-```
-
-## 🛠️ Development
-
-### Local Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/kubiks-inc/kubiks-grafana-plugin.git
-cd kubiks-grafana-plugin
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Run tests
-npm run test
-
-# Build for production
-npm run build
-```
-
-### Project Structure
-```
-src/
-├── components/          # React components
-├── containers/          # Container components  
-├── lib/                # Utility libraries
-├── panels/             # Panel implementations
-├── store/              # State management
-└── styles.css          # Global styles
-```
-
-### Technology Stack
-- **React** 18.2+ with TypeScript
-- **@xyflow/react** for interactive diagrams
-- **Zustand** for state management  
-- **TailwindCSS** for styling
-- **D3** and **Dagre** for layout algorithms
-
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](https://github.com/kubiks-inc/kubiks-grafana-plugin/blob/main/CONTRIBUTING.md) for details.
 
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite (`npm run test`)
-6. Submit a pull request
+### Getting Help & Support
 
-## 📚 Documentation
-
-- [Plugin Documentation](https://kubiks.ai/docs)
-- [API Reference](https://kubiks.ai/docs/api)
-- [Examples Repository](https://github.com/kubiks-inc/kubiks-examples)
-- [Video Tutorials](https://kubiks.ai/tutorials)
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Panel doesn't display data**
-- Verify your queries return the expected data format
-- Check the browser console for error messages
-- Ensure field mappings match your data structure
-
-**Performance issues with large graphs**
-- Enable node simplification for better performance
-- Consider using data filtering to reduce node count
-- Adjust refresh intervals for less frequent updates
-
-**Layout problems**
-- Try different layout algorithms (tree, grid, force)
-- Adjust canvas zoom and pan settings
-- Clear browser cache and reload
-
-### Getting Help
-
-- [GitHub Issues](https://github.com/kubiks-inc/kubiks-grafana-plugin/issues)
-- [Community Discord](https://discord.gg/kubiks)
-- [Support Email](mailto:support@kubiks.ai)
+- [GitHub Issues](https://github.com/kubiks-inc/kubiks-grafana-plugin/issues) - Bug reports and feature requests
 
 ## 📄 License
 
