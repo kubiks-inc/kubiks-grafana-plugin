@@ -1,7 +1,6 @@
 export const testIds = {
   appConfig: {
-    apiKey: 'data-testid ac-api-key',
-    apiUrl: 'data-testid ac-api-url',
+    serviceMapSchema: 'data-testid ac-service-map-schema',
     submit: 'data-testid ac-submit-form',
   },
   serviceMapSchemaEditor: {

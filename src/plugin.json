@@ -1,13 +1,22 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
-  "name": "Kubiks",
+  "name": "Kubiks Service Map",
   "id": "kubiks-kubiks-panel",
   "backend": true,
   "executable": "gpx_kubiks",
   "info": {
     "keywords": [
-      "app"
+      "service map",
+      "dependency graph",
+      "microservices",
+      "distributed systems",
+      "observability",
+      "monitoring",
+      "service discovery",
+      "service mesh",
+      "service graph",
+      "service dependency graph"
     ],
     "description": "A powerful service map visualization panel for monitoring and observing distributed systems and microservices architecture.",
     "author": {

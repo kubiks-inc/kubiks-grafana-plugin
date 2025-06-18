@@ -3,22 +3,15 @@ import { lastValueFrom } from 'rxjs';
 import { css } from '@emotion/css';
 import { AppPluginMeta, GrafanaTheme2, PluginConfigPageProps, PluginMeta } from '@grafana/data';
 import { getBackendSrv } from '@grafana/runtime';
-import { Button, Field, FieldSet, Input, SecretInput, useStyles2 } from '@grafana/ui';
+import { Button, Field, FieldSet, Input, useStyles2 } from '@grafana/ui';
 import { testIds } from '../testIds';
 import ServiceMapSchemaEditor from '../ServiceMapSchemaEditor';
 
 type AppPluginSettings = {
-  apiUrl?: string;
   serviceMapSchema?: string;
 };
 
 type State = {
-  // The URL to reach our custom API.
-  apiUrl: string;
-  // Tells us if the API key secret is set.
-  isApiKeySet: boolean;
-  // A secret key for our custom API.
-  apiKey: string;
   // The service map schema configuration.
   serviceMapSchema: string;
   // Validation state for service map schema.
@@ -29,23 +22,11 @@ export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppP
 
 const AppConfig = ({ plugin }: AppConfigProps) => {
   const s = useStyles2(getStyles);
-  const { enabled, pinned, jsonData, secureJsonFields } = plugin.meta;
+  const { enabled, pinned, jsonData } = plugin.meta;
   const [state, setState] = useState<State>({
-    apiUrl: jsonData?.apiUrl || '',
-    apiKey: '',
-    isApiKeySet: Boolean(secureJsonFields?.apiKey),
     serviceMapSchema: jsonData?.serviceMapSchema || '',
     isSchemaValid: true,
   });
-
-  const isSubmitDisabled = Boolean(!state.apiUrl || (!state.isApiKeySet && !state.apiKey));
-
-  const onResetApiKey = () =>
-    setState({
-      ...state,
-      apiKey: '',
-      isApiKeySet: false,
-    });
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setState({
@@ -90,59 +71,33 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
   };
 
   const onSubmit = () => {
-    if (isSubmitDisabled) {
-      return;
-    }
-
     updatePluginAndReload(plugin.meta.id, {
       enabled,
       pinned,
       jsonData: {
         ...jsonData,
-        apiUrl: state.apiUrl,
       },
-      // This cannot be queried later by the frontend.
-      // We don't want to override it in case it was set previously and left untouched now.
-      secureJsonData: state.isApiKeySet
-        ? undefined
-        : {
-          apiKey: state.apiKey,
-        },
     });
   };
 
   return (
     <form onSubmit={onSubmit}>
-      <FieldSet label="API Settings">
-        <Field label="API Key" description="A secret key for authenticating to our custom API">
-          <SecretInput
-            width={60}
-            id="config-api-key"
-            data-testid={testIds.appConfig.apiKey}
-            name="apiKey"
-            value={state.apiKey}
-            isConfigured={state.isApiKeySet}
-            placeholder={'Your secret API key'}
-            onChange={onChange}
-            onReset={onResetApiKey}
-          />
-        </Field>
-
-        <Field label="API Url" description="" className={s.marginTop}>
+      <FieldSet label="Service Map Configuration">
+        <Field label="Service Map Schema" description="The schema for the service map">
           <Input
             width={60}
-            name="apiUrl"
-            id="config-api-url"
-            data-testid={testIds.appConfig.apiUrl}
-            value={state.apiUrl}
+            name="serviceMapSchema"
+            id="config-service-map-schema"
+            data-testid={testIds.appConfig.serviceMapSchema}
+            value={state.serviceMapSchema}
             placeholder={`E.g.: http://mywebsite.com/api/v1`}
             onChange={onChange}
           />
         </Field>
 
         <div className={s.marginTop}>
-          <Button type="submit" data-testid={testIds.appConfig.submit} disabled={isSubmitDisabled}>
-            Save API settings
+          <Button type="submit" data-testid={testIds.appConfig.submit}>
+            Save Service Map Configuration
           </Button>
         </div>
       </FieldSet>
