@@ -18,7 +18,7 @@
       "service graph",
       "service dependency graph"
     ],
-    "description": "A powerful service map visualization panel for monitoring and observing distributed systems and microservices architecture.",
+    "description": "Real-time service map visualization providing complete end-to-end visibility across your entire stack, from CDNs to egress APIs.",
     "author": {
       "name": "Kubiks"
     },
@@ -43,6 +43,10 @@
     "screenshots": [
       {
         "name": "Service Map Overview",
+        "path": "img/servicemap.png"
+      },
+      {
+        "name": "Details View",
         "path": "img/screenshot.png"
       },
       {
