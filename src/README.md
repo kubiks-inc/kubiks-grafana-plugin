@@ -167,7 +167,7 @@ Query service relationships and dependencies from your tracing systems
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/kubiks-inc/kubiks-grafana-plugin/blob/main/CONTRIBUTING.md) for details.
 
 ### Getting Help & Support
 
@@ -175,7 +175,7 @@ We welcome contributions! Please see our [Contributing Guidelines](../CONTRIBUTI
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](../LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/kubiks-inc/kubiks-grafana-plugin/blob/main/LICENSE) file for details.
 
 ---
 
